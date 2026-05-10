@@ -43,7 +43,8 @@ Item {
         "timer": [timerComp, timerCompVert],
         "weather": [weatherComp, weatherComp],
         "policies_panel_button": [policiesPanelButton, policiesPanelButton],
-        "dashboard_panel_button": [dashboardPanelButton, dashboardPanelButtonVert]
+        "dashboard_panel_button": [dashboardPanelButton, dashboardPanelButtonVert],
+        "network_speed": [networkSpeedComp, networkSpeedComp],
     })
 
     property list<string> primaryBackgroundComps: ["timer", "record_indicator", "screen_share_indicator"] // components that are mostly indicators
@@ -139,5 +140,6 @@ Item {
     Component { id: policiesPanelButton; PoliciesPanelButton {} }
     
     Component { id: dashboardPanelButton; DashboardPanelButton {} }
+    Component { id: networkSpeedComp; NetworkSpeed {} }
     Component { id: dashboardPanelButtonVert; VerticalDashboardPanelButton {} }
 }

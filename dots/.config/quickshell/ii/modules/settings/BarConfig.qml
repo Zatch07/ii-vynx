@@ -702,5 +702,60 @@ ContentPage {
                 }
             }
         }
+        ContentSection {
+            id: networkSpeed
+            icon: "speed"
+            title: Translation.tr("Network speed")
+            
+            ContentSubsection {
+                title: Translation.tr("Mode selector")
+                ConfigSelectionArray {
+                    currentValue: Config.options.bar.networkSpeed.displayMode
+                    onSelected: newValue => { Config.options.bar.networkSpeed.displayMode = newValue; }
+                    options: [
+                        { displayName: Translation.tr("Total"), icon: "expand", value: 0 },
+                        { displayName: Translation.tr("Download"), icon: "arrow_downward", value: 1 },
+                        { displayName: Translation.tr("Upload"), icon: "arrow_upward", value: 2 },
+                        { displayName: Translation.tr("Both"), icon: "unfold_more", value: 3 }
+                    ]
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Unit type")
+                ConfigSelectionArray {
+                    currentValue: Config.options.bar.networkSpeed.unitType
+                    onSelected: newValue => { Config.options.bar.networkSpeed.unitType = newValue; }
+                    options: [
+                        { displayName: Translation.tr("Binary (KiB/s)"), icon: "memory", value: 0 },
+                        { displayName: Translation.tr("Metric (KB/s)"), icon: "functions", value: 1 },
+                        { displayName: Translation.tr("Bitrate (Kbps)"), icon: "speed", value: 2 }
+                    ]
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Icon settings")
+                ConfigSwitch {
+                    buttonIcon: "vertical_align_center"
+                    text: Translation.tr("Show speed indicators (↑↓)")
+                    checked: Config.options.bar.networkSpeed.showIcons
+                    onCheckedChanged: { Config.options.bar.networkSpeed.showIcons = checked; }
+                }
+                ContentSubsection {
+                    title: Translation.tr("Icon position")
+                    enabled: Config.options.bar.networkSpeed.showIcons
+                    opacity: enabled ? 1.0 : 0.5
+                    ConfigSelectionArray {
+                        currentValue: Config.options.bar.networkSpeed.iconPosition
+                        onSelected: newValue => { Config.options.bar.networkSpeed.iconPosition = newValue; }
+                        options: [
+                            { displayName: Translation.tr("Left"), icon: "align_horizontal_left", value: 0 },
+                            { displayName: Translation.tr("Right"), icon: "align_horizontal_right", value: 1 }
+                        ]
+                    }
+                }
+            }
+        }
     }
 }
