@@ -20,6 +20,7 @@ ContentPage {
         if (ExtensionManager.availableExtensions.length === 0) {
             ExtensionManager.refreshAvailableExtensions()
         }
+        ExtensionManager.checkAllUpdates()
         page.filter()
     }
 

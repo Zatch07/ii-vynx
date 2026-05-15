@@ -18,6 +18,8 @@ Singleton {
     property var installedExtensions: ({})
     property var updateStates: ({})
     property var _updateQueue: ({}) // { extId: string, repoUrl: string, branch: string, step: string }
+    property var _updateCheckQueue: []
+    property bool _updateCheckRunning: false
     property list<string> recommendedExtensions: [
         "ii-vynx-test-extension"
     ]
@@ -244,6 +246,7 @@ Singleton {
         let ext = root.installedExtensions[extId]
         if (!ext || !ext.repoUrl) {
             root.updateCheckDone(extId, false, ext ? "No repo URL" : "Not installed")
+            root._advanceUpdateCheckQueue()
             return
         }
 
@@ -275,6 +278,7 @@ Singleton {
             }
         })
         root.updateCheckDone(extId, available, "")
+        root._advanceUpdateCheckQueue()
     }
 
     function updateExtension(extId) {
@@ -342,6 +346,32 @@ Singleton {
         }
         root.loading = false
         root._updateQueue = {}
+    }
+
+    function checkAllUpdates() {
+        let ids = []
+        for (let id in root.installedExtensions) {
+            let ext = root.installedExtensions[id]
+            if (ext.repoUrl) ids.push(id)
+        }
+        root._updateCheckQueue = ids
+        root._updateCheckRunning = false
+        root._processUpdateCheckQueue()
+    }
+
+    function _processUpdateCheckQueue() {
+        if (root._updateCheckRunning) return
+        if (root._updateCheckQueue.length === 0) return
+        root._updateCheckRunning = true
+        root.checkUpdate(root._updateCheckQueue.shift())
+    }
+
+    function _advanceUpdateCheckQueue() {
+        if (!root._updateCheckRunning) return
+        root._updateCheckRunning = false
+        if (root._updateCheckQueue.length > 0) {
+            Qt.callLater(root._processUpdateCheckQueue)
+        }
     }
 
     function getContributionPoint(pointName) {
@@ -430,6 +460,7 @@ Singleton {
                     [updateCheckProc._pendingExtId]: { checking: false, localHash: "", remoteHash: "", updateAvailable: false, error: this.text }
                 })
                 root.updateCheckDone(updateCheckProc._pendingExtId, false, this.text)
+                root._advanceUpdateCheckQueue()
             }
         }
     }
