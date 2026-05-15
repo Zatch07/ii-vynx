@@ -16,12 +16,24 @@ Item {
     property bool translatorEnabled: Config.options.policies.translator !== 0
     property bool animeEnabled: Config.options.policies.weeb !== 0  
     property bool animeCloset: Config.options.policies.weeb === 2  
-    property bool wallpapersEnabled: Config.options.policies.wallpapers !== 0
-    property var tabButtonList: [
-        ...(root.aiChatEnabled ? [{"icon": "neurology", "name": Translation.tr("Intelligence")}] : []),
-        ...(root.translatorEnabled ? [{"icon": "translate", "name": Translation.tr("Translator")}] : []),
+    property bool wallpapersEnabled: Config.options.policies.wallpapers !== 0  
+
+    property var extensionPages: ExtensionManager.ready
+        ? ExtensionManager.getContributionPoint("sidebarLeftPages") : []
+
+    Connections {
+        target: ExtensionManager
+        function onExtensionInstalled() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
+        function onExtensionRemoved() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
+        function onExtensionToggled() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
+    }
+
+    property var tabButtonList: [  
+        ...(root.aiChatEnabled ? [{"icon": "neurology", "name": Translation.tr("Intelligence")}] : []),  
+        ...(root.translatorEnabled ? [{"icon": "translate", "name": Translation.tr("Translator")}] : []), 
         ...(root.wallpapersEnabled ? [{"icon": "wallpaper", "name": Translation.tr("Wallpapers")}] : []),
-        ...((root.animeEnabled && !root.animeCloset) ? [{"icon": "bookmark_heart", "name": Translation.tr("Anime")}] : [])
+        ...((root.animeEnabled && !root.animeCloset) ? [{"icon": "bookmark_heart", "name": Translation.tr("Anime")}] : []),
+        ...root.extensionPages.map(p => ({icon: p.icon, name: p.title}))
     ]
     property int tabCount: swipeView.count
 
@@ -93,7 +105,8 @@ Item {
                     ...(root.translatorEnabled ? [translator.createObject()] : []),
                     ...((root.tabButtonList.length === 0 || (!root.aiChatEnabled && !root.translatorEnabled && root.animeCloset)) ? [placeholder.createObject()] : []),
                     ...(root.wallpapersEnabled ? [wallpaperBrowser.createObject()] : []),
-                        ...(root.animeEnabled ? [anime.createObject()] : []),
+                    ...(root.animeEnabled ? [anime.createObject()] : []),
+                    ...root.extensionPages.map(p => extPageLoader.createObject(swipeView, {source: "file://" + p.fullPath}))
                 ]
             }
         }
@@ -123,6 +136,11 @@ Item {
                     color: Appearance.colors.colSubtext
                 }
             }
+        }
+
+        Component {
+            id: extPageLoader
+            Loader {}
         }
     }
 }

@@ -17,6 +17,15 @@ Rectangle {
     property int selectedTab: Persistent.states.sidebar.bottomGroup.tab
     property int previousIndex: -1
     property bool collapsed: Persistent.states.sidebar.bottomGroup.collapsed
+    property var extensionTabs: ExtensionManager.ready ? ExtensionManager.getContributionPoint("sidebarRightBottom") : []
+
+    Connections {
+        target: ExtensionManager
+        function onExtensionInstalled() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom") }
+        function onExtensionRemoved() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom") }
+        function onExtensionToggled() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom") }
+    }
+
     property var tabs: [
         {
             "type": "calendar",
@@ -36,6 +45,13 @@ Rectangle {
             "icon": "schedule",
             "widget": "pomodoro/PomodoroWidget.qml"
         },
+        ...root.extensionTabs.map(p => ({
+            "type": "ext_" + p.identifier,
+            "name": p.title,
+            "icon": p.icon,
+            "widget": "file://" + p.fullPath,
+            "isExtension": true
+        }))
     ]
 
     Behavior on implicitHeight {

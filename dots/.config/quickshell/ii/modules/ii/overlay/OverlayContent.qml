@@ -54,12 +54,23 @@ Item {
         Repeater {
             model: ScriptModel {
                 values: Persistent.states.overlay.open.map(identifier => {
-                    return OverlayContext.availableWidgets.find(w => w.identifier === identifier);
+                    return OverlayContext.availableWidgets.find(w => w.identifier === identifier && !w.isExtension);
                 })
                 objectProp: "identifier"
             }
-            delegate: OverlayWidgetDelegateChooser {
-                
+            delegate: OverlayWidgetDelegateChooser {}
+        }
+
+        Repeater {
+            model: ScriptModel {
+                values: Persistent.states.overlay.open.map(identifier => {
+                    return OverlayContext.availableWidgets.find(w => w.identifier === identifier && w.isExtension);
+                })
+                objectProp: "identifier"
+            }
+            delegate: Loader {
+                source: model && model.modelData && model.modelData.isExtension ? "file://" + model.modelData.fullPath : ""
+                active: source.length > 0
             }
         }
     }
