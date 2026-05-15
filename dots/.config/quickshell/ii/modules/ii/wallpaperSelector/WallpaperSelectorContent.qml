@@ -386,7 +386,7 @@ MouseArea {
                                         { icon: "download", name: Translation.tr("Downloads"), path: Directories.downloads }, 
                                         { icon: "image", name: Translation.tr("Pictures"), path: Directories.pictures }, 
                                         { icon: "movie", name: Translation.tr("Videos"), path: Directories.videos }, 
-                                        { icon: "public", name: Translation.tr("Browser"), path: "BROWSER_MODE" }, 
+                                        ...(ExtensionManager.installedExtensions["vynx-wallpaper-browser"] ? [{ icon: "public", name: Translation.tr("Browser"), path: "BROWSER_MODE" }] : []),
                                         { icon: "favorite", name: Translation.tr("Favourites"), path: "FAVOURITES_MODE" }, 
                                         { icon: "", name: "---", path: "INTENTIONALLY_INVALID_DIR" }, 
                                         ...Config.options.wallpaperSelector.directories,
@@ -520,19 +520,14 @@ MouseArea {
                     }
 
                     StyledText {
-                        visible: !statusText.visible && (wallpaperSelectorContent.browserMode && grid.model.length === 0)
-                        text: Translation.tr("Please install the official 'Wallpaper Browser' extension to use this feature.")
-                        anchors.centerIn: parent
-
-                        font.family: Appearance.font.family.reading
-                    }
-
-                    StyledText {
                         id: statusText
                         visible: (wallpaperSelectorContent.favMode && grid.model.count === 0) || (wallpaperSelectorContent.browserMode && grid.model.length === 0)
                         text: {
                             if (wallpaperSelectorContent.browserMode) {
-                                return (ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").runningRequests > 0) ? Translation.tr("Searching...") : Translation.tr("Search wallpapers with the search bar at the bottom.");
+                                if (ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService")?.runningRequests > 0) {
+                                    return Translation.tr("Searching...");
+                                }
+                                return Translation.tr("Search wallpapers with the bottom serch bar.");
                             }
                             return Translation.tr("No favourites yet. Click the heart icon on any wallpaper to add it to favourites.");
                         }
