@@ -41,10 +41,10 @@ Item {
             anchors { fill: parent; margins: 10 }
             spacing: 12
 
-            Rectangle {
+            MaterialShape {
                 Layout.preferredWidth: 60
                 Layout.preferredHeight: 60
-                radius: Appearance.rounding.normal
+                randomShape: true
                 color: Appearance.colors.colLayer3
                 MaterialSymbol {
                     anchors.centerIn: parent

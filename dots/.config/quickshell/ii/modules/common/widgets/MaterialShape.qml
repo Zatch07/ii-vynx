@@ -46,9 +46,6 @@ ShapeCanvas {
         "Circle": MaterialShape.Shape.Circle,
         "Square": MaterialShape.Shape.Square,
         "Slanted": MaterialShape.Shape.Slanted,
-        "Circle": MaterialShape.Shape.Circle,
-        "Square": MaterialShape.Shape.Square,
-        "Slanted": MaterialShape.Shape.Slanted,
         "Arch": MaterialShape.Shape.Arch,
         "Fan": MaterialShape.Shape.Fan,
         "Arrow": MaterialShape.Shape.Arrow,
@@ -92,9 +89,38 @@ ShapeCanvas {
     property string shapeString
     property var shape
     property double implicitSize
+    property bool randomShape: false
     implicitHeight: implicitSize
     implicitWidth: implicitSize
     polygonIsNormalized: true
+
+    Component.onCompleted: {
+        if (randomShape) {
+            let keys = Object.keys(shapeMap)
+
+            let banned = [
+                "SemiCircle",
+                "Oval",
+                "Diamond",
+                "Burst",
+                "Boom",
+                "SoftBoom",
+                "Flower",
+                "Puffy",
+                "PuffyDiamond",
+                "PixelTriangle",
+                "Heart",
+                "Bun",
+                "ClamShell",
+                "Triangle"
+            ]
+
+            let validKeys = keys.filter(k => !banned.includes(k))
+            let randomKey = validKeys[Math.floor(Math.random() * validKeys.length)]
+
+            shapeString = randomKey
+        }
+    }
 
     onShapeStringChanged: {
         if (!shapeString) return

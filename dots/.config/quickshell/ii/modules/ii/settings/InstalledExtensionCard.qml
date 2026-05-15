@@ -29,11 +29,12 @@ Item {
             anchors.margins: 10
             spacing: 12
 
-            Rectangle {
+            MaterialShape {
                 Layout.preferredWidth: 60
                 Layout.preferredHeight: 60
-                radius: Appearance.rounding.normal
+                //radius: Appearance.rounding.normal
                 color: Appearance.colors.colLayer3
+                randomShape: true
                 MaterialSymbol {
                     anchors.centerIn: parent
                     text: "extension"
