@@ -104,7 +104,6 @@ Item {
                     ...(root.aiChatEnabled ? [aiChat.createObject()] : []),
                     ...(root.translatorEnabled ? [translator.createObject()] : []),
                     ...((root.tabButtonList.length === 0 || (!root.aiChatEnabled && !root.translatorEnabled && root.animeCloset)) ? [placeholder.createObject()] : []),
-                    ...(root.wallpapersEnabled ? [wallpaperBrowser.createObject()] : []),
                     ...(root.animeEnabled ? [anime.createObject()] : []),
                     ...root.extensionPages.map(p => {
                         var qml = 'import QtQuick; Loader { source: "file://' + p.fullPath + '"; active: true }'
@@ -121,10 +120,6 @@ Item {
         Component {
             id: translator
             Translator {}
-        }
-        Component {  
-            id: wallpaperBrowser  
-            WallpaperBrowserUI {}  
         }
         Component {
             id: anime

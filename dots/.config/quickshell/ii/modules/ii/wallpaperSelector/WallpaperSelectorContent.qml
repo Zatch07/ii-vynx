@@ -28,8 +28,8 @@ MouseArea {
 
     property var apiImages: {
         let allImages = [];
-        for (let i = 0; i < WallpaperBrowser.responses.length; i++) {
-            let resp = WallpaperBrowser.responses[i];
+        for (let i = 0; i < ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").responses.length; i++) {
+            let resp = ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").responses[i];
             if (resp.images) {
                 for (let j = 0; j < resp.images.length; j++) {
                     let img = resp.images[j];
@@ -210,8 +210,8 @@ MouseArea {
     }
     
     function searchForSimilarImages(id) {
-        WallpaperBrowser.clearResponses();
-        WallpaperBrowser.moreLikeThisPicture(id, 1);
+        ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").clearResponses();
+        ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").moreLikeThisPicture(id, 1);
         wallpaperSelectorContent.browserMode = true;
         wallpaperSelectorContent.favMode = false;
         filterText = "";
@@ -472,7 +472,7 @@ MouseArea {
                             options: {
                                 let items = [{ displayName: wallpaperSelectorContent.browserMode ? Translation.tr("Wallpaper Browser") : Translation.tr("Favourites"), isRoot: true }];
                                 if (wallpaperSelectorContent.browserMode) {
-                                    const tags = WallpaperBrowser.currentSearchTags;
+                                    const tags = ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").currentSearchTags;
                                     for (let i = 0; i < tags.length; i++) {
                                         items.push({ displayName: tags[i], value: tags[i] });
                                     }
@@ -482,8 +482,8 @@ MouseArea {
                             onSelected: newValue => {
                                 if (!newValue) return;
                                 wallpaperSelectorContent.moreOptionsModelData = null
-                                WallpaperBrowser.clearResponses();
-                                WallpaperBrowser.makeRequest([newValue], 20, 1);
+                                ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").clearResponses();
+                                ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").makeRequest([newValue], 20, 1);
                             }
                         }
                     }
@@ -497,7 +497,7 @@ MouseArea {
 
                     StyledIndeterminateProgressBar {
                         id: indeterminateProgressBar
-                        visible: (Wallpapers.thumbnailGenerationRunning && value == 0) || (wallpaperSelectorContent.browserMode && WallpaperBrowser.runningRequests > 0) || (wallpaperSelectorContent.colorCacheProgress === 0 && colorCacheProc.running) || wallpaperSelectorContent.isColorFiltering
+                        visible: (Wallpapers.thumbnailGenerationRunning && value == 0) || (wallpaperSelectorContent.browserMode && ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").runningRequests > 0) || (wallpaperSelectorContent.colorCacheProgress === 0 && colorCacheProc.running) || wallpaperSelectorContent.isColorFiltering
                         anchors {
                             bottom: parent.top
                             left: parent.left
@@ -520,10 +520,19 @@ MouseArea {
                     }
 
                     StyledText {
+                        visible: !statusText.visible && (wallpaperSelectorContent.browserMode && grid.model.length === 0)
+                        text: Translation.tr("Please install the official 'Wallpaper Browser' extension to use this feature.")
+                        anchors.centerIn: parent
+
+                        font.family: Appearance.font.family.reading
+                    }
+
+                    StyledText {
+                        id: statusText
                         visible: (wallpaperSelectorContent.favMode && grid.model.count === 0) || (wallpaperSelectorContent.browserMode && grid.model.length === 0)
                         text: {
                             if (wallpaperSelectorContent.browserMode) {
-                                return (WallpaperBrowser.runningRequests > 0) ? Translation.tr("Searching...") : Translation.tr("Search wallpapers with the search bar at the bottom.");
+                                return (ExtensionServices.get("vynx-wallpaper-browser", "wallpaperBrowserService").runningRequests > 0) ? Translation.tr("Searching...") : Translation.tr("Search wallpapers with the search bar at the bottom.");
                             }
                             return Translation.tr("No favourites yet. Click the heart icon on any wallpaper to add it to favourites.");
                         }
