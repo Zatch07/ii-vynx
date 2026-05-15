@@ -30,6 +30,7 @@ ContentPage {
         function onExtensionInstalled(extId) { page.filter() }
         function onExtensionRemoved(extId) { page.filter() }
         function onExtensionToggled(extId) { page.filter() }
+        function onUpdateCheckDone(extId, available, error) { page.filter() }
     }
 
     function filter() {
@@ -262,7 +263,7 @@ ContentPage {
                                                 }
                                             }
                                         } else {
-                                            ExtensionManager.installExtension(ext.repoUrl, ext.name)
+                                            ExtensionManager.installExtension(ext.repoUrl, ext.name, ext.defaultBranch || "main")
                                         }
                                     }
                                 }
@@ -308,13 +309,12 @@ ContentPage {
             delegate: Item {
                 required property var modelData
                 property var ext: modelData
-
-                Component.onCompleted: {
-                    console.log("Installed extension:", ext.name, "enabled:", ext.enabled, enabled in ext ? "yes" : "no")
-                }
+                property var updateState: ExtensionManager.updateStates[ext.id] || {}
+                property bool updateChecking: updateState.checking || false
+                property bool updateAvailable: updateState.updateAvailable || false
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: 60
+                Layout.preferredHeight: 70
 
                 Rectangle {
                     anchors.fill: parent
@@ -343,16 +343,63 @@ ContentPage {
                                 font.weight: Font.Medium
                                 color: Appearance.colors.colOnLayer0
                             }
-                            StyledText {
-                                text: "v" + ext.version + " by " + ext.author
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: Appearance.colors.colSubtext
+                            RowLayout {
+                                spacing: 6
+                                StyledText {
+                                    text: "v" + ext.version + " by " + ext.author
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colSubtext
+                                }
+                                StyledText {
+                                    visible: ext.repoUrl && updateChecking
+                                    text: Translation.tr("Checking update...")
+                                    font.pixelSize: Appearance.font.pixelSize.smallest
+                                    color: Appearance.colors.colTertiary
+                                }
+                                StyledText {
+                                    visible: ext.repoUrl && updateAvailable && !updateChecking
+                                    text: Translation.tr("Update available!")
+                                    font.pixelSize: Appearance.font.pixelSize.smallest
+                                    color: Appearance.colors.colPrimary
+                                }
+                                StyledText {
+                                    visible: ext.repoUrl && !updateChecking && !updateAvailable && updateState.localHash
+                                    text: Translation.tr("Up to date")
+                                    font.pixelSize: Appearance.font.pixelSize.smallest
+                                    color: Appearance.colors.colSubtext
+                                }
+                                Item { Layout.fillWidth: true }
                             }
                         }
 
                         StyledSwitch {
                             checked: ext.enabled
                             onClicked: ExtensionManager.toggleExtension(ext.id, !ext.enabled)
+                        }
+
+                        RippleButton {
+                            implicitWidth: 60
+                            implicitHeight: 28
+                            buttonRadius: Appearance.rounding.full
+                            colBackground: updateAvailable ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
+                            visible: ext.repoUrl && ext.repoUrl.length > 0
+                            contentItem: StyledText {
+                                anchors.centerIn: parent
+                                text: updateChecking
+                                      ? "..."
+                                      : (updateAvailable ? Translation.tr("Update") : Translation.tr("Check"))
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                color: updateAvailable
+                                       ? Appearance.colors.colOnPrimaryContainer
+                                       : Appearance.colors.colSubtext
+                            }
+                            onClicked: {
+                                if (updateAvailable) {
+                                    ExtensionManager.updateExtension(ext.id)
+                                } else {
+                                    ExtensionManager.checkUpdate(ext.id)
+                                }
+                            }
                         }
 
                         RippleButton {

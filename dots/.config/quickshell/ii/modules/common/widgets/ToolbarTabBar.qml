@@ -62,13 +62,13 @@ Item {
             id: leftBound
             idx1Duration: 50
             idx2Duration: 200
-            index: activeIndicator.targetItem.x
+            index: activeIndicator.targetItem ? activeIndicator.targetItem.x : 0
         }
         AnimatedTabIndexPair {
             id: rightBound
             idx1Duration: 50
             idx2Duration: 200
-            index: activeIndicator.targetItem.x + activeIndicator.targetItem.width
+            index: activeIndicator.targetItem ? activeIndicator.targetItem.x + activeIndicator.targetItem.width : 0
         }
         x: Math.min(leftBound.idx1, leftBound.idx2)
         width: Math.max(rightBound.idx1, rightBound.idx2) - x

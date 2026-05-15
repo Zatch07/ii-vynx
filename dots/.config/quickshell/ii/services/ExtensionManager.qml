@@ -16,12 +16,14 @@ Singleton {
     property string error: ""
     property var availableExtensions: []
     property var installedExtensions: ({})
+    property var updateStates: ({})
 
     signal extensionSearchDone()
     signal extensionInstalled(string extId)
     signal extensionRemoved(string extId)
     signal extensionToggled(string extId)
     signal manifestReady(int repoId)
+    signal updateCheckDone(string extId, bool available, string error)
 
     Component.onCompleted: {
         Quickshell.execDetached(["mkdir", "-p", Directories.extensionsCachePath])
@@ -146,16 +148,18 @@ Singleton {
 
     // ── Install / Uninstall ──
 
-    function installExtension(repoUrl, extId) {
+    function installExtension(repoUrl, extId, defaultBranch) {
         root.loading = true
         root.error = ""
         let dest = Directories.extensionsInstalledPath + "/" + extId
         installProc._pendingExtId = extId
         installProc._pendingDest = dest
+        installProc._pendingRepoUrl = repoUrl
+        installProc._pendingBranch = defaultBranch || "main"
         installProc.exec(["git", "clone", "--depth", "1", repoUrl, dest])
     }
 
-    function registerInstalled(extId, dest, jsonText) {
+    function registerInstalled(extId, dest, repoUrl, defaultBranch, jsonText) {
         try {
             let manifest = JSON.parse(jsonText)
             let entry = {
@@ -168,6 +172,8 @@ Singleton {
                 enabled: true,
                 installedPath: dest,
                 installedAt: new Date().toISOString(),
+                repoUrl: repoUrl || "",
+                defaultBranch: defaultBranch || "main",
                 contributes: manifest.contributes || {}
             }
             root.installedExtensions = Object.assign({}, root.installedExtensions, { [extId]: entry })
@@ -204,7 +210,88 @@ Singleton {
         root.extensionToggled(extId)
     }
 
-    // ── Contribution queries ──
+    // ── Update management ──
+
+    function checkUpdate(extId) {
+        let ext = root.installedExtensions[extId]
+        if (!ext || !ext.repoUrl) {
+            root.updateCheckDone(extId, false, ext ? "No repo URL" : "Not installed")
+            return
+        }
+
+        root.updateStates = Object.assign({}, root.updateStates, {
+            [extId]: { checking: true, localHash: "", remoteHash: "", updateAvailable: false, error: "" }
+        })
+
+        updateCheckProc._pendingExtId = extId
+        updateCheckProc.exec(["bash", "-c",
+            "local=$(git -C \"" + ext.installedPath + "\" rev-parse HEAD 2>/dev/null) && " +
+            "remote=$(git ls-remote \"" + ext.repoUrl + "\" \"" + ext.defaultBranch + "\" 2>/dev/null | head -1 | awk '{print $1}') && " +
+            "echo \"$local $remote\""
+        ])
+    }
+
+    function processUpdateCheck(extId, output) {
+        let parts = output.trim().split(/\s+/)
+        let localHash = parts[0] || ""
+        let remoteHash = parts[1] || ""
+        let available = localHash.length > 0 && remoteHash.length > 0 && localHash !== remoteHash
+
+        root.updateStates = Object.assign({}, root.updateStates, {
+            [extId]: {
+                checking: false,
+                localHash: localHash,
+                remoteHash: remoteHash,
+                updateAvailable: available,
+                error: ""
+            }
+        })
+        root.updateCheckDone(extId, available, "")
+    }
+
+    function updateExtension(extId) {
+        let ext = root.installedExtensions[extId]
+        if (!ext) return
+
+        root.loading = true
+        root.error = ""
+        updatePullProc._pendingExtId = extId
+        updatePullProc.exec(["git", "-C", ext.installedPath, "pull", "--ff-only"])
+    }
+
+    function finalizeUpdate(extId, exitCode) {
+        root.loading = false
+        if (exitCode !== 0) {
+            root.error = "Update failed (exit " + exitCode + ")"
+            return
+        }
+        // Re-read extension.json to update the entry
+        let ext = root.installedExtensions[extId]
+        if (ext) {
+            updateReader._pendingExtId = extId
+            updateReader.path = ext.installedPath + "/extension.json"
+        }
+    }
+
+    function reRegisterUpdated(extId, jsonText) {
+        try {
+            let manifest = JSON.parse(jsonText)
+            let existing = root.installedExtensions[extId]
+            if (!existing) return
+            let updated = Object.assign({}, existing, {
+                name: manifest.name || existing.name,
+                description: manifest.description || existing.description,
+                version: manifest.version || existing.version,
+                author: manifest.author || existing.author,
+                coverArt: manifest.coverArt || existing.coverArt,
+                contributes: manifest.contributes || existing.contributes
+            })
+            root.installedExtensions = Object.assign({}, root.installedExtensions, { [extId]: updated })
+            root.syncPluginsAdapter()
+        } catch (e) {
+            root.error = "Failed to re-read extension.json: " + e
+        }
+    }
 
     function getContributionPoint(pointName) {
         let result = []
@@ -255,10 +342,14 @@ Singleton {
         id: installProc
         property string _pendingExtId: ""
         property string _pendingDest: ""
+        property string _pendingRepoUrl: ""
+        property string _pendingBranch: "main"
         onExited: (exitCode, _) => {
             if (exitCode === 0) {
                 installReader._pendingExtId = installProc._pendingExtId
                 installReader._pendingDest = installProc._pendingDest
+                installReader._pendingRepoUrl = installProc._pendingRepoUrl
+                installReader._pendingBranch = installProc._pendingBranch
                 installReader.path = installProc._pendingDest + "/extension.json"
             } else {
                 root.error = "Git clone failed (exit " + exitCode + ")"
@@ -271,6 +362,28 @@ Singleton {
         id: removeProc
         property string _pendingExtId: ""
         onExited: root.finalizeUninstall(removeProc._pendingExtId)
+    }
+
+    Process {
+        id: updateCheckProc
+        property string _pendingExtId: ""
+        stdout: StdioCollector {
+            onStreamFinished: root.processUpdateCheck(updateCheckProc._pendingExtId, this.text)
+        }
+        stderr: StdioCollector {
+            onStreamFinished: if (this.text) {
+                root.updateStates = Object.assign({}, root.updateStates, {
+                    [updateCheckProc._pendingExtId]: { checking: false, localHash: "", remoteHash: "", updateAvailable: false, error: this.text }
+                })
+                root.updateCheckDone(updateCheckProc._pendingExtId, false, this.text)
+            }
+        }
+    }
+
+    Process {
+        id: updatePullProc
+        property string _pendingExtId: ""
+        onExited: (exitCode, _) => root.finalizeUpdate(updatePullProc._pendingExtId, exitCode)
     }
 
     // ── File persistence ──
@@ -305,10 +418,18 @@ Singleton {
         id: installReader
         property string _pendingExtId: ""
         property string _pendingDest: ""
-        onLoaded: root.registerInstalled(installReader._pendingExtId, installReader._pendingDest, installReader.text())
+        property string _pendingRepoUrl: ""
+        property string _pendingBranch: "main"
+        onLoaded: root.registerInstalled(installReader._pendingExtId, installReader._pendingDest, installReader._pendingRepoUrl, installReader._pendingBranch, installReader.text())
         onLoadFailed: {
             root.error = "Installed extension has no extension.json"
             root.loading = false
         }
+    }
+
+    FileView {
+        id: updateReader
+        property string _pendingExtId: ""
+        onLoaded: root.reRegisterUpdated(updateReader._pendingExtId, updateReader.text())
     }
 }
