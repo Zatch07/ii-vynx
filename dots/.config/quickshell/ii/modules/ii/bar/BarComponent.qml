@@ -111,6 +111,12 @@ Item {
             id: itemLoader
             active: true
             sourceComponent: wrapper._currentComp
+            onLoaded: {
+                let extId = BarComponentRegistry.getExtensionIdForComponent(modelData.id)
+                if (extId && item && ("extensionId" in item)) {
+                    item.extensionId = extId
+                }
+            }
         }
     }
 

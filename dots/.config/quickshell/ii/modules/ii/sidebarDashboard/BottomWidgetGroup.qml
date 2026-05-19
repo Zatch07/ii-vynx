@@ -50,7 +50,8 @@ Rectangle {
             "name": p.title,
             "icon": p.icon,
             "widget": "file://" + p.fullPath,
-            "isExtension": true
+            "isExtension": true,
+            "extensionId": p.extensionId
         }))
     ]
 
@@ -214,6 +215,13 @@ Rectangle {
                 id: tabStack
                 anchors.fill: parent
                 anchors.bottomMargin: -anchors.topMargin
+
+                onLoaded: {
+                    let tab = root.tabs[root.selectedTab]
+                    if (tab && tab.extensionId && item) {
+                        item.extensionId = tab.extensionId
+                    }
+                }
 
                 Component.onCompleted: {
                     tabStack.source = root.tabs[root.selectedTab].widget;

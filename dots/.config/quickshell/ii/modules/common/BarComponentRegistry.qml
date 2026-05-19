@@ -60,7 +60,8 @@ Singleton {
             meta.push({
                 id: id,
                 icon: c.icon || "extension",
-                title: c.title || id
+                title: c.title || id,
+                extensionId: c.extensionId || ""
             })
 
             let horizComp = Qt.createComponent("file://" + c.fullPath)
@@ -91,6 +92,13 @@ Singleton {
 
     function getComponent(id) {
         return root.allComponents.find(c => c.id === id) || null
+    }
+
+    function getExtensionIdForComponent(id) {
+        for (let i = 0; i < root.extensionComponents.length; i++) {
+            if (root.extensionComponents[i].id === id) return root.extensionComponents[i].extensionId
+        }
+        return ""
     }
 
     function getAvailableComponents(usedIds) {

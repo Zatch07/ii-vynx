@@ -41,6 +41,13 @@ Item {
         swipeView.currentItem.forceActiveFocus()
     }
 
+    function createExtensionPage(page) {
+        return Qt.createQmlObject(
+            'import QtQuick; Loader { source: "file://' + page.fullPath + '"; active: true; onLoaded: if (item) item.extensionId = "' + page.extensionId + '" }',
+            swipeView
+        )
+    }
+
     Keys.onPressed: (event) => {
         if (event.modifiers === Qt.ControlModifier) {
             if (event.key === Qt.Key_PageDown) {
@@ -105,10 +112,7 @@ Item {
                     ...(root.translatorEnabled ? [translator.createObject()] : []),
                     ...((root.tabButtonList.length === 0 || (!root.aiChatEnabled && !root.translatorEnabled && root.animeCloset)) ? [placeholder.createObject()] : []),
                     ...(root.animeEnabled ? [anime.createObject()] : []),
-                    ...root.extensionPages.map(p => {
-                        var qml = 'import QtQuick; Loader { source: "file://' + p.fullPath + '"; active: true }'
-                        return Qt.createQmlObject(qml, swipeView)
-                    }).filter(item => item)
+                    ...root.extensionPages.map(p => root.createExtensionPage(p)).filter(item => item)
                 ]
             }
         }

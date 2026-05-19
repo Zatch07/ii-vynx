@@ -32,8 +32,10 @@ Singleton {
     }
 
     function _instantiate(comp, key) {
+        let extId = key.split(".")[0]
         let instance = comp.createObject(null)
         if (instance) {
+            instance.extensionId = extId
             let updated = Object.assign({}, root.loaded)
             updated[key] = instance
             root.loaded = updated

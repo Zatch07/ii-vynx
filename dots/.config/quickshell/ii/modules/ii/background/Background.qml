@@ -185,7 +185,7 @@ Variants {
                     let savedWidgetConfig = ExtensionManager.getExtensionWidgetConfig(extId, wid)
                     let savedX = savedWidgetConfig ? savedWidgetConfig.x : x
                     let savedY = savedWidgetConfig ? savedWidgetConfig.y : y
-                    let qml = 'import QtQml; QtObject { property string extensionId: "' + extId + '"; property bool enable: true; property real x: ' + savedX + '; property real y: ' + savedY + '; property string placementStrategy: "' + strat + '" }'
+                    let qml = 'import QtQml; QtObject { property bool enable: true; property real x: ' + savedX + '; property real y: ' + savedY + '; property string placementStrategy: "' + strat + '" }'
                     let cfg = Qt.createQmlObject(qml,bgRoot)
 
                     let onPosChanged = () => {
@@ -204,6 +204,7 @@ Variants {
                     })
 
                     if (widget) {
+                        widget.extensionId = extId
                         let objects = _extensionBgWidgetObjects.slice()
                         objects.push(widget)
                         _extensionBgWidgetObjects = objects
