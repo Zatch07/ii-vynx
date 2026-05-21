@@ -181,7 +181,6 @@ Singleton {
                 property string terminal: "kitty -1" // This is only for shell actions
                 property string update: "kitty -1 --hold=yes fish -i -c 'pkexec pacman -Syu'"
                 property string volumeMixer: `~/.config/hypr/hyprland/scripts/launch_first_available.sh "pavucontrol-qt" "pavucontrol"`
-                property list<var> bluetoothDeviceImages: []
             }
 
             property JsonObject background: JsonObject {
@@ -424,8 +423,6 @@ Singleton {
                     property bool clickToShow: false
                     property bool compactPopups: false
                     property bool showSwap: false
-                    property bool enableBluetoothConnectionPopup: true
-                    property string bluetoothDevicesLayout: "classic" // Options: classic, expressive
                 }
                 property JsonObject sizes: JsonObject {
                     property int height: 40 // horizontal mode
@@ -463,10 +460,6 @@ Singleton {
                 property bool splitButtons: false
                 property bool useMouseSymbol: false
                 property bool useFnSymbol: false
-                property bool enableGmail: true
-                property bool enableTimetable: true
-                property bool enablePeriodicTable: true
-                property bool enableCommands: false
                 property JsonObject fontSize: JsonObject {
                     property int key: Appearance.font.pixelSize.smaller
                     property int comment: Appearance.font.pixelSize.smaller
