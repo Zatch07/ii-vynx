@@ -792,7 +792,6 @@ ContentPage {
                     to: 5000
                     stepSize: 100
                     onValueChanged: { Config.options.bar.networkSpeed.updateInterval = value; }
-                }
             }
         }
     }
