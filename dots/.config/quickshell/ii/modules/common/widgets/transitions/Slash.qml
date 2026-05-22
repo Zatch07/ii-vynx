@@ -48,7 +48,7 @@ Item {
         target: circleMask
         property: "scale" // Animate scale, not width!
         duration: effect.duration
-        easing.type: Easing.Bezier
+        easing.type: Easing.BezierSpline
         easing.bezierCurve: [0.227, 0.877, 0.959, 0.310, 1.0, 1.0]
         onFinished: effect.finished()
     }
