@@ -435,6 +435,7 @@ Singleton {
                     property int unitType: 0 // 0: Binary (IEC), 1: Metric (SI), 2: Bits
                     property int iconPosition: 0 // 0: Left, 1: Right
                     property int updateInterval: 1000 // ms
+                    property bool autoHide: true
                 }
             }
 

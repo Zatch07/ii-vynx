@@ -8,15 +8,101 @@ import QtQuick.Layouts
 Item {
     id: root
     property bool vertical: false
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : networkLayout.implicitWidth + 6
-    implicitHeight: vertical ? (displayMode === 5 ? singleLineText.implicitWidth + 6 : networkLayout.implicitHeight + 6) : Appearance.sizes.barHeight
+    readonly property bool autoHide: Config.options.bar.networkSpeed.autoHide ?? true
+    readonly property int threshold: {
+        if (unitType === 0) return 1024;       // 1 KiB = 1024 Bytes
+        if (unitType === 1) return 1000;       // 1 KB = 1000 Bytes
+        if (unitType === 2) return 125;        // 1 Kb = 1000 bits = 125 Bytes
+        return 1024;
+    }
+    readonly property bool hasActivity: {
+        if (displayMode === 1) {
+            return NetworkUsage.networkDownloadSpeed >= threshold;
+        } else if (displayMode === 2) {
+            return NetworkUsage.networkUploadSpeed >= threshold;
+        } else if (displayMode === 3) {
+            return NetworkUsage.networkDownloadSpeed >= threshold || NetworkUsage.networkUploadSpeed >= threshold;
+        } else {
+            return (NetworkUsage.networkDownloadSpeed + NetworkUsage.networkUploadSpeed) >= threshold;
+        }
+    }
+    property bool showWidget: true
+
+    visible: autoHide ? showWidget : true
+    implicitWidth: visible ? (vertical ? Appearance.sizes.verticalBarWidth : networkLayout.implicitWidth + 6) : 0
+    implicitHeight: visible ? (vertical ? (displayMode === 5 ? singleLineText.implicitWidth + 6 : networkLayout.implicitHeight + 6) : Appearance.sizes.barHeight) : 0
+
+    // Auto-hide delay timer (10 seconds grace period to prevent layour flickering)
+    Timer {
+        id: hideTimer
+        interval: 10000
+        running: autoHide && !hasActivity
+        repeat: false
+        onTriggered: {
+            showWidget = false;
+        }
+    }
+
+    function updateVisibility() {
+        try {
+            if (typeof rootItem !== "undefined") {
+                rootItem.visible = (!autoHide || showWidget);
+            } else {
+                root.visible = (!autoHide || showWidget);
+            }
+        } catch (e) {
+            root.visible = (!autoHide || showWidget);
+        }
+    }
+
+    onShowWidgetChanged: updateVisibility()
+
+    onHasActivityChanged: {
+        if (hasActivity) {
+            hideTimer.stop();
+            showWidget = true;
+        }
+        updateVisibility();
+    }
+
+    onAutoHideChanged: {
+        if (!autoHide) {
+            hideTimer.stop();
+            showWidget = true;
+        }
+        updateVisibility();
+    }
 
     readonly property int displayMode: Config.options.bar.networkSpeed.displayMode
     readonly property bool showIcons: Config.options.bar.networkSpeed.showIcons
     readonly property int unitType: Config.options.bar.networkSpeed.unitType
     readonly property int iconPosition: Config.options.bar.networkSpeed.iconPosition
 
-    Component.onCompleted: NetworkUsage.activeInstances++
+    onVerticalChanged: {
+        if (vertical) {
+            if (Config.options.bar.networkSpeed.displayMode < 4) {
+                Config.options.bar.networkSpeed.displayMode = 5;
+            }
+        } else {
+            if (Config.options.bar.networkSpeed.displayMode === 5) {
+                Config.options.bar.networkSpeed.displayMode = 0;
+            }
+        }
+    }
+
+    Component.onCompleted: {
+        NetworkUsage.activeInstances++;
+        if (vertical) {
+            if (Config.options.bar.networkSpeed.displayMode < 4) {
+                Config.options.bar.networkSpeed.displayMode = 5;
+            }
+        } else {
+            if (Config.options.bar.networkSpeed.displayMode === 5) {
+                Config.options.bar.networkSpeed.displayMode = 0;
+            }
+        }
+        updateVisibility();
+    }
     Component.onDestruction: NetworkUsage.activeInstances--
 
     // Shared formatting function for speed values

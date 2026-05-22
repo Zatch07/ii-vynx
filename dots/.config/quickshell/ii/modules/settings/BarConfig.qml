@@ -792,7 +792,13 @@ ContentPage {
                     to: 5000
                     stepSize: 100
                     onValueChanged: { Config.options.bar.networkSpeed.updateInterval = value; }
+                }
+                ConfigSwitch {
+                    buttonIcon: "visibility_off"
+                    text: Translation.tr("Auto-hide when idle")
+                    checked: Config.options.bar.networkSpeed.autoHide
+                    onCheckedChanged: { Config.options.bar.networkSpeed.autoHide = checked; }
+                }
             }
-        }
     }
 }
