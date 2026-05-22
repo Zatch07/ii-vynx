@@ -92,6 +92,18 @@ ContentPage {
                         icon: "swap_horiz",
                         value: "wipe",
                         tooltip: Translation.tr("Wipes the screen horizontally to reveal the new wallpaper")
+                    },
+                    {
+                        displayName: Translation.tr("Diamond Wipe"),
+                        icon: "diamond",
+                        value: "diamond",
+                        tooltip: Translation.tr("Expands a 4-sided diamond outward from the center to reveal the new wallpaper")
+                    },
+                    {
+                        displayName: Translation.tr("Slash Wipe"),
+                        icon: "timeline",
+                        value: "slash",
+                        tooltip: Translation.tr("Expands a 45-degree slash line outward to reveal the new wallpaper")
                     }
                 ]
             }
