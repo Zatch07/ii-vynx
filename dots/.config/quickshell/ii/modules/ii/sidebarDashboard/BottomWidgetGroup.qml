@@ -21,9 +21,30 @@ Rectangle {
 
     Connections {
         target: ExtensionManager
-        function onExtensionInstalled() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom") }
-        function onExtensionRemoved() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom") }
-        function onExtensionToggled() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom") }
+        function onRefreshExtensions() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom"); root.refreshCurrentTab() }
+        function onExtensionInstalled() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom"); root.refreshCurrentTab() }
+        function onExtensionRemoved() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom"); root.refreshCurrentTab() }
+        function onExtensionToggled() { root.extensionTabs = ExtensionManager.getContributionPoint("sidebarRightBottom"); root.refreshCurrentTab() }
+    }
+
+    function refreshCurrentTab() {
+        if (!root.tabs.length) return
+        let tab = root.tabs[root.selectedTab]
+        if (!tab) return
+        if (tab.isExtension) {
+            let comp = ExtensionManager.loadExtensionQmlComponent(tab.fullPath)
+            if (comp && comp.status === Component.Ready) {
+                tabStack.sourceComponent = comp
+            } else if (comp) {
+                comp.statusChanged.connect(() => {
+                    if (comp.status === Component.Ready) {
+                        tabStack.sourceComponent = comp
+                    }
+                })
+            }
+        } else {
+            tabStack.source = tab.widget
+        }
     }
 
     property var tabs: [
@@ -49,7 +70,8 @@ Rectangle {
             "type": "ext_" + p.identifier,
             "name": p.title,
             "icon": p.icon,
-            "widget": "file://" + p.fullPath,
+            "widget": "file://" + p.fullPath + "?_t=" + Date.now(),
+            "fullPath": p.fullPath,
             "isExtension": true,
             "extensionId": p.extensionId
         }))

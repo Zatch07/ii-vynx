@@ -254,6 +254,65 @@ Singleton {
         localReader.reload()
     }
 
+    function reinstallLocalExtension(extId) {
+        let ext = root.installedExtensions[extId]
+        if (!ext || !ext.isLocal) return
+
+        root.loading = true
+        root.error = ""
+
+        reloadLocalProc._pendingExtId = extId
+        reloadLocalProc.exec(["cat", ext.installedPath + "/extension.json"])
+    }
+
+    function processLocalExtensionReload(extId, jsonText) {
+        try {
+            let extensionJson = JSON.parse(jsonText)
+            let existing = root.installedExtensions[extId]
+            if (!existing) return
+
+            let wasEnabled = existing.enabled
+
+            // Disable first to remove all extension components from shell
+            if (wasEnabled) {
+                root.toggleExtension(extId, false)
+            }
+
+            // Update entry with new contributes
+            let updated = Object.assign({}, root.installedExtensions[extId], {
+                name: extensionJson.name || existing.name,
+                description: extensionJson.description || existing.description,
+                version: extensionJson.version || existing.version,
+                author: extensionJson.author || existing.author,
+                icon: extensionJson.icon || existing.icon,
+                shapeString: extensionJson.shapeString || existing.shapeString,
+                contributes: extensionJson.contributes || {},
+                configDefaults: extensionJson.configDefaults || {}
+            })
+            root.installedExtensions = Object.assign({}, root.installedExtensions, { [extId]: updated })
+            root.syncPluginsAdapter()
+            root.applyExtensionConfigDefaults(extId)
+
+            // Re-enable to trigger full re-creation with fresh QML
+            if (wasEnabled) {
+                root.toggleExtension(extId, true)
+            }
+
+            root.loading = false
+        } catch (e) {
+            root.error = "Failed to parse extension.json: " + e
+            root.loading = false
+        }
+    }
+
+    /**
+     * Loads a QML component from a file path, bypassing QML engine cache
+     * by adding a unique query parameter to force recompilation.
+     */
+    function loadExtensionQmlComponent(fullPath) {
+        return Qt.createComponent("file://" + fullPath + "?_t=" + Date.now())
+    }
+
     function registerInstalled(extId, dest, repoUrl, defaultBranch, htmlUrl, jsonText, isLocal, isCustomUrl) {
         try {
             let extensionJson = JSON.parse(jsonText)
@@ -670,6 +729,17 @@ Singleton {
         id: updatePullProc
         property string _pendingExtId: ""
         onExited: (exitCode, _) => root.finalizeUpdate(updatePullProc._pendingExtId, exitCode)
+    }
+
+    Process {
+        id: reloadLocalProc
+        property string _pendingExtId: ""
+        stdout: StdioCollector {
+            onStreamFinished: root.processLocalExtensionReload(reloadLocalProc._pendingExtId, this.text)
+        }
+        stderr: StdioCollector {
+            onStreamFinished: if (this.text) { console.log("Local extension reload error:", this.text) }
+        }
     }
 
     // ── File persistence ──

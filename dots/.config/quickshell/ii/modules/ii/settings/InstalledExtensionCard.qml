@@ -209,7 +209,7 @@ Item {
                     buttonRadius: Appearance.rounding.full
                     colBackground: updateAvailable ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
                     colBackgroundHover: updateAvailable ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colLayer3Hover
-                    visible: ext.repoUrl && ext.repoUrl.length > 0
+                    visible: ext.repoUrl && ext.repoUrl.length > 0 && !ext.isLocal
                     contentItem: StyledText {
                         anchors.centerIn: parent
                         horizontalAlignment: Text.AlignHCenter
@@ -225,6 +225,25 @@ Item {
                             ExtensionManager.checkUpdate(ext.id)
                         }
                     }
+                }
+
+                RippleButton {
+                    implicitWidth: 80
+                    implicitHeight: 28
+                    padding: 0
+                    buttonRadius: Appearance.rounding.full
+                    colBackground: Appearance.colors.colTertiaryContainer
+                    colBackgroundHover: Appearance.colors.colTertiaryContainerHover
+                    visible: ext.isLocal
+                    contentItem: StyledText {
+                        anchors.centerIn: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        text: Translation.tr("Reload")
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: Appearance.colors.colOnTertiaryContainer
+                    }
+                    onClicked: ExtensionManager.reinstallLocalExtension(ext.id)
                 }
 
                 RippleButton {

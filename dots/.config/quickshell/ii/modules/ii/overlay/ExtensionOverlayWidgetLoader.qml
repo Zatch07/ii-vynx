@@ -19,7 +19,6 @@ Item {
         let entry = root.modelData
         let extId = entry.extensionId
         let wid = entry.identifier
-        let url = "file://" + entry.fullPath
 
         let saved = ExtensionManager.getExtensionOverlayConfig(extId, wid)
         let savedX = saved?.x ?? entry.x ?? 100
@@ -33,7 +32,7 @@ Item {
         let cfg = Qt.createQmlObject(cfgQml, root)
         root._configEntry = cfg
 
-        let comp = Qt.createComponent(url)
+        let comp = ExtensionManager.loadExtensionQmlComponent(entry.fullPath)
 
         let createWidget = (comp) => {
             if (!root._active) return

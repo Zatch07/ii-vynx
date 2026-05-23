@@ -172,14 +172,13 @@ Variants {
             for (let wi = 0; wi < list.length; wi++) {
                 let entry = list[wi]
                 let fullPath = entry.fullPath
-                let url = "file://" + fullPath
                 let extId = entry.extensionId
                 let wid = entry.identifier
                 let x = entry.x
                 let y = entry.y
                 let strat = entry.placementStrategy || "free"
 
-                let comp = Qt.createComponent(url)
+                let comp = ExtensionManager.loadExtensionQmlComponent(fullPath)
 
                 let createWidget = (comp, entry, fullPath, extId, wid, x, y, strat) => {
                     let savedWidgetConfig = ExtensionManager.getExtensionWidgetConfig(extId, wid)

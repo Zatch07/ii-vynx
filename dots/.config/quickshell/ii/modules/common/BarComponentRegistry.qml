@@ -35,6 +35,7 @@ Singleton {
     Connections {
         target: ExtensionManager
         function onReadyChanged() { root.refreshExtensionComponents() }
+        function onRefreshExtensions() { root.refreshExtensionComponents() }
         function onExtensionInstalled() { root.refreshExtensionComponents() }
         function onExtensionRemoved() { root.refreshExtensionComponents() }
         function onExtensionToggled() { root.refreshExtensionComponents() }
@@ -64,13 +65,13 @@ Singleton {
                 extensionId: c.extensionId || ""
             })
 
-            let horizComp = Qt.createComponent("file://" + c.fullPath)
-            if (horizComp.status !== Component.Ready) {
-                console.warn("BarComponentRegistry: failed to load horizontal component for", id, ":", horizComp.errorString())
+            let horizComp = ExtensionManager.loadExtensionQmlComponent(c.fullPath)
+            if (!horizComp || horizComp.status !== Component.Ready) {
+                console.warn("BarComponentRegistry: failed to load horizontal component for", id, ":", horizComp?.errorString())
                 continue
             }
 
-            let vertComp = c.fullPathVertical ? Qt.createComponent("file://" + c.fullPathVertical) : horizComp
+            let vertComp = c.fullPathVertical ? ExtensionManager.loadExtensionQmlComponent(c.fullPathVertical) : horizComp
 
             if (vertComp.status !== Component.Ready) {
                 console.warn("BarComponentRegistry: failed to load vertical component for", id, ":", vertComp.errorString())

@@ -26,6 +26,7 @@ Item {
 
     Connections {
         target: ExtensionManager
+        function onRefreshExtensions() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
         function onExtensionInstalled() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
         function onExtensionRemoved() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
         function onExtensionToggled() { root.extensionPages = ExtensionManager.getContributionPoint("sidebarLeftPages") }
@@ -46,7 +47,7 @@ Item {
 
     function createExtensionPage(page) {
         let loader = Qt.createQmlObject('import QtQuick; Loader { active: true }', swipeView)
-        loader.source = "file://" + page.fullPath
+        loader.source = "file://" + page.fullPath + "?_t=" + Date.now()
         let setExtId = () => {
             if (loader.item) {
                 if ("extensionId" in loader.item) {
