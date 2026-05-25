@@ -27,7 +27,7 @@ Scope {
     PanelLoader { component: WaffleActionCenter {} }
     PanelLoader { component: WaffleBar {} }
     PanelLoader { component: WaffleBackground {} }
-    PanelLoader { component: WaffleLock {} }
+    // PanelLoader { component: WaffleLock {} }
     PanelLoader { component: WaffleNotificationCenter {} }
     PanelLoader { component: WaffleNotificationPopup {} }
     PanelLoader { component: WaffleOSD {} }

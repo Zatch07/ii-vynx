@@ -21,10 +21,7 @@ Item {
     property bool compVisible: ((hasStop || sRunning) && root.showStopwatch) || ((pRunning || hasPomo) && root.showPomodoro)
 
     onCompVisibleChanged: rootItem.toggleVisible(compVisible)
-    Component.onCompleted: {
-        rootItem.toggleHighlight(true)
-        rootItem.toggleVisible(compVisible)
-    }
+    Component.onCompleted: rootItem.toggleVisible(compVisible)
 
     Behavior on implicitWidth {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

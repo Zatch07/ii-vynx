@@ -33,7 +33,6 @@ Singleton {
             'input': 'keyboard_alt',
             'preedit': 'keyboard_alt',
             'startswith:file': 'folder_copy', // Declarative startsWith check
-            'localsend': 'devices',
         };
 
         const lowerSummary = summary.toLowerCase();

@@ -58,12 +58,19 @@ Singleton {
     }
     
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
-        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light"]);
+        applyProc.exec([
+            Directories.wallpaperSwitchScriptPath,
+            "--mode", (darkMode ? "dark" : "light")
+        ])
     }
 
     function apply(path, darkMode = Appearance.m3colors.darkmode) {
-        if (!path || path.length === 0) return;
-        Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light", "--image", path]);
+        if (!path || path.length === 0) return
+        applyProc.exec([
+            Directories.wallpaperSwitchScriptPath,
+            "--image", path,
+            "--mode", (darkMode ? "dark" : "light")
+        ])
         root.changed()
     }
 

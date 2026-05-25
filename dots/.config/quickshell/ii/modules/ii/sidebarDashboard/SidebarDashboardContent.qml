@@ -221,34 +221,38 @@ Item {
             color: Appearance.colors.colLayer1
             readonly property int fullRadius: Config.options.appearance.sharpMode ? Appearance.rounding.full : height / 2
             radius: fullRadius
-            implicitWidth: uptimeRow.implicitWidth + 24
-            implicitHeight: uptimeRow.implicitHeight + 8
+            implicitWidth: uptimeRow.implicitWidth + 32
+            implicitHeight: uptimeRow.implicitHeight + 16
             
             Row {
                 id: uptimeRow
                 anchors.centerIn: parent
-                spacing: 8
+                spacing: 12
                 CustomIcon {
                     id: distroIcon
                     anchors.verticalCenter: parent.verticalCenter
                     width: 25
                     height: 25
-                    source: SystemInfo.distroIcon
+                    source: Config.options.bar.topLeftIcon == 'distro' ? SystemInfo.distroIcon : `${Config.options.bar.topLeftIcon}-symbolic`
                     colorize: true
                     color: Appearance.colors.colOnLayer0
                 }
                 ColumnLayout {
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: -4
+                    spacing: -2
                     StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignHCenter
                         font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colOnLayer0
-                        text: Translation.tr("Up")
+                        color: Appearance.colors.colSubtext
+                        text: Translation.tr("Uptime")
                         textFormat: Text.MarkdownText
                     }
                     StyledText {
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colSubtext
+                        Layout.alignment: Qt.AlignHCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        color: Appearance.colors.colOnLayer0
                         text: DateTime.uptime
                         textFormat: Text.MarkdownText
                     }
@@ -280,8 +284,7 @@ Item {
                 toggled: false
                 buttonIcon: "restart_alt"
                 onClicked: {
-                    Quickshell.execDetached(["hyprctl", "reload"])
-                    Quickshell.reload(true);
+                    Quickshell.execDetached(["/home/zatch/.config/hypr/custom/scripts/refresh-quickshell.sh"]);
                 }
                 StyledToolTip {
                     text: Translation.tr("Reload Hyprland & Quickshell")

@@ -7,11 +7,26 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.overlay
+import Qt.labs.platform
 
 StyledOverlayWidget {
     id: root
-    minimumWidth: 310
-    minimumHeight: 130
+    minimumWidth: 360
+    minimumHeight: 140
+
+    FileDialog {
+        id: videoFileDialog
+        title: "Select a Video to Edit"
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["Video files (*.mp4 *.mkv *.webm *.mov *.avi)", "All files (*)"]
+        onAccepted: {
+            let path = file.toString();
+            if (path.startsWith("file://")) {
+                path = path.substring(7);
+            }
+            GlobalStates.launchVideoEditor(path);
+        }
+    }
 
     contentItem: OverlayBackground {
         id: contentItem
@@ -63,29 +78,63 @@ StyledOverlayWidget {
                 }
             }
 
-            RippleButton {
+            Row {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-                Layout.fillWidth: false
-                readonly property int fullRadius: Config.options.appearance.sharpMode ? Appearance.rounding.full : height / 2
-                buttonRadius: fullRadius
-                colBackground: Appearance.colors.colLayer3
-                colBackgroundHover: Appearance.colors.colLayer3Hover
-                colRipple: Appearance.colors.colLayer3Active
-                onClicked: {
-                    GlobalStates.overlayOpen = false;
-                    Qt.openUrlExternally(`file://${Config.options.screenRecord.savePath}`);
-                }
-                contentItem: Row {
-                    anchors.centerIn: parent
-                    spacing: 6
-                    MaterialSymbol {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "animated_images"
-                        iconSize: 20
+                spacing: 10
+
+                RippleButton {
+                    implicitWidth: 150
+                    implicitHeight: 36
+                    readonly property int fullRadius: Config.options.appearance.sharpMode ? Appearance.rounding.full : height / 2
+                    buttonRadius: fullRadius
+                    colBackground: Appearance.colors.colLayer3
+                    colBackgroundHover: Appearance.colors.colLayer3Hover
+                    colRipple: Appearance.colors.colLayer3Active
+                    onClicked: {
+                        GlobalStates.overlayOpen = false;
+                        Qt.openUrlExternally(`file://${Config.options.screenRecord.savePath}`);
                     }
-                    StyledText {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: Translation.tr("Open recordings folder")
+                    contentItem: Row {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        MaterialSymbol {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "animated_images"
+                            iconSize: 18
+                        }
+                        StyledText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: Translation.tr("Open folder")
+                            font.pixelSize: 13
+                        }
+                    }
+                }
+
+                RippleButton {
+                    implicitWidth: 150
+                    implicitHeight: 36
+                    readonly property int fullRadius: Config.options.appearance.sharpMode ? Appearance.rounding.full : height / 2
+                    buttonRadius: fullRadius
+                    colBackground: Appearance.colors.colLayer3
+                    colBackgroundHover: Appearance.colors.colLayer3Hover
+                    colRipple: Appearance.colors.colLayer3Active
+                    onClicked: {
+                        GlobalStates.overlayOpen = false;
+                        videoFileDialog.open();
+                    }
+                    contentItem: Row {
+                        anchors.centerIn: parent
+                        spacing: 6
+                        MaterialSymbol {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "video_file"
+                            iconSize: 18
+                        }
+                        StyledText {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: Translation.tr("Edit video")
+                            font.pixelSize: 13
+                        }
                     }
                 }
             }

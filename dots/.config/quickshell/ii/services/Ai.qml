@@ -297,6 +297,19 @@ Singleton {
             "key_get_description": Translation.tr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
             "api_format": "gemini",
         }),
+        "bayofassets": aiModelComponent.createObject(this, {
+            "name": `Bay of Assets - ${currentModel}`,
+            "icon": "boa-symbolic",
+            "description": Translation.tr("Unified API | %1's model").arg("Bay of Assets"),
+            "homepage": "https://bayofassets.com",
+            "endpoint": "https://api.bayofassets.com/v1/chat/completions",
+            "model": `${currentModel}`,
+            "requires_key": true,
+            "key_id": "bayofassets",
+            "key_get_link": "https://api.bayofassets.com",
+            "key_get_description": Translation.tr("**Pricing**: Plan-based credits.\n\n**Instructions**: Get your API key from the Bay of Assets dashboard."),
+            "api_format": "openai",
+        }),
         "others": (root.otherModels && Persistent.states?.ai?.model && root.otherModels[Persistent.states.ai.model]) ? root.otherModels[Persistent.states.ai.model] : (Object.keys(root.otherModels).length > 0 ? root.otherModels[Object.keys(root.otherModels)[0]] : null)
     }
         
@@ -321,6 +334,17 @@ Singleton {
             { title: "Gemini 2.5 Flash-Lite", value: "gemini-2.5-flash-lite" },
             { title: "Gemini 2.5 Flash", value: "gemini-2.5-flash" },
             { title: "Gemini 3 Flash Preview", value: "gemini-3-flash-preview" }
+        ],
+        "bayofassets": [
+            { title: "Claude 4.6 Sonnet Thinking", value: "claude-sonnet-4-6-thinking" },
+            { title: "Claude 4.7 Opus Thinking", value: "claude-opus-4-7-thinking" },
+            { title: "Claude 4.7 Opus", value: "claude-opus-4-7" },
+            { title: "Claude 4.6 Opus", value: "claude-opus-4-6" },
+            { title: "Claude 4.5 Haiku", value: "claude-haiku-4-5" },
+            { title: "Gemini 3.1 Pro", value: "gemini-3.1-pro" },
+            { title: "Gemini 3 Flash", value: "gemini-3-flash" },
+            { title: "GPT 5.5", value: "gpt-5.5" },
+            { title: "GPT 5.3 Codex", value: "gpt-5.3-codex" }
         ],
         "others": []
     }

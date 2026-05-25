@@ -17,7 +17,6 @@ Item {
     required property int index
     property var originalIndex: index
     property bool vertical: false
-    property bool highlighted: false
 
     implicitWidth: wrapper.implicitWidth
     implicitHeight: wrapper.implicitHeight
@@ -27,10 +26,6 @@ Item {
         if (barSection == 0) Config.options.bar.layouts.left[originalIndex].visible = visibility
         else if (barSection == 1) Config.options.bar.layouts.center[originalIndex].visible = visibility
         else if (barSection == 2) Config.options.bar.layouts.right[originalIndex].visible = visibility
-    }
-
-    function toggleHighlight(highlight) {
-        rootItem.highlighted = highlight
     }
 
     property var compMap: ({ // [horizontal, vertical]
@@ -48,10 +43,16 @@ Item {
         "timer": [timerComp, timerCompVert],
         "weather": [weatherComp, weatherComp],
         "policies_panel_button": [policiesPanelButton, policiesPanelButton],
-        "dashboard_panel_button": [dashboardPanelButton, dashboardPanelButtonVert]
+        "dashboard_panel_button": [dashboardPanelButton, dashboardPanelButtonVert],
+        "network_speed": [networkSpeedComp, networkSpeedComp],
+        "updates": [updatesComp, updatesComp]
     })
 
+    property list<string> primaryBackgroundComps: ["timer", "record_indicator", "screen_share_indicator"] // components that are mostly indicators
+
     property real startRadius: {
+        // Pills mode: uniform rounding everywhere, no big pill caps on section edges
+        if (barGroupStyle === 0) return Appearance.rounding.verysmall
         if (barSection === 0) {
             if (originalIndex == 0) return Appearance.rounding.full
             return Appearance.rounding.verysmall
@@ -66,6 +67,8 @@ Item {
     }
 
     property real endRadius: {
+        // Pills mode: uniform rounding everywhere, no big pill caps on section edges
+        if (barGroupStyle === 0) return Appearance.rounding.verysmall
         if (barSection === 2) {
             if (originalIndex == list.length - 1) return Appearance.rounding.full
             return Appearance.rounding.verysmall
@@ -81,7 +84,10 @@ Item {
 
     readonly property int barGroupStyle: Config.options.bar.barGroupStyle
     readonly property int barBackgroundStyle: Config.options.bar.barBackgroundStyle
-    property color colBackground: barGroupStyle == 0 ? Appearance.colors.colLayer1 :
+    // Pills (0): always use solid opaque surface color so pill backgrounds are clearly visible
+    // Island (1): opaque when bar is transparent (groups float), semi-transparent when bar is visible
+    // Transparent (2): no group background
+    property color colBackground: barGroupStyle == 0 ? Appearance.m3colors.m3surfaceContainerLow :
                                    (barGroupStyle == 1 && barBackgroundStyle == 1) ? Appearance.colors.colLayer1 :
                                    (barGroupStyle == 1) ? Appearance.m3colors.m3surfaceContainerLow :
                                    "transparent";
@@ -98,7 +104,7 @@ Item {
         
         startRadius: rootItem.startRadius
         endRadius: rootItem.endRadius
-        colBackground: rootItem.highlighted ? rootItem.colBackgroundHighlight : rootItem.colBackground
+        colBackground: primaryBackgroundComps.includes(modelData.id) ? rootItem.colBackgroundHighlight : rootItem.colBackground
 
         Loader {
             id: itemLoader
@@ -143,4 +149,7 @@ Item {
     
     Component { id: dashboardPanelButton; DashboardPanelButton {} }
     Component { id: dashboardPanelButtonVert; VerticalDashboardPanelButton {} }
+
+    Component { id: networkSpeedComp; NetworkSpeed { vertical: rootItem.vertical } }
+    Component { id: updatesComp; UpdatesButton {} }
 }

@@ -21,7 +21,6 @@ Singleton {
     property string to: Config.options?.light?.night?.to ?? "06:30"
     property bool automatic: Config.options?.light?.night?.automatic && (Config?.ready ?? true)
     property int colorTemperature: Config.options?.light?.night?.colorTemperature ?? 5000
-    property int defaultColorTemperature: 6000
     property int gamma: 100
     property bool shouldBeOn
     property bool firstEvaluation: true
@@ -84,12 +83,16 @@ Singleton {
     }
 
     function startHyprsunset() {
-        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset`]);
+        Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset -i`]);
     }
 
     function load() {
-        root.startHyprsunset();
-        root.ensureState();
+        if (!root.automatic) {
+            root.disableTemperature();
+        } else {
+            root.startHyprsunset();
+            root.ensureState();
+        }
     }
 
     Timer {
@@ -113,7 +116,7 @@ Singleton {
     function disableTemperature() {
         root.temperatureActive = false;
         // console.log("[Hyprsunset] Disabling");
-        Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.defaultColorTemperature}`]);
+        Quickshell.execDetached(["hyprctl", "hyprsunset", "identity"]);
     }
 
     function setGamma(gamma) {
@@ -137,10 +140,12 @@ Singleton {
             id: stateCollector
             onStreamFinished: {
                 const output = stateCollector.text.trim();
-                if (output.length == 0 || output.startsWith("Couldn't"))
+                const temp = parseInt(output);
+                if (isNaN(temp) || temp >= 6500) {
                     root.temperatureActive = false;
-                else
-                    root.temperatureActive = (output != root.defaultColorTemperature); // 6000 is the default when off
+                } else {
+                    root.temperatureActive = true;
+                }
                 // console.log("[Hyprsunset] Fetched state:", output, "->", root.temperatureActive);
             }
         }

@@ -19,10 +19,7 @@ MouseArea {
     implicitWidth: vertical ? 20 : minimal ? 50 : 80 // NOTE: Why do we have to enter a fixed size to make it dull?
     implicitHeight: vertical ? 50 : 20
 
-    Component.onCompleted: {
-        rootItem.toggleHighlight(true)
-        updateVisibility()
-    }
+    Component.onCompleted: updateVisibility()
     onActivelyRecordingChanged: updateVisibility()
 
     function updateVisibility() {

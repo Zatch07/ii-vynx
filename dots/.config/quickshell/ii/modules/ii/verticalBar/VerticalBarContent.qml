@@ -67,7 +67,7 @@ Item { // Bar content region
         }
         z: -10 // making sure its behind everything
         color: root.showBarBackground ? Appearance.colors.colLayer0 : "transparent"
-        radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
+        radius: Config.options.bar.cornerStyle === 1 ? 3 : 0
         border.width: Config.options.bar.cornerStyle === 1 ? 1 : 0
         border.color: root.showBarBackground ? Appearance.colors.colLayer0Border : "transparent"
         Behavior on color {

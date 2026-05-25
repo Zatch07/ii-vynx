@@ -178,8 +178,8 @@ Variants {
             // Wallpaper
             TransitionImage {
                 id: wallpaper
-                visible: opacity > 0 && !blurLoader.active && !bgRoot.wallpaperIsVideo
-                opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo) ? 1 : 0
+                visible: opacity > 0 && (GlobalStates.screenLocked || !bgRoot.wallpaperIsVideo)
+                opacity: (status === Image.Ready && (!bgRoot.wallpaperIsVideo || GlobalStates.screenLocked)) ? 1 : 0
                 // Range = groups that workspaces span on
                 property int chunkSize: Config?.options.bar.workspaces.shown ?? 10
                 property int lower: Math.floor(bgRoot.firstWorkspaceId / chunkSize) * chunkSize
@@ -214,26 +214,16 @@ Variants {
                 animated: Config.options.background.animateWallpaperChanges
                 fillMode: Image.PreserveAspectCrop
                 Behavior on x {
+                    enabled: !wallpaper.transitionActive
                     NumberAnimation {
                         duration: 600
                         easing.type: Easing.OutCubic
                     }
                 }
                 Behavior on y {
+                    enabled: !wallpaper.transitionActive
                     NumberAnimation {
                         duration: 600
-                        easing.type: Easing.OutCubic
-                    }
-                }
-                Behavior on width {
-                    NumberAnimation {
-                        duration: 800
-                        easing.type: Easing.OutCubic
-                    }
-                }
-                Behavior on height {
-                    NumberAnimation {
-                        duration: 800
                         easing.type: Easing.OutCubic
                     }
                 }

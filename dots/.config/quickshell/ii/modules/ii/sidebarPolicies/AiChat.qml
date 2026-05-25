@@ -375,15 +375,15 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                 mouseScrollFactor: Config.options.interactions.scrolling.mouseScrollFactor * 1.4
 
                 property int lastResponseLength: 0
-                // onContentHeightChanged: {
-                //     if (atYEnd)
-                //         Qt.callLater(positionViewAtEnd);
-                // }
-                // onCountChanged: {
-                //     // Auto-scroll when new messages are added
-                //     if (atYEnd)
-                //         Qt.callLater(positionViewAtEnd);
-                // }
+                onContentHeightChanged: {
+                    if (atYEnd)
+                        Qt.callLater(positionViewAtEnd);
+                }
+                onCountChanged: {
+                    // Auto-scroll when new messages are added
+                    if (atYEnd)
+                        Qt.callLater(positionViewAtEnd);
+                }
 
                 add: null // Prevent function calls from being janky
 
@@ -466,6 +466,11 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                                 symbol: "openrouter-symbolic",
                                 value: "openrouter"
                             },
+                            "bayofassets": {
+                                displayName: "BOA",
+                                symbol: "boa-symbolic",
+                                value: "bayofassets"
+                            },
                             "others": {
                                 displayName: Translation.tr("Others"),
                                 icon: "more_horiz",
@@ -483,6 +488,11 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                                 displayName: "OpenRouter",
                                 symbol: "openrouter-symbolic",
                                 value: "openrouter"
+                            },
+                            {
+                                displayName: "BOA",
+                                symbol: "boa-symbolic",
+                                value: "bayofassets"
                             },
                             {
                                 displayName: Translation.tr("Others"),

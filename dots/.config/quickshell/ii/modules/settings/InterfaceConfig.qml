@@ -104,6 +104,54 @@ ContentPage {
                 Config.options.cheatsheet.fontSize.comment = value;
             }
         }
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "mail"
+                text: Translation.tr("Enable Gmail")
+                checked: Config.options.cheatsheet.enableGmail
+                onCheckedChanged: {
+                    Config.options.cheatsheet.enableGmail = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "calendar_month"
+                text: Translation.tr("Enable Timetable")
+                checked: Config.options.cheatsheet.enableTimetable
+                onCheckedChanged: {
+                    Config.options.cheatsheet.enableTimetable = checked;
+                }
+            }
+        }
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "experiment"
+                text: Translation.tr("Enable Elements")
+                checked: Config.options.cheatsheet.enablePeriodicTable
+                onCheckedChanged: {
+                    Config.options.cheatsheet.enablePeriodicTable = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "terminal"
+                text: Translation.tr("Enable Commands")
+                checked: Config.options.cheatsheet.enableCommands
+                onCheckedChanged: {
+                    Config.options.cheatsheet.enableCommands = checked;
+                }
+            }
+        }
+        ConfigSwitch {
+            buttonIcon: "table_rows_narrow"
+            enabled: Config.options.cheatsheet.enableCommands
+            text: Translation.tr("Commands: sidebar tag layout")
+            checked: Config.options.cheatsheet.commandsTagsSidebar
+            onCheckedChanged: {
+                Config.options.cheatsheet.commandsTagsSidebar = checked;
+            }
+        }
     }
 
     ContentSection {
@@ -340,31 +388,6 @@ ContentPage {
             stepSize: 1000
             onValueChanged: {
                 Config.options.notifications.timeout = value;
-            }
-        }
-
-        ConfigSwitch {
-            buttonIcon: "monitor"
-            text: Translation.tr("Force specific monitor")
-            checked: Config.options.notifications.forceMonitor.enable
-            onCheckedChanged: {
-                Config.options.notifications.forceMonitor.enable = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("If you have multiple monitors and want notifications to only show on one of them, enable this and enter the monitor name below (e.g., eDP-1)")
-            }
-        }
-
-        ConfigRow {
-            enabled: Config.options.notifications.forceMonitor.enable
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Monitor name to show notifications on (e.g., eDP-1)")
-                text: Config.options.notifications.forceMonitor.name
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.notifications.forceMonitor.name = text;
-                }
             }
         }
     }

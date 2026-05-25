@@ -15,3 +15,6 @@ __pycache__/
 
 # Emacs auto backup file
 *~
+
+# Quickshell local environment config
+/dots/.config/quickshell/ii/.env

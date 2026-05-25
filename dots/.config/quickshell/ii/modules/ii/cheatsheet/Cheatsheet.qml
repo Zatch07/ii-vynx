@@ -10,24 +10,42 @@ import Quickshell.Io
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import "commands"
 
 Scope { // Scope
     id: root
-    property var tabButtonList: [
-        {
-            "icon": "calendar_month",
-            "name": Translation.tr("Timetable")
-        },
-        {
+    property var tabButtonList: {
+        let list = [];
+        if (Config.options.cheatsheet.enableTimetable) {
+            list.push({
+                "icon": "calendar_month",
+                "name": Translation.tr("Timetable")
+            });
+        }
+        list.push({
             "icon": "keyboard",
             "name": Translation.tr("Keybinds")
-        },
-        {
-            "icon": "experiment",
-            "name": Translation.tr("Elements")
-          },
-        
-    ]
+        });
+        if (Config.options.cheatsheet.enablePeriodicTable) {
+            list.push({
+                "icon": "experiment",
+                "name": Translation.tr("Elements")
+            });
+        }
+        if (Config.options.cheatsheet.enableCommands) {
+            list.push({
+                "icon": "terminal",
+                "name": Translation.tr("Commands")
+            });
+        }
+        if (Config.options.cheatsheet.enableGmail) {
+            list.push({
+                "icon": "mail",
+                "name": Translation.tr("Email")
+            });
+        }
+        return list;
+    }
 
     Loader {
         id: cheatsheetLoader
@@ -36,6 +54,15 @@ Scope { // Scope
         sourceComponent: PanelWindow { // Window
             id: cheatsheetRoot
             visible: cheatsheetLoader.active
+
+            Connections {
+                target: root
+                function onTabButtonListChanged() {
+                    if (swipeView.currentIndex >= root.tabButtonList.length) {
+                        swipeView.currentIndex = 0;
+                    }
+                }
+            }
 
             anchors {
                 top: true
@@ -51,24 +78,26 @@ Scope { // Scope
             implicitWidth: cheatsheetBackground.width + Appearance.sizes.elevationMargin * 2
             implicitHeight: cheatsheetBackground.height + Appearance.sizes.elevationMargin * 2
             WlrLayershell.namespace: "quickshell:cheatsheet"
-            // Setting this value makes it take its sweet time to open
-            // WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            WlrLayershell.keyboardFocus: {
+                // currentItem is the Loader delegate; .item is the loaded CheatsheetTimetable
+                const cur = swipeView.currentItem;
+                if (cur && cur.item && cur.item.eventPopupVisible)
+                    return WlrKeyboardFocus.OnDemand;
+                return WlrKeyboardFocus.None;
+            }
             color: "transparent"
 
             mask: Region {
                 item: cheatsheetBackground
             }
 
-            Component.onCompleted: {
-                GlobalFocusGrab.addDismissable(cheatsheetRoot);
-            }
-            Component.onDestruction: {
-                GlobalFocusGrab.removeDismissable(cheatsheetRoot);
-            }
-            Connections {
-                target: GlobalFocusGrab
-                function onDismissed() {
-                    cheatsheetRoot.hide();
+            HyprlandFocusGrab {
+                id: grab
+                windows: [cheatsheetRoot]
+                active: cheatsheetRoot.visible
+                onCleared: () => {
+                    if (!active)
+                        cheatsheetRoot.hide();
                 }
             }
 
@@ -166,7 +195,7 @@ Scope { // Scope
                         implicitHeight: Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0))
 
                         clip: true
-                        layer.enabled: true
+                        layer.enabled: !swipeView.moving
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
                                 width: swipeView.width
@@ -175,10 +204,49 @@ Scope { // Scope
                             }
                         }
 
-                        CheatsheetTimetable {}
-                        CheatsheetKeybinds {}
-                        CheatsheetPeriodicTable {}
-                        
+                        Repeater {
+                            model: root.tabButtonList
+                            delegate: Loader {
+                                id: tabDelegate
+                                required property var modelData
+                                required property int index
+
+                                // Timetable & Email: lazy — load only when first visited
+                                property bool _lazy: modelData.icon === "calendar_month" || modelData.icon === "mail"
+                                property bool _wasSeen: false
+                                active: !_lazy || swipeView.currentIndex === index || _wasSeen
+                                onActiveChanged: if (active)
+                                    _wasSeen = true
+
+                                asynchronous: _lazy
+                                source: {
+                                    switch (modelData.icon) {
+                                    case "calendar_month":
+                                        return "CheatsheetTimetable.qml";
+                                    case "keyboard":
+                                        return "CheatsheetKeybinds.qml";
+                                    case "experiment":
+                                        return "CheatsheetPeriodicTable.qml";
+                                    case "terminal":
+                                        return "commands/CheatsheetCommands.qml";
+                                    case "mail":
+                                        return "CheatsheetEmail.qml";
+                                    default:
+                                        return "";
+                                    }
+                                }
+
+                                // Loading indicator for async tabs
+                                Rectangle {
+                                    anchors.fill: parent
+                                    color: "transparent"
+                                    visible: tabDelegate._lazy && tabDelegate.status !== Loader.Ready
+                                    MaterialLoadingIndicator {
+                                        anchors.centerIn: parent
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

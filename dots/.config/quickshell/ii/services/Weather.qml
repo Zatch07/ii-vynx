@@ -16,6 +16,9 @@ Singleton {
     readonly property bool useUSCS: Config.options.bar.weather.useUSCS
     property bool gpsActive: Config.options.bar.weather.enableGPS
 
+    property int retryCount: 0
+    readonly property int maxRetries: 5
+
     onUseUSCSChanged: {
         root.getData();
     }
@@ -97,7 +100,19 @@ Singleton {
         // only take the current weather, location, asytronmy data
         command += "jq '{current: .current_condition[0], location: .nearest_area[0], astronomy: .weather[0].astronomy[0]}'";
         fetcher.command[2] = command;
+        fetcher.running = false;
         fetcher.running = true;
+    }
+
+    function handleFailure() {
+        if (root.retryCount < root.maxRetries) {
+            root.retryCount++;
+            console.warn(`[WeatherService] Fetch failed. Retrying in 5 seconds (Attempt ${root.retryCount}/${root.maxRetries})...`);
+            retryTimer.start();
+        } else {
+            console.error("[WeatherService] Max retries reached. Will try again at the next standard interval.");
+            root.retryCount = 0;
+        }
     }
 
     function getWeatherDescription(code) {
@@ -145,6 +160,7 @@ Singleton {
     }
 
     Component.onCompleted: {
+        root.getData();
         if (!root.gpsActive) return;
         console.info("[WeatherService] Starting the GPS service.");
         positionSource.start();
@@ -155,17 +171,27 @@ Singleton {
         command: ["bash", "-c", ""]
         stdout: StdioCollector {
             onStreamFinished: {
-                if (text.length === 0)
+                if (text.length === 0) {
+                    root.handleFailure();
                     return;
+                }
                 try {
                     const parsedData = JSON.parse(text);
                     root.refineData(parsedData);
-                    // console.info(`[ data: ${JSON.stringify(parsedData)}`);
+                    root.retryCount = 0;
                 } catch (e) {
                     console.error(`[WeatherService] ${e.message}`);
+                    root.handleFailure();
                 }
             }
         }
+    }
+
+    Timer {
+        id: retryTimer
+        interval: 5000
+        repeat: false
+        onTriggered: root.getData()
     }
 
     PositionSource {

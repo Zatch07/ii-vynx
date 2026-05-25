@@ -54,10 +54,19 @@ Item {
         width: artworkEnabled ? artworkBoxSize : 0
         height: artworkEnabled ? artworkBoxSize : 0
 
+        RotationAnimator {
+            target: artworkItem
+            from: 0
+            to: 360
+            duration: 12000
+            loops: Animation.Infinite
+            running: activePlayer?.isPlaying ?? false
+        }
+
         Rectangle {
             anchors.fill: parent
             color: Appearance.colors.colPrimaryContainer
-            radius: Appearance.rounding.full
+            radius: width / 2
 
             Image {
                 anchors.fill: parent
@@ -75,7 +84,7 @@ Item {
                     maskSource: Rectangle {
                         width: artworkItem.width
                         height: artworkItem.height
-                        radius: Appearance.rounding.full
+                        radius: width / 2
                     }
                 }
             }

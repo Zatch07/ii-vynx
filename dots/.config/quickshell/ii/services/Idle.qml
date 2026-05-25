@@ -2,13 +2,12 @@ pragma Singleton
 import qs.modules.common
 import QtQuick
 import Quickshell
-import Quickshell.Wayland
+import Quickshell.Io
 
 Singleton {
     id: root
 
-    property alias inhibit: idleInhibitor.enabled
-    inhibit: false
+    property bool inhibit: false
 
     readonly property string _sessionId: Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") || ""
 
@@ -38,23 +37,17 @@ Singleton {
         Persistent.states.idle.sessionId = root._sessionId
     }
 
-    IdleInhibitor {
-        id: idleInhibitor
-        window: PanelWindow {
-            // Inhibitor requires a "visible" surface
-            // Actually not lol
-            implicitWidth: 0
-            implicitHeight: 0
-            color: "transparent"
-            // Just in case...
-            anchors {
-                right: true
-                bottom: true
-            }
-            // Make it not interactable
-            mask: Region {
-                item: null
-            }
-        }
+    Process {
+        id: inhibitProcess
+        running: root.inhibit
+        command: [
+            "systemd-inhibit", 
+            "--what=idle", 
+            "--who=quickshell", 
+            "--why=Keep system awake", 
+            "--mode=block", 
+            "sleep", 
+            "infinity"
+        ]
     }
 }

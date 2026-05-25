@@ -19,6 +19,11 @@ GroupButton {
     property string buttonColor
     property bool leftmost: false
     property bool rightmost: false
+    property string buttonTooltip: ""
+    
+    StyledToolTip {
+        text: root.buttonTooltip
+    }
     
     readonly property bool sharpModeEnabled: Config.options.appearance.sharpMode
     readonly property int fullRadius: sharpModeEnabled ? Appearance.rounding.full : height / 2

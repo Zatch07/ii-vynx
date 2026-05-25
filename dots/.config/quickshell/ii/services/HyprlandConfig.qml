@@ -9,31 +9,46 @@ import qs.modules.common
 import qs.modules.common.functions
 
 /**
- * Configs Hyprland via hyprset.lua
+ * Configs Hyprland
  */
 Singleton {
     id: root
     
     signal reloaded()
 
+    readonly property string configuratorScriptPath: Quickshell.shellPath("scripts/hyprland/hyprconfigurator.py")
+    readonly property string shellOverridesPath: FileUtils.trimFileProtocol(`${Directories.config}/hypr/hyprland/shellOverrides/main.conf`)
+
     function set(key: string, value: var) {
-        Quickshell.execDetached([Directories.cliPath, "hyprset", "key", key, String(value)])
+        Quickshell.execDetached(["bash", "-c", //
+            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --set "${key}" "${value}"` //
+        ])
     }
     
     function setMany(entries: var) {
+        let args = ""
         for (let key in entries) {
-            Quickshell.execDetached([Directories.cliPath, "hyprset", "key", key, String(entries[key])])
+            args += `--set "${key}" "${entries[key]}" `
         }
+        Quickshell.execDetached(["bash", "-c", //
+            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} ${args}` //
+        ])
     }
     
     function reset(key: string) {
-        Quickshell.execDetached([Directories.cliPath, "hyprset", "reset", key])
+        Quickshell.execDetached(["bash", "-c", //
+            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --reset "${key}"` //
+        ])
     }
     
     function resetMany(keys: list<string>) {
+        let args = ""
         for (let i = 0; i < keys.length; i++) {
-            Quickshell.execDetached([Directories.cliPath, "hyprset", "reset", keys[i]])
+            args += `--reset "${keys[i]}" `
         }
+        Quickshell.execDetached(["bash", "-c", //
+            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} ${args}` //
+        ])
     }
 
     Connections {

@@ -116,6 +116,7 @@ is_video() {
 
 kill_existing_mpvpaper() {
     pkill -f -9 mpvpaper || true
+    pkill -f -9 linux-wallpaperengine || true
 }
 
 create_restore_script() {
@@ -204,7 +205,86 @@ switch() {
         check_and_prompt_upscale "$imgpath" &
         kill_existing_mpvpaper
 
-        if is_video "$imgpath"; then
+        if [[ "$imgpath" == *"[WE-"* ]]; then
+            set_wallpaper_path "$imgpath"
+            
+            # Check type from project.json
+            local we_type=$(jq -r '.type' "$imgpath/project.json" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+            local we_file=$(jq -r '.file' "$imgpath/project.json" 2>/dev/null)
+            
+            if [[ "$we_type" == "video" ]]; then
+                local video_path="$imgpath/$we_file"
+                
+                # Dependency check for mpvpaper
+                if ! command -v mpvpaper &> /dev/null; then
+                    notify-send -a "Wallpaper switcher" -c "im.error" "Missing mpvpaper" "Please install mpvpaper to play this video wallpaper."
+                    exit 1
+                fi
+                
+                # Use mpvpaper for videos
+                monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
+                for monitor in $monitors; do
+                    nohup mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" >/dev/null 2>&1 &
+                    sleep 0.1
+                done
+                
+                # Update Restore Script for Video WE
+                cat > "$RESTORE_SCRIPT.tmp" << EOF
+#!/bin/bash
+pkill -f -9 mpvpaper
+pkill -f -9 linux-wallpaperengine
+monitors=\$(hyprctl monitors -j | jq -r '.[] | .name')
+for monitor in \$monitors; do
+    nohup mpvpaper -o "$VIDEO_OPTS" "\$monitor" "$video_path" >/dev/null 2>&1 &
+    sleep 0.1
+done
+EOF
+            else
+                # Use linux-wallpaperengine for scenes
+                if ! command -v linux-wallpaperengine &> /dev/null; then
+                    notify-send -a "Wallpaper switcher" -c "im.error" "Missing linux-wallpaperengine" "Please install linux-wallpaperengine to play this scene."
+                    exit 1
+                fi
+
+                # Setup array to handle multi-monitor execution
+                local we_args=(--fps 60 --silent)
+                while read -r monitor; do
+                    we_args+=(--screen-root "$monitor")
+                done < <(hyprctl monitors -j | jq -r '.[] | .name')
+                
+                # Pass the direct directory path
+                we_args+=("$imgpath")
+                
+                /usr/bin/linux-wallpaperengine "${we_args[@]}" > "$STATE_DIR/user/generated/linux_we.log" 2>&1 &
+                
+                # Update Restore Script for Scene WE
+                cat > "$RESTORE_SCRIPT.tmp" << EOF
+#!/bin/bash
+pkill -f -9 mpvpaper
+pkill -f -9 linux-wallpaperengine
+we_args=(--fps 60 --silent)
+while read -r monitor; do
+    we_args+=(--screen-root "\$monitor")
+done < <(hyprctl monitors -j | jq -r '.[] | .name')
+we_args+=("$imgpath")
+/usr/bin/linux-wallpaperengine "\${we_args[@]}" > "$STATE_DIR/user/generated/linux_we.log" 2>&1 &
+EOF
+            fi
+            
+            mv "$RESTORE_SCRIPT.tmp" "$RESTORE_SCRIPT"
+            chmod +x "$RESTORE_SCRIPT"
+            
+            # Find the preview image for Matugen 
+            local thumbnail="$imgpath/preview.jpg"
+            if [ ! -f "$thumbnail" ]; then
+                thumbnail="$imgpath/preview.png"
+            fi
+            set_thumbnail_path "$thumbnail"
+            
+            matugen_args+=(image "$thumbnail")
+            generate_colors_material_args=(--path "$thumbnail")
+
+        elif is_video "$imgpath"; then
             mkdir -p "$THUMBNAIL_DIR"
 
             missing_deps=()
@@ -316,8 +396,8 @@ switch() {
     source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
     python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
         > "$STATE_DIR"/user/generated/material_colors.scss
-    deactivate
     "$SCRIPT_DIR"/applycolor.sh
+    deactivate
 
     # Pass screen width, height, and wallpaper path to post_process
     max_width_desired="$(hyprctl monitors -j | jq '([.[].width] | min)' | xargs)"

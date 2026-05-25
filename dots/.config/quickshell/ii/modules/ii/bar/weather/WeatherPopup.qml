@@ -12,7 +12,6 @@ StyledPopup {
     id: root
     popupRadius: Appearance.rounding.large
 
-    required property bool compact
     property bool compactMode: Config.options.bar.tooltips.compactPopups
     property int cardMargins: 14
 
@@ -50,6 +49,8 @@ StyledPopup {
         if (Config.options.bar.weather.city)
             root.fetchForecast();
     }
+
+
 
     function fetchForecast() {
         forecastLoading = true;
@@ -100,6 +101,13 @@ StyledPopup {
         anchors.centerIn: parent
         spacing: 12
 
+        Connections {
+            target: Weather
+            function onDataChanged() {
+                root.fetchForecast();
+            }
+        }
+
         Process {
             id: forecastFetcher
             command: ["bash", "-c", ""]
@@ -134,25 +142,19 @@ StyledPopup {
         }
         
         HourlyForecast {
-            visible: !root.compact
-            showDivider: false
+            Layout.minimumWidth: 360
+            margins: root.cardMargins
             spacing: 6
-            
-            icon: "schedule"
-            title: Translation.tr("Hourly")
-            headerExtraText: Translation.tr("Last refresh: %1").arg(Weather.data.lastRefresh || "--").slice(0, 20)
-            
             shapeString: "Clover4Leaf"
             shapeColor: Appearance.colors.colSecondaryContainer
             symbolColor: Appearance.colors.colOnSecondaryContainer
-            
-            Layout.minimumWidth: 360
-            margins: root.cardMargins
+            showDivider: false
+            title: Translation.tr("Hourly")
+            icon: "schedule"
+            headerExtraText: Translation.tr("Last refresh: %1").arg(Weather.data.lastRefresh || "--").slice(0, 20)
         }
 
         MetricsGrid {
-            visible: !root.compact
-
             Layout.fillWidth: true
             columns: 2
             rowSpacing: 8
@@ -161,8 +163,6 @@ StyledPopup {
         }
 
         InDayForecast {
-            visible: !root.compact
-
             Layout.minimumWidth: 360
             margins: root.cardMargins
             spacing: 8

@@ -117,10 +117,12 @@ Item { // Player instance
             }
         }
 
-        StyledImage {
+        Image {
             id: blurredArt
             anchors.fill: parent
             source: root.displayedArtFilePath
+            sourceSize.width: background.width
+            sourceSize.height: background.height
             fillMode: Image.PreserveAspectCrop
             cache: false
             antialiasing: true
@@ -157,7 +159,7 @@ Item { // Player instance
                 id: artBackground
                 Layout.fillHeight: true
                 implicitWidth: height
-                radius: Appearance.rounding.verysmall
+                radius: height / 2
                 color: ColorUtils.transparentize(blendedColors.colLayer1, 0.5)
 
                 layer.enabled: true
@@ -181,6 +183,17 @@ Item { // Player instance
 
                     width: size
                     height: size
+                    sourceSize.width: size
+                    sourceSize.height: size
+
+                    RotationAnimator {
+                        target: mediaArt
+                        from: 0
+                        to: 360
+                        duration: 12000
+                        loops: Animation.Infinite
+                        running: root.player?.isPlaying ?? false
+                    }
                 }
             }
 

@@ -33,8 +33,14 @@ Singleton {
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
 
+    property bool videoEditorPopupOpen: false
+    property bool videoEditorOpen: false
+    property string videoEditorPath: ""
+
     property bool dashboardPanelOpen: false // formerly sidebarRightOpen
     property bool policiesPanelOpen: false  // formerly sidebarLeftOpen
+    property bool bluetoothConnectionPopupOpen: false
+    property var bluetoothConnectionPopupDevice: null
 
     readonly property bool effectiveLeftOpen: {
         switch (Config.options.sidebar.position) {
@@ -83,6 +89,18 @@ Singleton {
         }
         onReleased: {
             root.superDown = false
+        }
+    }
+
+    function launchVideoEditor(path) {
+        root.videoEditorPath = path;
+        root.videoEditorPopupOpen = true;
+    }
+
+    IpcHandler {
+        target: "launchVideoEditor"
+        function handle(path: string): void {
+            root.launchVideoEditor(path);
         }
     }
 }
