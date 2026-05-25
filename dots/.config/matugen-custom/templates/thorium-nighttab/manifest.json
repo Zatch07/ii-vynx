@@ -1,0 +1,18 @@
+{
+   "chrome_url_overrides": {
+      "newtab": "index.html"
+   },
+   "default_locale": "en_GB",
+   "description": "__MSG_appDescription__",
+   "icons": {
+      "128": "icon/icon-128.png",
+      "16": "icon/icon-16.png",
+      "48": "icon/icon-48.png",
+      "512": "icon/icon-512.png"
+   },
+   "manifest_version": 3,
+   "name": "__MSG_appName__",
+   "short_name": "__MSG_appShortName__",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "7.5.0"
+}

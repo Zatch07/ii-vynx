@@ -1,0 +1,46 @@
+:root {
+  /* BACKGROUNDS - Using Matugen Surface Shades */
+  --theme-background-theme: #090f0e !important;
+  --theme-background-color: #0e1513 !important;
+
+  /* ELEMENT BOXES - Darker/Distinguishable Containers */
+  --theme-primary-010: #090f0e !important;
+  --theme-primary-020: #161d1c !important;
+  --theme-primary-030: #1a2120 !important;
+  --theme-primary-040: #252b2a !important;
+  --theme-primary-050: #303635 !important;
+
+  /* TEXT - Dynamic Contrast */
+  --theme-primary-text-010: #dde4e1 !important;
+  --theme-primary-text-020: #bec9c6 !important;
+  --theme-primary-text-030: #899390 !important;
+
+  /* ACCENT - For Icons & Active Elements */
+  --theme-accent: #82d5c9 !important;
+  --theme-accent-text: #003732 !important;
+
+  /* ICON & FORM OVERRIDES */
+  --form-icon: #82d5c9 !important;
+  --form-icon-checked: #82d5c9 !important;
+  --icon-color: #82d5c9 !important;
+  --form-icon-symbol: #003732 !important;
+  --form-group-border: #3f4947 !important;
+
+  /* MISC UI Polish */
+  --theme-shadow: #000000 !important;
+  --theme-shade-opacity: 60 !important;
+  --theme-shade-blur: 8 !important;
+  --theme-radius: 12 !important; /* Consistent rounding */
+}
+
+/* Specific fix for Bookmark Box Backgrounds to make them pop */
+.bookmark-item {
+  background-color: var(--theme-primary-020) !important;
+  border: 1px solid var(--theme-primary-030) !important;
+  box-shadow: 0 4px 6px -1px var(--theme-shadow), 0 2px 4px -1px var(--theme-shadow) !important;
+}
+
+.bookmark-item:hover {
+  background-color: var(--theme-primary-030) !important;
+  border-color: var(--theme-accent) !important;
+}
