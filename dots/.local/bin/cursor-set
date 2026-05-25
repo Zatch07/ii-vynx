@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+THEME=$1
+SIZE=${2:-24}
+if [ -z "$THEME" ]; then
+    echo "Usage: cursor-set <theme_name> [size]"
+    echo "Available themes:"
+    ls ~/.icons ~/.local/share/icons /usr/share/icons 2>/dev/null | sort -u
+    exit 1
+fi
+echo "🚀 Syncing system to cursor: $THEME ($SIZE)..."
+# --- 1. Hyprland ---
+hyprctl setcursor "$THEME" "$SIZE"
+sed -i "s/exec-once = hyprctl setcursor.*/exec-once = hyprctl setcursor $THEME $SIZE/" ~/.config/hypr/hyprland/execs.conf
+# --- 2. GSettings (GTK/GNOME) ---
+gsettings set org.gnome.desktop.interface cursor-theme "$THEME"
+gsettings set org.gnome.desktop.interface cursor-size "$SIZE"
+# --- 3. GTK 3 & 4 Configuration ---
+for v in 3.0 4.0; do
+    CONF="$HOME/.config/gtk-$v/settings.ini"
+    if [ -f "$CONF" ]; then
+        sed -i "s/gtk-cursor-theme-name=.*/gtk-cursor-theme-name=$THEME/" "$CONF"
+        sed -i "s/gtk-cursor-theme-size=.*/gtk-cursor-theme-size=$SIZE/" "$CONF"
+    fi
+done
+# --- 4. X11 Legacy ---
+if [ -f ~/.Xresources ]; then
+    sed -i "s/Xcursor.theme:.*/Xcursor.theme: $THEME/" ~/.Xresources
+    sed -i "s/Xcursor.size:.*/Xcursor.size: $SIZE/" ~/.Xresources
+    xrdb -merge ~/.Xresources 2>/dev/null
+fi
+# --- 5. Qt Fallback (Optional but helpful) ---
+mkdir -p ~/.icons/default
+cat << EOK > ~/.icons/default/index.theme
+[Icon Theme]
+Inherits=$THEME
+EOK
+notify-send "Cursor Updated" "Theme set to $THEME" -i "preferences-desktop-cursor"
+echo "✅ All configs synced!"

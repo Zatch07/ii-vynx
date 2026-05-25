@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# List all installed themes
+THEMES=$(ls ~/.icons ~/.local/share/icons /usr/share/icons 2>/dev/null | sort -u)
+
+# Use fzf to pick a theme
+SELECTED_THEME=$(echo "$THEMES" | fzf --prompt="Select Cursor Theme: " --height=15 --reverse --border)
+
+if [ -n "$SELECTED_THEME" ]; then
+    # Use fzf to pick a standard size
+    SELECTED_SIZE=$(echo -e "24\n32\n48\n64" | fzf --prompt="Select Size: " --height=10 --reverse --border)
+    
+    if [ -n "$SELECTED_SIZE" ]; then
+        cursor-set "$SELECTED_THEME" "$SELECTED_SIZE"
+    fi
+fi

@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Directories
+QS_DIR="$HOME/.config/quickshell"
+TARGET_LINK="$QS_DIR/ii"
+
+# Check current link
+CURRENT=$(readlink -f "$TARGET_LINK")
+
+# Handle arguments for direct selection
+if [[ "$1" == "pacman" ]]; then
+    ln -sfT "ii-pacman" "$TARGET_LINK"
+    NEW_THEME="Pacman"
+elif [[ "$1" == "original" ]]; then
+    ln -sfT "ii-original" "$TARGET_LINK"
+    NEW_THEME="Original"
+elif [[ "$1" == "latest" ]]; then
+    ln -sfT "ii-latest" "$TARGET_LINK"
+    NEW_THEME="Latest"
+elif [[ "$1" == "material-you" ]]; then
+    ln -sfT "ii-material-you" "$TARGET_LINK"
+    NEW_THEME="Material You"
+else
+    # Cycle behavior if no argument is provided
+    if [[ "$CURRENT" == *"ii-pacman"* ]]; then
+        ln -sfT "ii-original" "$TARGET_LINK"
+        NEW_THEME="Original"
+    elif [[ "$CURRENT" == *"ii-original"* ]]; then
+        ln -sfT "ii-latest" "$TARGET_LINK"
+        NEW_THEME="Latest"
+    elif [[ "$CURRENT" == *"ii-latest"* ]]; then
+        ln -sfT "ii-material-you" "$TARGET_LINK"
+        NEW_THEME="Material You"
+    else
+        ln -sfT "ii-pacman" "$TARGET_LINK"
+        NEW_THEME="Pacman"
+    fi
+fi
+
+
+# Notify
+notify-send -e "QuickShell Theme" "Switched to $NEW_THEME mode"
+
+# Refresh UI via Hot-Reload without duplicating processes
+hyprctl reload && touch "$TARGET_LINK/shell.qml"
+
+echo "Successfully switched to $NEW_THEME"

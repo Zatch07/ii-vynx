@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# Function to log messages (useful for debugging)
+log_message() {
+    echo "[$(date '+%m-%d %H:%M:%S')] $1"
+}
+
+# Get the target workspace from the argument
+target_workspace=$1
+
+# Check if a target workspace was provided
+if [ -z "$target_workspace" ]; then
+    log_message "Error: No target workspace provided"
+    exit 1
+fi
+
+# Get the current active workspace ID and Name
+ws_info=$(hyprctl activeworkspace -j)
+current_id=$(echo "$ws_info" | jq -r '.id')
+current_name=$(echo "$ws_info" | jq -r '.name')
+
+if [[ "$current_id" == "$target_workspace" || "$current_name" == "$target_workspace" ]]; then
+    log_message "Already on workspace $target_workspace. Skipping."
+    exit 0
+fi
+
+log_message "Shifting everything from WS $current_id ($current_name) to $target_workspace"
+
+# Grab all window addresses on this workspace (matches both ID and Name)
+window_addresses=$(hyprctl clients -j | jq -r ".[] | select(.workspace.id == $current_id or .workspace.name == \"$current_name\") | .address")
+
+# Move each window silently to the target workspace
+for address in $window_addresses; do
+    hyprctl dispatch movetoworkspacesilent "$target_workspace,address:$address" > /dev/null
+done
+
+log_message "Successfully shifted windows to $target_workspace"

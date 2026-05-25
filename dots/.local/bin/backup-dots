@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# backup-dots - Global wrapper for dotfiles backup
+SCRIPT="/home/zatch/end4-dots-backup/backup.sh"
+
+# Default to 'all' if no argument is provided
+TARGET="${1:-all}"
+
+case "$TARGET" in
+    github|seagate|drive|all)
+        "$SCRIPT" "$TARGET"
+        ;;
+    help|--help|-h)
+        echo "Usage: backup-dots [github|seagate|drive|all]"
+        echo ""
+        echo "  (Default) all - Runs GitHub, Seagate, and Drive backups"
+        echo "  github        - Selective backup of configs only (No large assets)"
+        echo "  seagate       - Full backup to Seagate Hard Drive"
+        echo "  drive         - Sync Seagate backup to Google Drive"
+        ;;
+    *)
+        echo "Unknown target: $TARGET"
+        echo "Use 'backup-dots help' for usage info."
+        exit 1
+        ;;
+esac

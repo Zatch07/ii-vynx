@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# ----------------------------------------------------------------
+# add-custom-we-wallpaper.sh
+# ----------------------------------------------------------------
+
+TARGET_DIR="$HOME/Pictures/Wallpapers/WallpaperEngine"
+mkdir -p "$TARGET_DIR"
+
+# 1. Prompt for folder selection
+SOURCE_FOLDER=$(kdialog --getexistingdirectory . --title "Select folder containing video wallpaper")
+[ -z "$SOURCE_FOLDER" ] && exit 0
+
+# 2. Search for video file (mp4, webm, mkv, avi, mov)
+VIDEO_FILE=$(find "$SOURCE_FOLDER" -maxdepth 1 -type f \( -name "*.mp4" -o -name "*.webm" -o -name "*.mkv" -o -name "*.avi" -o -name "*.mov" \) | head -n 1)
+
+if [ -z "$VIDEO_FILE" ]; then
+    notify-send "Error" "No video file found in $SOURCE_FOLDER" -i "dialog-error"
+    exit 1
+fi
+
+# 3. Prompt for name
+NAME=$(kdialog --inputbox "Enter name for the wallpaper" "$(basename "$SOURCE_FOLDER")")
+[ -z "$NAME" ] && exit 0
+
+# 4. Generate ID and create new folder
+ID=$((RANDOM % 9000000000 + 1000000000))
+NEW_FOLDER="$TARGET_DIR/$NAME [WE-$ID]"
+mkdir -p "$NEW_FOLDER"
+
+# 5. Copy video file
+cp "$VIDEO_FILE" "$NEW_FOLDER/$(basename "$VIDEO_FILE")"
+
+# 6. Look for preview or generate one
+PREVIEW_FILE=$(find "$SOURCE_FOLDER" -maxdepth 1 -type f \( -name "preview.jpg" -o -name "preview.png" -o -name "preview.gif" -o -name "thumbnail.jpg" -o -name "thumbnail.png" \) | head -n 1)
+
+if [ -n "$PREVIEW_FILE" ]; then
+    cp "$PREVIEW_FILE" "$NEW_FOLDER/preview.${PREVIEW_FILE##*.}"
+else
+    # Try any image in the folder as fallback
+    FALLBACK_IMG=$(find "$SOURCE_FOLDER" -maxdepth 1 -type f \( -name "*.jpg" -o -name "*.png" -o -name "*.webp" \) | head -n 1)
+    if [ -n "$FALLBACK_IMG" ]; then
+        cp "$FALLBACK_IMG" "$NEW_FOLDER/preview.${FALLBACK_IMG##*.}"
+    else
+        # Generate from first frame of video
+        ffmpeg -y -i "$VIDEO_FILE" -ss 00:00:01.000 -vframes 1 "$NEW_FOLDER/preview.jpg" > /dev/null 2>&1
+    fi
+fi
+
+# 7. Create project.json (compatible with switchwall.sh and linux-wallpaperengine)
+cat > "$NEW_FOLDER/project.json" << EOF
+{
+    "title": "$NAME",
+    "type": "video",
+    "file": "$(basename "$VIDEO_FILE")",
+    "preview": "preview.jpg"
+}
+EOF
+
+notify-send "Wallpaper Engine" "Added $NAME to collection" -i "preferences-desktop-wallpaper"
+echo "✅ Added $NAME to $TARGET_DIR"
