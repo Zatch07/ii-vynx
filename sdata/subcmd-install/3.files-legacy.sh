@@ -79,3 +79,6 @@ esac
 install_file "dots/.local/share/icons/illogical-impulse.svg" "${XDG_DATA_HOME}"/icons/illogical-impulse.svg
 install_dir__ignore_existing "dots/.local/share/icons" "${XDG_DATA_HOME}"/icons
 install_dir__ignore_existing "dots/.local/bin" "${HOME}"/.local/bin
+install_dir__ignore_existing "dots/.config/fish/conf.d" "${XDG_CONFIG_HOME}"/fish/conf.d
+install_dir__ignore_existing "dots/.config/nvim/lua/plugins" "${XDG_CONFIG_HOME}"/nvim/lua/plugins
+install_dir__ignore_existing "dots/.local/share/color-schemes" "${XDG_DATA_HOME}"/color-schemes
