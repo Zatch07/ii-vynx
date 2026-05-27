@@ -1,7 +1,41 @@
-hl.bind("CTRL+SUPER+ALT+Slash", hl.dsp.exec_cmd("xdg-open ~/.config/hypr/custom/keybinds.lua"), {description = "Edit user keybinds"} )
+-- Custom keybinds
+-- This file will not be overwritten across dots-hyprland updates.
 
--- Thorium Browser
+-- Unbind defaults to prevent conflicts
+hl.unbind("SUPER + B")
+hl.unbind("CTRL + SUPER + R")
+hl.unbind("SUPER + SHIFT + Left")
+hl.unbind("SUPER + SHIFT + Right")
+hl.unbind("SUPER + SHIFT + Up")
+hl.unbind("SUPER + SHIFT + Down")
+hl.unbind("CTRL + SUPER + T")
+hl.unbind("CTRL + SUPER + ALT + T")
+hl.unbind("SUPER + SUPER_L")
+hl.unbind("SUPER + SUPER_R")
+hl.unbind("SUPER + J")
+
+-- Unbind workspace conflicts
+for i = 1, 10 do
+    local numberkey = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 }
+    local numpadkey = { 87, 88, 89, 83, 84, 85, 79, 80, 81, 90 }
+    hl.unbind("SUPER + ALT + code:" .. numberkey[i])
+    hl.unbind("SUPER + ALT + code:" .. numpadkey[i])
+    hl.unbind("SUPER + SHIFT + code:" .. numberkey[i])
+    hl.unbind("SUPER + SHIFT + code:" .. numpadkey[i])
+end
+
+-- Custom app keybinds
+hl.bind("CTRL+SUPER+Slash", hl.dsp.exec_cmd("xdg-open ~/.config/illogical-impulse/config.json"), {description = "Edit shell config"} )
+hl.bind("CTRL+SUPER+ALT+Slash", hl.dsp.exec_cmd("xdg-open ~/.config/hypr/custom/keybinds.lua"), {description = "Edit user keybinds"} )
 hl.bind("SUPER + B", hl.dsp.exec_cmd("thorium-browser-avx2"), { description = "App: Browser (Thorium)" })
+
+-- Launcher (Alt + Grave)
+hl.bind("ALT + grave", hl.dsp.global("quickshell:searchToggle"), { description = "Shell: Toggle search" })
+hl.bind("ALT + grave", hl.dsp.exec_cmd("qs -c $qsConfig ipc call TEST_ALIVE || pkill fuzzel || fuzzel"))
+
+-- Skwd Window Switcher
+hl.bind("ALT + Tab", hl.dsp.exec_cmd("bash -c 'echo \"switcherNext\" > ${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/skwd/cmd'"), { description = "Window: Switch next" })
+hl.bind("ALT + SHIFT + Tab", hl.dsp.exec_cmd("bash -c 'echo \"switcherPrev\" > ${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/skwd/cmd'"), { description = "Window: Switch prev" })
 
 -- Quickshell custom controls
 hl.bind("CTRL + SUPER + B", hl.dsp.global("quickshell:barToggle"), { description = "Shell: Toggle bar" })
@@ -29,8 +63,10 @@ for i = 1, 10 do
     local numberkey = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 }
     local keyval = i % 10
     hl.bind("CTRL + SUPER + code:" .. numberkey[i], hl.dsp.exec_cmd("~/.local/bin/workspace-shift " .. keyval))
-    hl.bind("SUPER + ALT + code:" .. numberkey[i], hl.dsp.exec_cmd("~/.local/bin/workspace-shift " .. keyval .. " && hyprctl dispatch workspace " .. keyval))
-    hl.bind("SUPER + SHIFT + code:" .. numberkey[i], hl.dsp.window.move({ workspace = workspace_in_group(i), follow = true }))
+    hl.bind("SUPER + ALT + code:" .. numberkey[i], hl.dsp.exec_cmd("~/.local/bin/workspace-shift " .. keyval .. " && hyprctl dispatch 'hl.dsp.focus({ workspace = " .. keyval .. " })'"))
+    hl.bind("SUPER + SHIFT + code:" .. numberkey[i], function()
+        hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = true }))
+    end)
 end
 
 -- Keypad numbers
@@ -38,6 +74,8 @@ for i = 1, 10 do
     local numpadkey = { 87, 88, 89, 83, 84, 85, 79, 80, 81, 90 }
     local keyval = i % 10
     hl.bind("CTRL + SUPER + code:" .. numpadkey[i], hl.dsp.exec_cmd("~/.local/bin/workspace-shift " .. keyval))
-    hl.bind("SUPER + ALT + code:" .. numpadkey[i], hl.dsp.exec_cmd("~/.local/bin/workspace-shift " .. keyval .. " && hyprctl dispatch workspace " .. keyval))
-    hl.bind("SUPER + SHIFT + code:" .. numpadkey[i], hl.dsp.window.move({ workspace = workspace_in_group(i), follow = true }))
+    hl.bind("SUPER + ALT + code:" .. numpadkey[i], hl.dsp.exec_cmd("~/.local/bin/workspace-shift " .. keyval .. " && hyprctl dispatch 'hl.dsp.focus({ workspace = " .. keyval .. " })'"))
+    hl.bind("SUPER + SHIFT + code:" .. numpadkey[i], function()
+        hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = true }))
+    end)
 end

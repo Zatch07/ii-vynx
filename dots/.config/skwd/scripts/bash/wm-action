@@ -27,18 +27,36 @@ case "$SKWD_COMPOSITOR" in
 
   # Hyprland compositor actions
   hyprland)
+    dispatch_cmd() {
+      local lua_cmd="$1"
+      local legacy_cmd="$2"
+      local res
+      res=$(hyprctl dispatch "$lua_cmd" 2>&1)
+      if [[ "$res" =~ "error:" ]]; then
+        hyprctl dispatch $legacy_cmd
+      fi
+    }
+
     case "$action" in
-      focus-window)     hyprctl dispatch focuswindow "address:$1" ;;
-      close-window)     hyprctl dispatch closewindow "address:$1" ;;
-      focus-monitor)    hyprctl dispatch focusmonitor "$1" ;;
-      focus-workspace)  hyprctl dispatch workspace "$1" ;;
+      focus-window)
+        addr="$1"
+        [[ ! "$addr" =~ ^0x ]] && addr="0x$addr"
+        dispatch_cmd "hl.dsp.focus({ window = 'address:$addr' })" "focuswindow address:$1"
+        ;;
+      close-window)
+        addr="$1"
+        [[ ! "$addr" =~ ^0x ]] && addr="0x$addr"
+        dispatch_cmd "hl.dsp.window.close({ window = 'address:$addr' })" "closewindow address:$1"
+        ;;
+      focus-monitor)    dispatch_cmd "hl.dsp.focus({ monitor = '$1' })" "focusmonitor $1" ;;
+      focus-workspace)  dispatch_cmd "hl.dsp.focus({ workspace = '$1' })" "workspace $1" ;;
       list-windows)     hyprctl -j clients ;;
       list-workspaces)  hyprctl -j workspaces ;;
       list-outputs)     hyprctl -j monitors | jq '[.[] | {key: .name, value: .}] | from_entries' ;;
       event-stream)     exec socat -U - "UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock" ;;
       screenshot-window) grim -g "$(hyprctl -j clients | jq -r --arg addr "$1" '.[] | select(.address == $addr) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')" "$2" ;;
       screenshot-output) grim -o "$1" "$2" ;;
-      quit)             hyprctl dispatch exit ;;
+      quit)             dispatch_cmd "hl.dsp.exit()" "exit" ;;
       *)                echo "wm-action: unknown action: $action" >&2; exit 1 ;;
     esac
     ;;

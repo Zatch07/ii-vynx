@@ -1,1 +1,2 @@
-
+-- Custom general configuration
+-- This file will not be overwritten across dots-hyprland updates.

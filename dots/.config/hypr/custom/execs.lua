@@ -1,3 +1,6 @@
+-- Custom startup applications
+-- This file will not be overwritten across dots-hyprland updates.
+
 hl.on("hyprland.start", function ()
     hl.exec_cmd("bash -c 'sleep 3 && vesktop'")
     hl.exec_cmd("jamesdsp --tray")

@@ -86,7 +86,7 @@ Scope {
             GlobalStates.screenLocked = false;
             
             // Refocus last focused window on unlock (hack)
-            Quickshell.execDetached(["bash", "-c", `sleep 0.2; hyprctl --batch "dispatch togglespecialworkspace; dispatch togglespecialworkspace"`])
+            Quickshell.execDetached(["bash", "-c", `sleep 0.2; res=$(hyprctl --batch 'dispatch hl.dsp.workspace.toggle_special("special"); dispatch hl.dsp.workspace.toggle_special("special")' 2>&1); [[ "$res" =~ "error:" ]] && hyprctl --batch "dispatch togglespecialworkspace; dispatch togglespecialworkspace"`])
 
             // Reset
             lockContext.reset();

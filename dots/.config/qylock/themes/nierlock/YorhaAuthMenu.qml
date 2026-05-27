@@ -96,6 +96,16 @@ Item {
                     soundEngine.play("input");
                 }
                 onAccepted: root.context.tryUnlock()
+
+                Connections {
+                    target: root.context
+                    function onCurrentTextChanged() {
+                        if (root.context.currentText === "") {
+                            authInput.text = "";
+                        }
+                    }
+                }
+
                 // NOTE: why i needed both?
                 cursorVisible: false
                 cursorDelegate: Item {}
