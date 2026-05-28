@@ -15,9 +15,22 @@ ShellRoot {
 
     property bool open: false
 
+    property bool _zatchLoadState: false
+
+    onOpenChanged: {
+        if (open) {
+            _zatchLoadState = true
+        } else {
+            // Tell the content to play the out-animation!
+            if (wallpaperSelectorLoader.item && wallpaperSelectorLoader.item.contentItem) {
+                wallpaperSelectorLoader.item.contentItem.requestClose()
+            }
+        }
+    }
+
     Loader {
         id: wallpaperSelectorLoader
-        active: root.open
+        active: root._zatchLoadState
 
         sourceComponent: PanelWindow {
             id: panelWindow
@@ -37,7 +50,7 @@ ShellRoot {
             anchors.right: true
             margins {
                 // Push down from bar so it sits in the vertical centre of the screen
-                top: Math.max(0, (monitor.height / 2) - 260)
+                top: Math.max(0, (monitor.height / 2) - 310)
             }
 
             // Only the content rectangle intercepts input
@@ -45,7 +58,7 @@ ShellRoot {
                 item: content
             }
 
-            implicitHeight: 520
+            implicitHeight: 620
             implicitWidth: monitor.width
 
             Component.onCompleted: {
@@ -63,9 +76,13 @@ ShellRoot {
 
             WallpaperSelectorContent {
                 id: content
+                objectName: "content" // to find it easily if needed
                 anchors.fill: parent
                 onCloseRequested: root.open = false
+                onDismissFinished: root._zatchLoadState = false
             }
+            // Expose the content so the shell can call it!
+            property var contentItem: content
         }
     }
 

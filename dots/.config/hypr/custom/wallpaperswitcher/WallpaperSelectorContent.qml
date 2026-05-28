@@ -14,6 +14,33 @@ Item {
     id: root
     
     signal closeRequested()
+    signal dismissFinished()
+
+    property bool isDismissing: false
+    property int unloadedRadius: -1
+
+    Timer {
+        id: unloadTimer
+        interval: 40
+        repeat: true
+        running: false
+        onTriggered: {
+            root.unloadedRadius += 1
+            if (root.unloadedRadius >= 8) {
+                unloadTimer.stop()
+                root.dismissFinished()
+            }
+        }
+    }
+
+    function requestClose() {
+        if (isDismissing) return
+        isDismissing = true
+        unloadedRadius = -1
+        tabBarOpacity = 0
+        unloadTimer.start()
+        root.closeRequested()
+    }
 
     readonly property string thumbDir: "file:///home/zatch/.cache/wallpaper_picker/thumbs"
     readonly property string srcDir: "/home/zatch/Pictures/Wallpapers"
@@ -117,7 +144,7 @@ Item {
     // ── Keyboard navigation ─────────────────────────────────────────────────
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            root.closeRequested()
+            root.requestClose()
             event.accepted = true
         } else if (event.key === Qt.Key_Left) {
             view.decrementCurrentIndex()
@@ -146,7 +173,7 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         
         // INCREASE THIS: Pushes the tabs further down from the top of the screen
-        anchors.topMargin: 10 
+        anchors.topMargin: 0 
         
         spacing: 30
         height: 45
@@ -288,7 +315,7 @@ Item {
     ListView {
         id: view
         anchors.top: tabBar.bottom
-        anchors.topMargin: 0 
+        anchors.topMargin: 20 
         anchors.bottom: parent.bottom
         
         // INCREASE THIS: Pushes the bottom edge of the list up, giving names space
@@ -358,6 +385,21 @@ Item {
             property real entrySlideY: startOffscreenY
             property real entryFade: 0
 
+            property bool isUnloading: root.isDismissing && delegateRoot.ring <= root.unloadedRadius
+            onIsUnloadingChanged: {
+                if (isUnloading) {
+                    slideAnim.to = startOffscreenY
+                    slideAnim.duration = 350
+                    slideDelay.duration = 0
+                    slideAnimSeq.restart()
+
+                    fadeAnim.to = 0.0
+                    fadeAnim.duration = 200
+                    fadeDelay.duration = 0
+                    fadeAnimSeq.restart()
+                }
+            }
+
             function triggerAnimation() {
                 // Reset to off-screen positions instantly
                 entrySlideY = startOffscreenY
@@ -424,7 +466,8 @@ Item {
             function pickWallpaper() {
                 const modeArg = root.useDarkMode ? "dark" : "light"
                 Quickshell.execDetached(["bash", "-c", `~/.config/quickshell/ii/scripts/colors/switchwall.sh '${srcPath}' --mode ${modeArg}`])
-                root.closeRequested()
+                // Since this uses quickshell detached, it doesn't close immediately. Let's animate out!
+                root.requestClose()
             }
 
             MouseArea {

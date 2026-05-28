@@ -426,9 +426,25 @@ ContentPage {
                     value: extrasPage.currentCursorSize
                     implicitWidth: 100
                     baseHeight: 32
-                    onValueModified: {
-                        extrasPage.currentCursorSize = value;
-                        extrasPage.applyCursorSize(value);
+                }
+
+                RippleButton {
+                    implicitWidth: 50
+                    implicitHeight: 32
+                    buttonRadius: Appearance.rounding.small
+                    colBackground: Appearance.colors.colPrimaryContainer
+                    onClicked: {
+                        extrasPage.currentCursorSize = customSizeInput.value;
+                        extrasPage.applyCursorSize(customSizeInput.value);
+                    }
+                    contentItem: StyledText {
+                        anchors.centerIn: parent
+                        text: "Set"
+                        color: Appearance.colors.colOnPrimaryContainer
+                        font {
+                            pixelSize: Appearance.font.pixelSize.smaller
+                            bold: true
+                        }
                     }
                 }
             }

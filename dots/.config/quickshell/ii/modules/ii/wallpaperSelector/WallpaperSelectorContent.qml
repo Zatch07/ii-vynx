@@ -59,6 +59,24 @@ Item {
         onTriggered: root.tabBarOpacity = 1
     }
 
+    signal dismissFinished()
+    property bool isDismissing: false
+    property int unloadedRadius: -1
+
+    Timer {
+        id: unloadTimer
+        interval: 40
+        repeat: true
+        running: false
+        onTriggered: {
+            root.unloadedRadius += 1
+            if (root.unloadedRadius >= 8) {
+                unloadTimer.stop()
+                root.dismissFinished()
+            }
+        }
+    }
+
     property bool _focusDone: false
     function focusCurrentWallpaper() {
         if (_focusDone) return
@@ -340,6 +358,12 @@ Item {
             property real entryFade: 0
 
             function triggerAnimation() {
+                if (delegateRoot.ring > 6) {
+                    entrySlideY = 0
+                    entryFade = 1.0
+                    return
+                }
+
                 // Reset to off-screen positions instantly
                 entrySlideY = startOffscreenY
                 entryFade = 0
@@ -366,10 +390,30 @@ Item {
                     delegateRoot.triggerAnimation()
                 }
             }
+            
+            property bool isUnloading: root.isDismissing && delegateRoot.ring <= root.unloadedRadius
+            onIsUnloadingChanged: {
+                if (isUnloading) {
+                    slideAnim.to = startOffscreenY
+                    slideAnim.duration = 350
+                    slideDelay.duration = 0
+                    slideAnimSeq.restart()
+
+                    fadeAnim.to = 0.0
+                    fadeAnim.duration = 200
+                    fadeDelay.duration = 0
+                    fadeAnimSeq.restart()
+                }
+            }
 
             Component.onCompleted: {
                 if (root._entryRevealRing > 0) {
-                    delegateRoot.triggerAnimation()
+                    if (delegateRoot.ring > 6) {
+                        entrySlideY = 0
+                        entryFade = 1.0
+                    } else {
+                        delegateRoot.triggerAnimation()
+                    }
                 } else {
                     entrySlideY = startOffscreenY
                     entryFade = 0
@@ -571,10 +615,19 @@ Item {
         target: GlobalStates
         function onWallpaperSelectorOpenChanged() {
             if (GlobalStates.wallpaperSelectorOpen) {
+                root.isDismissing = false
+                root.unloadedRadius = -1
+                root.tabBarOpacity = 0
                 root._focusDone = false
                 root.focusCurrentWallpaper()
-                root.startEntryAnimation()
+                root._entryRevealRing = 0
+                entryAnimTimer.restart()
                 view.forceActiveFocus()
+            } else {
+                root.isDismissing = true
+                root.unloadedRadius = -1
+                root.tabBarOpacity = 0
+                unloadTimer.start()
             }
         }
     }
@@ -582,6 +635,7 @@ Item {
     Component.onCompleted: {
         view.forceActiveFocus()
         root.focusCurrentWallpaper()
-        root.startEntryAnimation()
+        root._entryRevealRing = 0
+        entryAnimTimer.restart()
     }
 }

@@ -12,10 +12,21 @@ import Quickshell.Hyprland
 
 Scope {
     id: root
+    property bool _zatchLoadState: false
+    Component.onCompleted: _zatchLoadState = GlobalStates.wallpaperSelectorOpen
+
+    Connections {
+        target: GlobalStates
+        function onWallpaperSelectorOpenChanged() {
+            if (GlobalStates.wallpaperSelectorOpen) {
+                root._zatchLoadState = true;
+            }
+        }
+    }
 
     Loader {
         id: wallpaperSelectorLoader
-        active: GlobalStates.wallpaperSelectorOpen
+        active: root._zatchLoadState
 
         sourceComponent: PanelWindow {
             id: panelWindow
@@ -57,6 +68,9 @@ Scope {
                 id: content
                 anchors {
                     fill: parent
+                }
+                onDismissFinished: {
+                    root._zatchLoadState = false;
                 }
             }
         }

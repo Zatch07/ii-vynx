@@ -1,4 +1,5 @@
--- Custom variables
--- This file will not be overwritten across dots-hyprland updates.
+-- Custom overrides for variables.lua
+-- This file is managed by Quickshell Extras settings
 
+fileManager = "dolphin"
 codeEditor = "code"

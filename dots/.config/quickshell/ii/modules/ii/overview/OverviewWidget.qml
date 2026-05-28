@@ -492,7 +492,7 @@ Item {
                                     if (root.draggingTargetWorkspace === root.draggingFromWorkspace) { // plugin directly supports same workspace switch
                                         Hyprland.dispatch(`layoutmsg swapaddrdir ${targetWindowAdress} ${root.draggingDirection} ${window.windowData?.address} true`)
                                     } else { // different workspace
-                                        Hyprland.dispatch(`movetoworkspacesilent ${targetWorkspace}, address:${root.draggingFromWindowAddress}`)
+                                        Hyprland.dispatch(`hl.dsp.window.move({ workspace = ${targetWorkspace}, follow = false, window = "address:${window.windowData?.address}" })`)
                                         Qt.callLater(() => {
                                             Hyprland.dispatch(`layoutmsg swapaddrdir ${targetWindowAdress} ${root.draggingDirection} ${window.windowData?.address} true`)
                                         })
@@ -522,7 +522,7 @@ Item {
                                     Hyprland.dispatch(`layoutmsg focusaddr ${windowData.address}`)
                                     GlobalStates.overviewOpen = false;
                                 } else {
-                                    Hyprland.dispatch(`focuswindow address:${windowData.address}`)
+                                    Hyprland.dispatch(`hl.dsp.focus({ workspace = ${windowData.workspace.id} })`)
                                     Qt.callLater(() => {
                                         Hyprland.dispatch(`layoutmsg focusaddr ${windowData.address}`);
                                         GlobalStates.overviewOpen = false;

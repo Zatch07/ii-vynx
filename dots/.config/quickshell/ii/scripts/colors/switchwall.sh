@@ -55,8 +55,8 @@ post_process() {
     local screen_height="$2"
     local wallpaper_path="$3"
 
-    handle_kde_material_you_colors &
-    "$SCRIPT_DIR/code/material-code-set-color.sh" &
+    handle_kde_material_you_colors >/dev/null 2>&1 &
+    "$SCRIPT_DIR/code/material-code-set-color.sh" >/dev/null 2>&1 &
     
     # Generate YouTube Music theme
     "$SCRIPT_DIR/../ytmusic/generate-ytmusic-theme.sh" > /dev/null 2>&1 &
@@ -177,10 +177,10 @@ switch() {
     aiStylingModel=$(jq -r '.background.widgets.clock.cookie.aiStylingModel' "$SHELL_CONFIG_FILE")
     if [[ "$aiStylingEnabled" == "true" ]]; then
         if [[ "$aiStylingModel" == "gemini" ]]; then  
-            "$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" &
+            "$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" 2>/dev/null &
         fi
         if [[ "$aiStylingModel" == "openrouter" ]]; then  
-            "$SCRIPT_DIR/../ai/openrouter-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" &
+            "$SCRIPT_DIR/../ai/openrouter-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" 2>/dev/null &
         fi
     fi
 
@@ -202,7 +202,7 @@ switch() {
             exit 0
         fi
 
-        check_and_prompt_upscale "$imgpath" &
+        check_and_prompt_upscale "$imgpath" >/dev/null 2>&1 &
         kill_existing_mpvpaper
 
         if [[ "$imgpath" == *"[WE-"* ]]; then
