@@ -542,6 +542,14 @@ ContentPage {
                     Config.options.bar.utilButtons.showScreenRecord = checked;
                 }
             }
+            ConfigSwitch {
+                buttonIcon: "content_paste"
+                text: Translation.tr("Clipboard history")
+                checked: Config.options.bar.utilButtons.showClipboardHistory
+                onCheckedChanged: {
+                    Config.options.bar.utilButtons.showClipboardHistory = checked;
+                }
+            }
         }
     }
 

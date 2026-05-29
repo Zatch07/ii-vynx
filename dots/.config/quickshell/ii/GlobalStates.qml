@@ -41,6 +41,7 @@ Singleton {
     property bool policiesPanelOpen: false  // formerly sidebarLeftOpen
     property bool bluetoothConnectionPopupOpen: false
     property var bluetoothConnectionPopupDevice: null
+    property list<real> visualizerPoints: []
 
     readonly property bool effectiveLeftOpen: {
         switch (Config.options.sidebar.position) {

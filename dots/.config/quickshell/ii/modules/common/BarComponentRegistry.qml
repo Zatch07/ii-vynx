@@ -22,7 +22,9 @@ Singleton {
         { id: "weather", icon: "weather_mix", title: "Weather" },
         { id: "utility_buttons", icon: "build", title: "Utility buttons" },
         { id: "network_speed", icon: "speed", title: "Network speed" },
-        { id: "updates", icon: "update", title: "Updates" }
+        { id: "updates", icon: "update", title: "Updates" },
+        { id: "power_button", icon: "power_settings_new", title: "Power button" },
+        { id: "visualizer", icon: "graphic_eq", title: "Visualizer" }
     ]
 
     function getComponent(id) {
@@ -30,6 +32,6 @@ Singleton {
     }
 
     function getAvailableComponents(usedIds) {
-        return allComponents.filter(c => !usedIds.includes(c.id))
+        return allComponents.filter(c => c.id === "visualizer" || !usedIds.includes(c.id))
     }
 }

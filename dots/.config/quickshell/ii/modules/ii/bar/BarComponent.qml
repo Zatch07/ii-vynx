@@ -45,7 +45,9 @@ Item {
         "policies_panel_button": [policiesPanelButton, policiesPanelButton],
         "dashboard_panel_button": [dashboardPanelButton, dashboardPanelButtonVert],
         "network_speed": [networkSpeedComp, networkSpeedComp],
-        "updates": [updatesComp, updatesComp]
+        "updates": [updatesComp, updatesComp],
+        "power_button": [powerButtonComp, powerButtonComp],
+        "visualizer": [visualizerComp, visualizerComp]
     })
 
     property list<string> primaryBackgroundComps: ["timer", "record_indicator", "screen_share_indicator"] // components that are mostly indicators
@@ -152,4 +154,6 @@ Item {
 
     Component { id: networkSpeedComp; NetworkSpeed { vertical: rootItem.vertical } }
     Component { id: updatesComp; UpdatesButton {} }
+    Component { id: powerButtonComp; PowerButton {} }
+    Component { id: visualizerComp; Visualizer {} }
 }

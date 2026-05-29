@@ -37,6 +37,9 @@ Singleton {
         humidity: 0,
         sunrise: 0,
         sunset: 0,
+        moonPhase: "",
+        isNight: false,
+        currentIcon: "cloud",
         windDir: 0,
         wCode: 0,
         wDesc: "",
@@ -56,9 +59,46 @@ Singleton {
         temp.humidity = (data?.current?.humidity || 0) + "%";
         temp.sunrise = data?.astronomy?.sunrise || "0.0";
         temp.sunset = data?.astronomy?.sunset || "0.0";
+        temp.moonPhase = data?.astronomy?.moon_phase || "";
+        
+        function parseTimeStr(timeStr) {
+            if (!timeStr || timeStr === "0.0") return 0;
+            let parts = timeStr.split(" ");
+            let hm = parts[0].split(":");
+            let h = parseInt(hm[0]);
+            let m = parseInt(hm[1]);
+            if (parts[1] === "PM" && h !== 12) h += 12;
+            if (parts[1] === "AM" && h === 12) h = 0;
+            return h * 60 + m;
+        }
+
+        let now = new Date();
+        let currentMins = now.getHours() * 60 + now.getMinutes();
+        let sunriseMins = parseTimeStr(temp.sunrise);
+        let sunsetMins = parseTimeStr(temp.sunset);
+        temp.isNight = (sunriseMins > 0 && sunsetMins > 0) ? (currentMins < sunriseMins || currentMins > sunsetMins) : false;
+
         temp.windDir = data?.current?.winddir16Point || "N";
         temp.wCode = data?.current?.weatherCode || "113";
         temp.wDesc = root.getWeatherDescription(temp.wCode);
+
+        let defaultIcon = Icons.getWeatherIcon(temp.wCode);
+        if (temp.isNight && defaultIcon === "clear_day") {
+            let phase = temp.moonPhase.toLowerCase();
+            if (phase.includes("new")) defaultIcon = "brightness_3";
+            else if (phase.includes("waxing crescent")) defaultIcon = "brightness_4";
+            else if (phase.includes("first quarter")) defaultIcon = "brightness_5";
+            else if (phase.includes("waxing gibbous")) defaultIcon = "brightness_6";
+            else if (phase.includes("full")) defaultIcon = "brightness_7";
+            else if (phase.includes("waning gibbous")) defaultIcon = "brightness_6";
+            else if (phase.includes("last quarter")) defaultIcon = "brightness_5";
+            else if (phase.includes("waning crescent")) defaultIcon = "brightness_4";
+            else defaultIcon = "brightness_2";
+        } else if (temp.isNight && defaultIcon === "partly_cloudy_day") {
+            defaultIcon = "nights_stay";
+        }
+        temp.currentIcon = defaultIcon;
+
         temp.city = data?.location?.areaName[0]?.value || "City";
         temp.temp = "";
         temp.tempFeelsLike = "";

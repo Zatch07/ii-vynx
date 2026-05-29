@@ -31,6 +31,8 @@ ContentPage {
     property var    cursorSizes: ({})
     readonly property string sizesFilePath: Directories.shellConfig + "/custom_cursor_sizes.json"
 
+    property bool isLoaded: false
+
     Process {
         id: readHyprConfigProc
         running: true
@@ -52,8 +54,14 @@ ContentPage {
                         page.dimInactive = parsed.dim_inactive;
                         page.animEnabled = parsed.anim_enabled;
                         page.animSpeed = parsed.anim_speed;
+                        if (parsed.cursor_theme) page.currentCursor = parsed.cursor_theme;
+                        if (parsed.cursor_size) {
+                            page.currentCursorSize = parsed.cursor_size;
+                            customSizeInput.value = parsed.cursor_size;
+                        }
                     }
                 } catch (e) { }
+                page.isLoaded = true;
             }
         }
     }
@@ -181,7 +189,7 @@ ContentPage {
         }
     }
 
-    function saveHyprConfig() { saveHyprTimer.restart(); }
+    function saveHyprConfig() { if (page.isLoaded) saveHyprTimer.restart(); }
 
     ContentSection {
         icon: "near_me"
@@ -391,42 +399,6 @@ ContentPage {
     ContentSection {
         icon: "space_dashboard"
         title: Translation.tr("Layout & Gaps")
-
-        Item {
-            Layout.leftMargin: 8
-            Layout.rightMargin: 8
-            Layout.fillWidth: true
-            implicitHeight: layoutRow.implicitHeight
-
-            RowLayout {
-                id: layoutRow
-                anchors.fill: parent
-                spacing: 10
-
-                OptionalMaterialSymbol {
-                    icon: "dashboard"
-                }
-
-                StyledText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Layout Style")
-                    color: Appearance.colors.colOnSecondaryContainer
-                }
-
-                ConfigSelectionArray {
-                    Layout.fillWidth: false
-                    currentValue: page.currentLayout
-                    options: [
-                        { "displayName": "Dwindle", "value": "dwindle" },
-                        { "displayName": "Master", "value": "master" }
-                    ]
-                    onSelected: newValue => {
-                        page.currentLayout = newValue;
-                        page.saveHyprConfig();
-                    }
-                }
-            }
-        }
 
         ConfigSpinBox {
             icon: "view_in_ar"
