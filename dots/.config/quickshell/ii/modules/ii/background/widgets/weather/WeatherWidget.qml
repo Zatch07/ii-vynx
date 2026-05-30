@@ -42,16 +42,33 @@ AbstractBackgroundWidget {
             }
         }
 
-        MaterialSymbol {
-            iconSize: 80
-            color: Appearance.colors.colOnPrimaryContainer
-            text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+        Item {
+            width: 80
+            height: 80
             anchors {
                 left: parent.left
                 bottom: parent.bottom
-
                 leftMargin: 16
                 bottomMargin: 20
+            }
+            
+            property string currentIcon: Weather.data.currentIcon ?? "cloud"
+            property bool isMoon: currentIcon.startsWith("moon_")
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                visible: !parent.isMoon
+                iconSize: 80
+                color: Appearance.colors.colOnPrimaryContainer
+                text: parent.currentIcon
+            }
+
+            MoonPhaseIcon {
+                anchors.centerIn: parent
+                visible: parent.isMoon
+                iconSize: 80
+                color: Appearance.colors.colOnPrimaryContainer
+                phase: parent.isMoon ? parseInt(parent.currentIcon.split("_")[1]) : 0
             }
         }
     }

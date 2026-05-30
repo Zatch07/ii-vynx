@@ -1,11 +1,3 @@
-# Auto start Hyprland on tty1
-if status is-login
-    if test -z "$DISPLAY" -a "$XDG_VTNR" = 1
-        mkdir -p ~/.cache
-        exec start-hyprland > ~/.cache/hyprland.log 2>&1
-    end
-end
-
 # Commands to run in interactive sessions can go here
 if status is-interactive
     # No greeting
@@ -32,7 +24,6 @@ if status is-interactive
     alias claer "printf '\033[2J\033[3J\033[1;1H'"
     alias pamcan pacman
     alias q 'qs -c ii'
-    alias settings-custom 'quickshell --path ~/.config/quickshell/ii/custom-settings.qml >/dev/null 2>&1 & disown; echo "custom settings launched"'
     if test "$TERM" != "linux"
         alias ls 'eza --icons'
     end
@@ -40,10 +31,3 @@ if status is-interactive
         alias ssh 'kitten ssh'
     end
 end
-
-# Bay of Assets - Claude Code Config
-set -gx ANTHROPIC_BASE_URL https://api.bayofassets.com/
-set -gx ANTHROPIC_AUTH_TOKEN "boa-9dc83464-e55a-4311-88a2-069e63f97686"
-set -gx ANTHROPIC_DEFAULT_HAIKU_MODEL claude-haiku-4-5
-set -gx ANTHROPIC_DEFAULT_SONNET_MODEL claude-sonnet-4-6-thinking
-set -gx ANTHROPIC_DEFAULT_OPUS_MODEL claude-opus-4-6-thinking

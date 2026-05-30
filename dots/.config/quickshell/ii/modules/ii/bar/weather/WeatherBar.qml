@@ -37,12 +37,30 @@ MouseArea {
         columns: root.vertical ? 1 : 2
         rows: root.vertical ? 2 : 1
 
-        MaterialSymbol {
-            fill: 0
-            text: Weather.data.currentIcon ?? "cloud"
-            iconSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer1
+        Item {
             Layout.alignment: root.vertical ? Qt.AlignHCenter : Qt.AlignVCenter
+            implicitWidth: Appearance.font.pixelSize.large
+            implicitHeight: Appearance.font.pixelSize.large
+            
+            property string currentIcon: Weather.data.currentIcon ?? "cloud"
+            property bool isMoon: currentIcon.startsWith("moon_")
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                visible: !parent.isMoon
+                fill: 0
+                text: parent.currentIcon
+                iconSize: Appearance.font.pixelSize.large
+                color: Appearance.colors.colOnLayer1
+            }
+
+            MoonPhaseIcon {
+                anchors.centerIn: parent
+                visible: parent.isMoon
+                iconSize: Appearance.font.pixelSize.large
+                color: Appearance.colors.colOnLayer1
+                phase: parent.isMoon ? parseInt(parent.currentIcon.split("_")[1]) : 0
+            }
         }
 
         StyledText {

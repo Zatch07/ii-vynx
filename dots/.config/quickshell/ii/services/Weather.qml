@@ -85,15 +85,15 @@ Singleton {
         let defaultIcon = Icons.getWeatherIcon(temp.wCode);
         if (temp.isNight && defaultIcon === "clear_day") {
             let phase = temp.moonPhase.toLowerCase();
-            if (phase.includes("new")) defaultIcon = "brightness_3";
-            else if (phase.includes("waxing crescent")) defaultIcon = "brightness_4";
-            else if (phase.includes("first quarter")) defaultIcon = "brightness_5";
-            else if (phase.includes("waxing gibbous")) defaultIcon = "brightness_6";
-            else if (phase.includes("full")) defaultIcon = "brightness_7";
-            else if (phase.includes("waning gibbous")) defaultIcon = "brightness_6";
-            else if (phase.includes("last quarter")) defaultIcon = "brightness_5";
-            else if (phase.includes("waning crescent")) defaultIcon = "brightness_4";
-            else defaultIcon = "brightness_2";
+            if (phase.includes("new")) defaultIcon = "moon_0";
+            else if (phase.includes("waxing crescent")) defaultIcon = "moon_1";
+            else if (phase.includes("first quarter")) defaultIcon = "moon_2";
+            else if (phase.includes("waxing gibbous")) defaultIcon = "moon_3";
+            else if (phase.includes("full")) defaultIcon = "moon_4";
+            else if (phase.includes("waning gibbous")) defaultIcon = "moon_5";
+            else if (phase.includes("last quarter")) defaultIcon = "moon_6";
+            else if (phase.includes("waning crescent")) defaultIcon = "moon_7";
+            else defaultIcon = "moon_0";
         } else if (temp.isNight && defaultIcon === "partly_cloudy_day") {
             defaultIcon = "nights_stay";
         }

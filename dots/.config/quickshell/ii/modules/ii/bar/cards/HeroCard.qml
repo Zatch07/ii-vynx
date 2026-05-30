@@ -64,13 +64,30 @@ Rectangle {
             margins: heroCardRoot.margins
         }
 
-        MaterialSymbol {
-            id: iconSymbol
+        Item {
+            id: iconWrapper
             visible: heroCardRoot.icon !== "" && shapeItem.children.length <= 1
             anchors.centerIn: parent
-            text: heroCardRoot.icon
-            iconSize: heroCardRoot.iconFontSize
-            color: heroCardRoot.symbolColor
+            width: heroCardRoot.iconFontSize
+            height: heroCardRoot.iconFontSize
+
+            property bool isMoon: heroCardRoot.icon.startsWith("moon_")
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                visible: !parent.isMoon
+                text: heroCardRoot.icon
+                iconSize: heroCardRoot.iconFontSize
+                color: heroCardRoot.symbolColor
+            }
+
+            MoonPhaseIcon {
+                anchors.centerIn: parent
+                visible: parent.isMoon
+                iconSize: heroCardRoot.iconFontSize
+                color: heroCardRoot.symbolColor
+                phase: parent.isMoon ? parseInt(heroCardRoot.icon.split("_")[1]) : 0
+            }
         }
     }
 

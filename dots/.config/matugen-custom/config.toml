@@ -6,8 +6,8 @@ input_path = '~/.config/matugen-custom/templates/colors.json'
 output_path = '~/.local/state/quickshell/user/generated/colors.json'
 
 [templates.hyprland]
-input_path = '~/.config/matugen-custom/templates/hyprland/colors.conf'
-output_path = '~/.config/hypr/hyprland/colors.conf'
+input_path = '~/.config/matugen-custom/templates/hyprland/colors.lua'
+output_path = '~/.config/hypr/hyprland/colors.lua'
 
 [templates.hyprlock]
 input_path = '~/.config/matugen-custom/templates/hyprland/hyprlock-colors.conf'
@@ -61,12 +61,9 @@ output_path = '~/.config/kitty/matugen-colors.conf'
 post_hook = "killall -USR1 kitty"
 
 [templates.antigravity]
-input_path = '~/.config/matugen-custom/templates/antigravity/dankshell.json'
-output_path = '~/.antigravity/extensions/matugen-theme/themes/matugen-color-theme.json'
-
-[templates.antigravity_settings]
-input_path = '~/.config/matugen-custom/templates/antigravity/antigravity-premium.json.tpl'
-output_path = '~/.config/Antigravity/User/settings.json'
+input_path = '~/.config/matugen-custom/templates/antigravity-agent.json.tpl'
+output_path = '~/.gemini/config/customThemeSeedsDark.json'
+post_hook = "~/.config/matugen-custom/scripts/update_antigravity.sh"
 
 [templates.vscode]
 input_path = '~/.config/matugen-custom/templates/vscode/dankshell.json'

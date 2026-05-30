@@ -39,7 +39,7 @@
             "enableCustom": true,
             "expressive": "Space Grotesk",
             "iconNerd": "JetBrains Mono NF",
-            "main": "Cartograph CF",
+            "main": "Google Sans Flex",
             "monospace": "JetBrains Mono NF",
             "numbers": "Google Sans Flex",
             "reading": "Readex Pro",
@@ -47,7 +47,7 @@
         },
         "palette": {
             "accentColor": "",
-            "type": "samurai"
+            "type": "scheme-monochrome"
         },
         "sharpMode": false,
         "toggleWindowRounding": false,
@@ -117,9 +117,9 @@
             "widgetsFactor": 1.2,
             "workspaceZoom": 1
         },
-        "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Hunt Showdown Official [WE-3544229853]/preview.jpg",
+        "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/YessirSupra Batman [WE-3413531257]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/sword_girl_with_blue_eyes.png",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white5.jpg",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -154,7 +154,7 @@
                     "vertical": false
                 },
                 "enable": true,
-                "placementStrategy": "leastBusy",
+                "placementStrategy": "free",
                 "quote": {
                     "enable": false,
                     "text": ""
@@ -162,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 1938.333333333333,
-                "y": 568.3333333333333
+                "x": 1161.953125,
+                "y": 450.46484375
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -183,8 +183,8 @@
                     "opacity": 0.5,
                     "smoothing": 5
                 },
-                "x": 970,
-                "y": 470
+                "x": 2110,
+                "y": 990
             },
             "weather": {
                 "enable": false,
@@ -264,6 +264,11 @@
                     "centered": false,
                     "id": "music_player",
                     "visible": true
+                },
+                {
+                    "centered": false,
+                    "id": "visualizer",
+                    "visible": true
                 }
             ],
             "right": [
@@ -300,6 +305,11 @@
                 {
                     "centered": false,
                     "id": "dashboard_panel_button",
+                    "visible": true
+                },
+                {
+                    "centered": false,
+                    "id": "power_button",
                     "visible": true
                 }
             ]
@@ -350,8 +360,9 @@
         },
         "topLeftIcon": "arch",
         "utilButtons": {
+            "showClipboardHistory": true,
             "showColorPicker": false,
-            "showDarkModeToggle": true,
+            "showDarkModeToggle": false,
             "showKeyboardToggle": false,
             "showMicToggle": true,
             "showPerformanceProfileToggle": true,
@@ -387,7 +398,7 @@
         }
     },
     "battery": {
-        "automaticSuspend": true,
+        "automaticSuspend": false,
         "critical": 5,
         "full": 101,
         "low": 20,
@@ -397,10 +408,10 @@
         "locale": "en-GB"
     },
     "cheatsheet": {
-        "commandsTagsSidebar": false,
-        "enableCommands": false,
+        "commandsTagsSidebar": true,
+        "enableCommands": true,
         "enableGmail": true,
-        "enablePeriodicTable": true,
+        "enablePeriodicTable": false,
         "enableTimetable": true,
         "fontSize": {
             "comment": 12,
@@ -506,7 +517,7 @@
     },
     "media": {
         "filterDuplicatePlayers": true,
-        "priorityPlayer": "spotify, thorium"
+        "priorityPlayer": "Spotify, thorium"
     },
     "musicRecognition": {
         "interval": 4,
@@ -673,24 +684,48 @@
                         "type": "network"
                     },
                     {
+                        "size": 2,
+                        "type": "bluetooth"
+                    },
+                    {
                         "size": 1,
                         "type": "idleInhibitor"
                     },
                     {
-                        "size": 2,
+                        "size": 1,
                         "type": "darkMode"
+                    },
+                    {
+                        "size": 1,
+                        "type": "nightLight"
                     },
                     {
                         "size": 1,
                         "type": "mic"
                     },
                     {
-                        "size": 2,
+                        "size": 1,
+                        "type": "notifications"
+                    },
+                    {
+                        "size": 1,
                         "type": "audio"
                     },
                     {
+                        "size": 1,
+                        "type": "gameMode"
+                    },
+                    {
+                        "size": 1,
+                        "type": "screenSnip"
+                    },
+                    {
+                        "size": 1,
+                        "type": "antiFlashbang"
+                    },
+                    {
                         "size": 2,
-                        "type": "nightLight"
+                        "type": "protonVpn"
                     }
                 ]
             },
