@@ -5,7 +5,16 @@
 # 1. Spicetify reload
 if command -v spicetify >/dev/null 2>&1 && [ -d "$HOME/.config/spicetify/Themes/wal" ]; then
     spicetify apply -n || spicetify restore backup apply
-    hyprctl dispatch sendshortcut "CTRL SHIFT, R, class:^(Spotify)$" || :
+    dispatch_cmd() {
+        local lua_cmd="$1"
+        local legacy_cmd="$2"
+        local res
+        res=$(hyprctl dispatch "$lua_cmd" 2>&1)
+        if [[ "$res" =~ "error:" ]]; then
+            hyprctl dispatch $legacy_cmd
+        fi
+    }
+    dispatch_cmd "hl.dsp.send_shortcut({ mods = 'CTRL SHIFT', key = 'R', window = 'class:^(Spotify)$' })" "sendshortcut \"CTRL SHIFT, R, class:^(Spotify)$\"" || :
 fi
 
 # 2. Refresh GTK theme (triggers apps like Thorium to pick up new colors)

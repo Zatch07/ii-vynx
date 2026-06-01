@@ -119,7 +119,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/YessirSupra Clean [WE-3411705025]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white1.png",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white2.jpg",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -162,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 1169.02734375,
-                "y": 594.66015625
+                "x": 1519.08203125,
+                "y": 419.55859375
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -344,8 +344,8 @@
         "screenList": [
         ],
         "sizes": {
-            "height": 40,
-            "width": 30
+            "height": 45,
+            "width": 45
         },
         "timers": {
             "showPomodoro": true,

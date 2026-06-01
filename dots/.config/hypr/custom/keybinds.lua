@@ -47,10 +47,10 @@ hl.bind("CTRL + SUPER + M", hl.dsp.global("quickshell:mediaModeToggle"), { descr
 hl.bind("CTRL + SUPER + R", hl.dsp.exec_cmd("~/.config/hypr/custom/scripts/refresh-quickshell.sh"), { description = "Shell: Refresh Hyprland and Quickshell" })
 
 -- Window Resizing (Arrows)
-hl.bind("SUPER + SHIFT + Right", hl.dsp.window.resize({ x = 50, y = 0 }), { repeating = true, description = "Window: Resize right" })
-hl.bind("SUPER + SHIFT + Left", hl.dsp.window.resize({ x = -50, y = 0 }), { repeating = true })
-hl.bind("SUPER + SHIFT + Up", hl.dsp.window.resize({ x = 0, y = -50 }), { repeating = true, description = "Window: Resize up" })
-hl.bind("SUPER + SHIFT + Down", hl.dsp.window.resize({ x = 0, y = 50 }), { repeating = true })
+hl.bind("SUPER + SHIFT + Right", hl.dsp.window.resize({ x = 50, y = 0, relative = true }), { repeating = true, description = "Window: Resize right" })
+hl.bind("SUPER + SHIFT + Left", hl.dsp.window.resize({ x = -50, y = 0, relative = true }), { repeating = true })
+hl.bind("SUPER + SHIFT + Up", hl.dsp.window.resize({ x = 0, y = -50, relative = true }), { repeating = true, description = "Window: Resize up" })
+hl.bind("SUPER + SHIFT + Down", hl.dsp.window.resize({ x = 0, y = 50, relative = true }), { repeating = true })
 
 -- Window Swapping (Arrows)
 hl.bind("SUPER + ALT + Left", hl.dsp.window.move({ direction = "l", swap = true }))
@@ -79,3 +79,4 @@ for i = 1, 10 do
         hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = true }))
     end)
 end
+
