@@ -117,9 +117,9 @@
             "widgetsFactor": 1.2,
             "workspaceZoom": 1
         },
-        "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/YessirSupra Batman [WE-3413531257]/preview.jpg",
+        "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/YessirSupra Clean [WE-3411705025]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white5.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white1.png",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -162,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 1161.953125,
-                "y": 450.46484375
+                "x": 1169.02734375,
+                "y": 594.66015625
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -383,12 +383,13 @@
             "alwaysShowNumbers": true,
             "dynamicWorkspaces": false,
             "maxWindowCount": 1,
-            "monochromeIcons": false,
+            "monochromeIcons": true,
             "numberMap": [
             ],
             "showAppIcons": false,
-            "showNumberDelay": 300,
+            "showNumberDelay": 250,
             "shown": 10,
+            "theme": "pacman",
             "useNerdFont": false,
             "useWorkspaceMap": false,
             "workspaceMap": [
@@ -758,7 +759,7 @@
     },
     "tray": {
         "filterPassive": true,
-        "invertPinnedItems": false,
+        "invertPinnedItems": true,
         "monochromeIcons": false,
         "pinnedItems": [
             "Fcitx"

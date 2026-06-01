@@ -351,6 +351,7 @@ Singleton {
                     property bool showClipboardHistory: true
                 }
                 property JsonObject workspaces: JsonObject {
+                    property string theme: "default"
                     property bool monochromeIcons: true
                     property int shown: 10
                     property bool showAppIcons: true

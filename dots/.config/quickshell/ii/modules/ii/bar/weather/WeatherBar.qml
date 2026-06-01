@@ -12,8 +12,8 @@ MouseArea {
     id: root
     property bool vertical: false
     property bool hovered: false
-    implicitWidth: rowLayout.implicitWidth + 10 * 2.5
-    implicitHeight: rowLayout.implicitHeight + 10 * 2
+    implicitWidth: root.vertical ? (rowLayout.implicitHeight + 10 * 2) : (rowLayout.implicitWidth + 10 * 2.5)
+    implicitHeight: root.vertical ? (rowLayout.implicitWidth + 10 * 2.5) : (rowLayout.implicitHeight + 10 * 2)
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
@@ -33,12 +33,13 @@ MouseArea {
     GridLayout {
         id: rowLayout
         anchors.centerIn: parent
+        rotation: root.vertical ? 90 : 0
 
-        columns: root.vertical ? 1 : 2
-        rows: root.vertical ? 2 : 1
+        columns: 2
+        rows: 1
 
         Item {
-            Layout.alignment: root.vertical ? Qt.AlignHCenter : Qt.AlignVCenter
+            Layout.alignment: Qt.AlignVCenter
             implicitWidth: Appearance.font.pixelSize.large
             implicitHeight: Appearance.font.pixelSize.large
             
@@ -68,7 +69,7 @@ MouseArea {
             font.pixelSize: Appearance.font.pixelSize.small
             color: Appearance.colors.colOnLayer1
             text: Weather.data?.temp ?? "--°"
-            Layout.alignment: root.vertical ? Qt.AlignHCenter : Qt.AlignVCenter
+            Layout.alignment: Qt.AlignVCenter
         }
     }
 

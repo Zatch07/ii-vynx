@@ -558,6 +558,20 @@ ContentPage {
         icon: "workspaces"
         title: Translation.tr("Workspaces")
 
+        ContentSubsection {
+            title: Translation.tr("Switcher style")
+            ConfigSelectionArray {
+                currentValue: Config.options.bar.workspaces.theme
+                onSelected: newValue => {
+                    Config.options.bar.workspaces.theme = newValue;
+                }
+                options: [
+                    { displayName: Translation.tr("Default"), icon: "timer_10", value: "default" },
+                    { displayName: Translation.tr("Pacman"), icon: "videogame_asset", value: "pacman" }
+                ]
+            }
+        }
+
         ConfigRow {
             uniform: true
 
@@ -574,6 +588,7 @@ ContentPage {
             }
 
             ConfigSwitch {
+                enabled: Config.options.bar.workspaces.theme !== "pacman"
                 buttonIcon: "counter_1"
                 text: Translation.tr('Always show numbers')
                 checked: Config.options.bar.workspaces.alwaysShowNumbers
