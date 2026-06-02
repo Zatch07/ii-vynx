@@ -29,9 +29,21 @@ log_message "Shifting everything from WS $current_id ($current_name) to $target_
 # Grab all window addresses on this workspace (matches both ID and Name)
 window_addresses=$(hyprctl clients -j | jq -r ".[] | select(.workspace.id == $current_id or .workspace.name == \"$current_name\") | .address")
 
+dispatch_cmd() {
+    local lua_cmd="$1"
+    local legacy_cmd="$2"
+    local res
+    res=$(hyprctl dispatch "$lua_cmd" 2>&1)
+    if [[ "$res" =~ "error:" ]]; then
+        hyprctl dispatch $legacy_cmd
+    fi
+}
+
 # Move each window silently to the target workspace
 for address in $window_addresses; do
-    hyprctl dispatch movetoworkspacesilent "$target_workspace,address:$address" > /dev/null
+    addr="$address"
+    [[ ! "$addr" =~ ^0x ]] && addr="0x$addr"
+    dispatch_cmd "hl.dsp.window.move({ window = 'address:$addr', workspace = tonumber('$target_workspace') or '$target_workspace', follow = false })" "movetoworkspacesilent $target_workspace,address:$address" > /dev/null
 done
 
 log_message "Successfully shifted windows to $target_workspace"
