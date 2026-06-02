@@ -106,11 +106,7 @@ Scope {
     }
 
     function lock() {
-        if (Config.options.lock.useHyprlock) {
-            Quickshell.execDetached(["bash", "-c", "pidof hyprlock || hyprlock"]);
-            return;
-        }
-        GlobalStates.screenLocked = true;
+        Quickshell.execDetached(["bash", "-c", "~/.config/qylock/smart_lock.sh"]);
     }
 
     IpcHandler {
@@ -118,6 +114,9 @@ Scope {
 
         function activate(): void {
             root.lock();
+        }
+        function activate_ii(): void {
+            GlobalStates.screenLocked = true;
         }
         function focus(): void {
             lockContext.shouldReFocus();

@@ -270,15 +270,19 @@ ContentPage {
         icon: "lock"
         title: Translation.tr("Lock screen")
 
-        ConfigSwitch {
-            buttonIcon: "water_drop"
-            text: Translation.tr('Use Hyprlock (instead of Quickshell)')
-            checked: Config.options.lock.useHyprlock
-            onCheckedChanged: {
-                Config.options.lock.useHyprlock = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("If you want to somehow use fingerprint unlock...")
+        ContentSubsection {
+            title: Translation.tr("Theme")
+
+            ConfigSelectionArray {
+                currentValue: Config.options.lock.lockTheme
+                onSelected: newValue => {
+                    Config.options.lock.lockTheme = newValue;
+                }
+                options: [
+                    { displayName: Translation.tr("Nier Automata (Qylock)"), icon: "water_drop", value: "nier" },
+                    { displayName: Translation.tr("Hyprlock"), icon: "lock", value: "hyprlock" },
+                    { displayName: Translation.tr("ii-Quickshell"), icon: "lock_open", value: "ii-quickshell" }
+                ]
             }
         }
 
@@ -293,6 +297,7 @@ ContentPage {
 
         ContentSubsection {
             title: Translation.tr("Security")
+            enabled: Config.options.lock.lockTheme !== "hyprlock"
 
             ConfigSwitch {
                 buttonIcon: "settings_power"
@@ -321,6 +326,7 @@ ContentPage {
 
         ContentSubsection {
             title: Translation.tr("Style: general")
+            enabled: Config.options.lock.lockTheme === "ii-quickshell"
 
             ConfigSwitch {
                 buttonIcon: "center_focus_weak"
@@ -351,6 +357,7 @@ ContentPage {
         }
         ContentSubsection {
             title: Translation.tr("Style: Blurred")
+            enabled: Config.options.lock.lockTheme === "ii-quickshell"
 
             ConfigSwitch {
                 buttonIcon: "blur_on"

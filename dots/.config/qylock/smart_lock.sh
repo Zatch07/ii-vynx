@@ -9,17 +9,43 @@ if ! flock -n 9; then
     exit 0
 fi
 
-THEME_FILE="$HOME/.config/qylock/theme"
-THEME=$(cat "$THEME_FILE" 2>/dev/null || echo "nier-automata")
-THEME_DIR="$HOME/.config/qylock/themes/$THEME"
+CONFIG_FILE="$HOME/.config/illogical-impulse/config.json"
+LAUNCH_ON_STARTUP=$(jq -r '.lock.launchOnStartup // false' "$CONFIG_FILE")
+LOCK_THEME=$(jq -r '.lock.lockTheme // "nier"' "$CONFIG_FILE")
+export QS_REQUIRE_PASSWORD_POWER=$(jq -r '.lock.security.requirePasswordToPower // false' "$CONFIG_FILE")
+export QS_UNLOCK_KEYRING=$(jq -r '.lock.security.unlockKeyring // false' "$CONFIG_FILE")
 
-echo "Attempting to lock with theme: $THEME"
+STARTUP_MODE=false
+if [ "$1" == "--startup" ]; then
+    STARTUP_MODE=true
+fi
 
-if [ -f "$THEME_DIR/shell.qml" ]; then
-    echo "Detected Native Quickshell Theme. Launching natively..."
-    quickshell -p "$THEME_DIR/shell.qml" 9>&-
+# Determine theme to launch
+ACTIVE_THEME="$LOCK_THEME"
+
+if [ "$STARTUP_MODE" = true ]; then
+    if [ "$LAUNCH_ON_STARTUP" != "true" ] || [ "$LOCK_THEME" == "nier" ]; then
+        ACTIVE_THEME="nier"
+    fi
+fi
+
+echo "Attempting to lock with theme: $ACTIVE_THEME"
+
+if [ "$ACTIVE_THEME" == "hyprlock" ]; then
+    echo "Launching Hyprlock..."
+    exec 9>&-
+    exec hyprlock
+elif [ "$ACTIVE_THEME" == "ii-quickshell" ]; then
+    echo "Launching ii-quickshell lock natively via Quickshell..."
+    quickshell -c ii ipc call lock activate_ii 9>&-
 else
-    false # Trigger fallback
+    THEME_DIR="$HOME/.config/qylock/themes/nierlock"
+    if [ -f "$THEME_DIR/shell.qml" ]; then
+        echo "Detected Native Quickshell Theme. Launching natively..."
+        quickshell -p "$THEME_DIR/shell.qml" 9>&-
+    else
+        false # Trigger fallback
+    fi
 fi
 
 # 3. Direct Fallback to Hyprlock

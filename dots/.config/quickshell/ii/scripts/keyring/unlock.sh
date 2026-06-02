@@ -15,9 +15,18 @@ if [[ -z "${UNLOCK_PASSWORD}" ]]; then
 fi
 
 # Unlock
-killall -q -u "$(whoami)" gnome-keyring-daemon
+killall --wait -q -u "$(whoami)" gnome-keyring-daemon
+sleep 0.2
+
+rm -rf /run/user/$(id -u)/keyring
+
 eval $(echo -n "${UNLOCK_PASSWORD}" \
            | gnome-keyring-daemon --daemonize --login \
            | sed -e 's/^/export /')
 unset UNLOCK_PASSWORD
+
+if [ -n "$SSH_AUTH_SOCK" ]; then
+    dbus-update-activation-environment --systemd SSH_AUTH_SOCK
+fi
+
 echo '' >&2

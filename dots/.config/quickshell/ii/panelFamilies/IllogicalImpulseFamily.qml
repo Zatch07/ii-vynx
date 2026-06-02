@@ -48,7 +48,7 @@ Scope {
     PanelLoader { extraCondition: Config.options.background.enable; component: Background {} }
     PanelLoader { component: Cheatsheet {} }
     PanelLoader { extraCondition: Config.options.dock.enable; component: Dock {} }
-    // PanelLoader { component: Lock {} }
+    PanelLoader { component: Lock {} }
     PanelLoader { component: MediaControls {} }
     PanelLoader { component: NotificationPopup {} }
     PanelLoader { component: OnScreenDisplay {} }

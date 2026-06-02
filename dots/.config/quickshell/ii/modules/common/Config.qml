@@ -548,7 +548,7 @@ Singleton {
             }
 
             property JsonObject lock: JsonObject {
-                property bool useHyprlock: false
+                property string lockTheme: "nier"
                 property bool launchOnStartup: false
                 property JsonObject blur: JsonObject {
                     property bool enable: true

@@ -129,12 +129,17 @@ Item {
                 text: "Power Off"
                 confirmSound: "poweroff"
                 onClicked: {
-                    root.context.confirmAction();
-                    actionTimer.action = function () {
-                        executeCommand("poweroff");
-                        soundEngine.stopBgm();
-                    };
-                    actionTimer.restart();
+                    if (Quickshell.env("QS_REQUIRE_PASSWORD_POWER") === "true") {
+                        root.context.targetAction = "poweroff";
+                        authInput.forceActiveFocus();
+                    } else {
+                        root.context.confirmAction();
+                        actionTimer.action = function () {
+                            executeCommand("poweroff");
+                            soundEngine.stopBgm();
+                        };
+                        actionTimer.restart();
+                    }
                 }
 
                 KeyNavigation.up: authInput
@@ -147,12 +152,17 @@ Item {
                 text: "Reboot"
                 confirmSound: "reboot"
                 onClicked: {
-                    root.context.confirmAction();
-                    actionTimer.action = function () {
-                        executeCommand("reboot");
-                        soundEngine.stopBgm();
-                    };
-                    actionTimer.restart();
+                    if (Quickshell.env("QS_REQUIRE_PASSWORD_POWER") === "true") {
+                        root.context.targetAction = "reboot";
+                        authInput.forceActiveFocus();
+                    } else {
+                        root.context.confirmAction();
+                        actionTimer.action = function () {
+                            executeCommand("reboot");
+                            soundEngine.stopBgm();
+                        };
+                        actionTimer.restart();
+                    }
                 }
 
                 KeyNavigation.up: btnPower

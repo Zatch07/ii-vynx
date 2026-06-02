@@ -10,6 +10,7 @@ Scope {
     signal actionConfirmed
 
     property string currentText: ""
+    property string targetAction: "unlock"
     property bool unlockInProgress: false
     property bool showFailure: false
     property bool showSuccess: false
@@ -55,10 +56,20 @@ Scope {
 
         onCompleted: result => {
             if (result == PamResult.Success) {
-                Quickshell.execDetached({
-                    environment: ({ "UNLOCK_PASSWORD": root.currentText }),
-                    command: ["bash", "-c", Quickshell.env("HOME") + "/.config/qylock/themes/nierlock/pam/unlock.sh"]
-                });
+                if (root.targetAction === "poweroff") {
+                    Quickshell.execDetached(["poweroff"]);
+                    return;
+                } else if (root.targetAction === "reboot") {
+                    Quickshell.execDetached(["reboot"]);
+                    return;
+                }
+
+                if (Quickshell.env("QS_UNLOCK_KEYRING") === "true") {
+                    Quickshell.execDetached({
+                        environment: ({ "UNLOCK_PASSWORD": root.currentText }),
+                        command: ["bash", "-c", Quickshell.env("HOME") + "/.config/qylock/themes/nierlock/pam/unlock.sh"]
+                    });
+                }
 
                 root.showSuccess = true;
                 successDelayTimer.start();
