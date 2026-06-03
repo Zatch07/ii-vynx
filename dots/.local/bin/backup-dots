@@ -1,26 +1,56 @@
 #!/usr/bin/env bash
 
-# backup-dots - Global wrapper for dotfiles backup
-SCRIPT="/home/zatch/end4-dots-backup/backup.sh"
+REPO_DIR="$HOME/Documents/Branches/ii-zatch"
 
-# Default to 'all' if no argument is provided
-TARGET="${1:-all}"
+echo "🔄 Starting backup of dotfiles to ii-zatch repository..."
+cd "$REPO_DIR" || { echo "❌ Failed to cd into $REPO_DIR"; exit 1; }
 
-case "$TARGET" in
-    github|seagate|drive|all)
-        "$SCRIPT" "$TARGET"
-        ;;
-    help|--help|-h)
-        echo "Usage: backup-dots [github|seagate|drive|all]"
-        echo ""
-        echo "  (Default) all - Runs GitHub, Seagate, and Drive backups"
-        echo "  github        - Selective backup of configs only (No large assets)"
-        echo "  seagate       - Full backup to Seagate Hard Drive"
-        echo "  drive         - Sync Seagate backup to Google Drive"
-        ;;
-    *)
-        echo "Unknown target: $TARGET"
-        echo "Use 'backup-dots help' for usage info."
-        exit 1
-        ;;
-esac
+# Sync function to handle different backup targets
+sync_target() {
+    local source_dir="$1"
+    local target_dir="$2"
+    
+    if [ ! -d "$target_dir" ]; then return; fi
+
+    for item in "$target_dir"/*; do
+        basename=$(basename "$item")
+        if [ -d "$source_dir/$basename" ]; then
+            if [ "$basename" == "quickshell" ]; then
+                # Handle quickshell/ii specially since it's a symlink
+                rsync -a --delete "$source_dir/quickshell/ii/" "$target_dir/quickshell/ii/"
+                # Remove submodule .git to avoid nested git repo issues
+                rm -rf "$target_dir/quickshell/ii/modules/common/widgets/shapes/.git"
+            else
+                rsync -a --delete "$source_dir/$basename/" "$target_dir/$basename/"
+            fi
+        elif [ -f "$source_dir/$basename" ]; then
+            cp "$source_dir/$basename" "$target_dir/$basename"
+        fi
+    done
+}
+
+# 1. Sync .config
+sync_target "$HOME/.config" "$REPO_DIR/dots/.config"
+
+# 2. Sync .local/bin and .local/share if they exist
+if [ -d "$REPO_DIR/dots/.local/bin" ]; then
+    sync_target "$HOME/.local/bin" "$REPO_DIR/dots/.local/bin"
+fi
+if [ -d "$REPO_DIR/dots/.local/share" ]; then
+    sync_target "$HOME/.local/share" "$REPO_DIR/dots/.local/share"
+fi
+
+echo "📁 Copied configuration files successfully."
+
+# Make sure git tracks changes
+git add dots/
+
+# Check if there are changes to commit
+if git diff --cached --quiet; then
+    echo "✨ No new changes to backup."
+else
+    commit_msg="Backup dots: $(date +'%Y-%m-%d %H:%M:%S')"
+    git commit -m "$commit_msg"
+    echo "✅ Changes committed locally with message: '$commit_msg'"
+    echo "🚀 You can now push these changes to GitHub using: cd $REPO_DIR && git push"
+fi

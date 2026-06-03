@@ -10,7 +10,23 @@ fi
 echo "🚀 Syncing system to cursor: $THEME ($SIZE)..."
 # --- 1. Hyprland ---
 hyprctl setcursor "$THEME" "$SIZE"
-sed -i "s/exec-once = hyprctl setcursor.*/exec-once = hyprctl setcursor $THEME $SIZE/" ~/.config/hypr/hyprland/execs.conf
+if [ -f ~/.config/hypr/hyprland/execs.conf ]; then
+    sed -i "s/exec-once = hyprctl setcursor.*/exec-once = hyprctl setcursor $THEME $SIZE/" ~/.config/hypr/hyprland/execs.conf
+fi
+if [ -f ~/.config/hypr/hyprland/execs.lua ]; then
+    sed -i "s/hl\.exec_cmd(\"hyprctl setcursor.*/hl.exec_cmd(\"hyprctl setcursor $THEME $SIZE\")/g" ~/.config/hypr/hyprland/execs.lua
+fi
+if [ -f ~/.config/hypr/custom/execs.lua ]; then
+    sed -i "s/hl\.exec_cmd(\"hyprctl setcursor.*/hl.exec_cmd(\"hyprctl setcursor $THEME $SIZE\")/g" ~/.config/hypr/custom/execs.lua
+fi
+if [ -f ~/.config/hypr/hyprland-gui.lua ]; then
+    sed -i "s/hl\.env(\"XCURSOR_THEME\".*/hl.env(\"XCURSOR_THEME\", \"$THEME\")/g" ~/.config/hypr/hyprland-gui.lua
+    sed -i "s/hl\.env(\"XCURSOR_SIZE\".*/hl.env(\"XCURSOR_SIZE\", \"$SIZE\")/g" ~/.config/hypr/hyprland-gui.lua
+fi
+if [ -f ~/.config/hypr/hyprland-gui.conf ]; then
+    sed -i "s/env = XCURSOR_THEME,.*/env = XCURSOR_THEME,$THEME/g" ~/.config/hypr/hyprland-gui.conf
+    sed -i "s/env = XCURSOR_SIZE,.*/env = XCURSOR_SIZE,$SIZE/g" ~/.config/hypr/hyprland-gui.conf
+fi
 # --- 2. GSettings (GTK/GNOME) ---
 gsettings set org.gnome.desktop.interface cursor-theme "$THEME"
 gsettings set org.gnome.desktop.interface cursor-size "$SIZE"

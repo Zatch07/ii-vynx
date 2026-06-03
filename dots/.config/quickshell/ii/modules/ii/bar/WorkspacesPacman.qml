@@ -54,23 +54,40 @@ Item {
     property bool isMoving: delayTimer.running || 
                             Math.abs((root.vertical ? pacmanOverlay.y : pacmanOverlay.x) - pacmanOverlay.targetPos) > 1
                             
+    property bool superAnimating: GlobalStates.superDown
+    
+    Timer {
+        id: superTimeout
+        interval: 2000
+        running: superAnimating && !root.isMoving
+        onTriggered: {
+            superAnimating = false;
+            root.mouthAngle = 45;
+        }
+    }
+
     property real mouthAngle: 45
     SequentialAnimation on mouthAngle {
         loops: Animation.Infinite
-        running: root.isMoving || GlobalStates.superDown
+        running: root.isMoving || superAnimating
         // Start by closing the mouth, then opening it
         NumberAnimation { to: 0; duration: 150; easing.type: Easing.Linear }
         NumberAnimation { to: 45; duration: 150; easing.type: Easing.Linear }
     }
     
     onIsMovingChanged: {
-        if (!isMoving && !GlobalStates.superDown) mouthAngle = 45;
+        if (!isMoving && !superAnimating) mouthAngle = 45;
     }
     
     Connections {
         target: GlobalStates
         function onSuperDownChanged() {
-            if (!GlobalStates.superDown && !root.isMoving) root.mouthAngle = 45;
+            if (GlobalStates.superDown) {
+                superAnimating = true;
+            } else {
+                superAnimating = false;
+                if (!root.isMoving) root.mouthAngle = 45;
+            }
         }
     }
 
