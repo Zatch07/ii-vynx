@@ -27,27 +27,28 @@ Item {
 
     StyledText {
         id: lyricText
-        anchors.fill: parent
+        width: parent.width
+        anchors.verticalCenter: parent.verticalCenter
         text: lyricLineItem.text
         color: lyricLineItem.highlight ? Appearance.colors.colOnLayer0 : Appearance.colors.colSubtext
         font.pixelSize: lyricLineItem.currentLyricsSize * (lyricLineItem.highlight ? 1.2 : 1.0)
         font.weight: changeTextWeight ? lyricLineItem.highlight ? Font.Bold : Font.Medium : Font.Medium
         horizontalAlignment: lyricLineItem.textHorizontalAlignment
         verticalAlignment: Text.AlignVCenter
-        elide: Text.ElideRight
         visible: !lyricLineItem.reallyUseGradient
-        wrapMode: Text.Wrap
-        maximumLineCount: 2
+        wrapMode: Text.WordWrap
     }
 
     Item {
-        anchors.fill: parent
+        width: parent.width
+        height: lyricText2.implicitHeight
+        anchors.verticalCenter: parent.verticalCenter
         visible: lyricLineItem.reallyUseGradient
         layer.enabled: visible
         layer.effect: OpacityMask {
             maskSource: Rectangle {
                 width: lyricLineItem.width
-                height: lyricLineItem.height
+                height: lyricText2.implicitHeight
                 gradient: Gradient {
                     GradientStop {
                         position: 0.0
@@ -62,6 +63,7 @@ Item {
         }
 
         StyledText {
+            id: lyricText2
             anchors.fill: parent
             text: lyricLineItem.text
             color: Appearance.colors.colSubtext
@@ -69,9 +71,7 @@ Item {
             font.weight: Font.Medium
             horizontalAlignment: lyricLineItem.textHorizontalAlignment
             verticalAlignment: Text.AlignVCenter
-            elide: Text.ElideRight
-            wrapMode: Text.Wrap
-            maximumLineCount: 2
+            wrapMode: Text.WordWrap
         }
     }
 }

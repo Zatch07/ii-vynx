@@ -44,6 +44,16 @@ Item {
         LyricsService.initiliazeLyrics()
     }
 
+    Connections {
+        target: GlobalStates
+        function onMediaControlsOpenChanged() {
+            if (GlobalStates.mediaControlsOpen) {
+                var globalPos = root.mapToItem(null, 0, 0);
+                Persistent.states.media.popupRect = Qt.rect(globalPos.x, globalPos.y, root.width, root.height);
+            }
+        }
+    }
+
     readonly property string artSource: activePlayer?.trackArtUrl && activePlayer.trackArtUrl !== "" ? activePlayer.trackArtUrl : ""
 
     Item {
@@ -101,7 +111,9 @@ Item {
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
+        hoverEnabled: !Config.options.bar.tooltips.clickToShow
         acceptedButtons: Qt.MiddleButton | Qt.BackButton | Qt.ForwardButton | Qt.RightButton | Qt.LeftButton
         cursorShape: Qt.PointingHandCursor
         onPressed: (event) => {
@@ -117,6 +129,11 @@ Item {
                 GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
             }
         }   
+
+        MediaPopup {
+            hoverTarget: mouseArea
+            active: hoverTarget && hoverTarget.containsMouse && !GlobalStates.mediaControlsOpen
+        }
     }
 
     Item {

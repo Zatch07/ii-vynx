@@ -227,6 +227,12 @@ Variants {
                 }
             }
 
+            FadeLoader {
+                shown: GlobalStates.mediaModeOpen
+                anchors.fill: parent
+                sourceComponent: MediaMode {}
+            }
+
             WidgetCanvas {
                 id: widgetCanvas
                 width: parent.width

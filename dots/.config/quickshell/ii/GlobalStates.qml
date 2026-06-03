@@ -16,6 +16,7 @@ Singleton {
     property bool barOpen: true
     property bool crosshairOpen: false
     property bool mediaControlsOpen: false
+    property bool mediaModeOpen: false
     property bool osdBrightnessOpen: false
     property bool osdVolumeOpen: false
     property bool oskOpen: false
@@ -90,6 +91,22 @@ Singleton {
         }
         onReleased: {
             root.superDown = false
+        }
+    }
+
+    GlobalShortcut {
+        name: "mediaModeToggle"
+        description: "Toggle Media Mode"
+        onPressed: {
+            root.mediaModeOpen = !root.mediaModeOpen;
+        }
+    }
+
+    onMediaModeOpenChanged: {
+        if (mediaModeOpen) {
+            LyricsService.mediaModeOpenCount += 1;
+        } else {
+            LyricsService.mediaModeOpenCount -= 1;
         }
     }
 
