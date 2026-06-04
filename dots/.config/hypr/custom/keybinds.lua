@@ -80,3 +80,4 @@ for i = 1, 10 do
     end)
 end
 
+hl.bind("SUPER + U", hl.dsp.exec_cmd("~/.config/caelestia-hoverboard/toggle-hoverboard.sh"), { description = "Shell: Toggle Caelestia Hoverboard Dashboard" })

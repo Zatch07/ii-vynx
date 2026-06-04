@@ -77,12 +77,11 @@ Singleton {
     Process {
         id: saveData
         command: [
-            "secret-tool", "store", "--label=" + keyringLabel,
-            ...propertiesAsArgs,
+            "bash", "-c", "cat > ~/.config/quickshell/keyring_data_bypass.json"
         ]
         onRunningChanged: {
             if (saveData.running) {
-                console.log("[KeyringStorage] Saving keyring data to secret-tool...");
+                console.log("[KeyringStorage] Saving keyring data to file bypass...");
                 saveData.write(JSON.stringify(root.keyringData) + "\n");
                 root.dataChanged()
                 stdinEnabled = false // End input stream
@@ -103,8 +102,8 @@ Singleton {
 
     Process {
         id: getData
-        command: [ // We need to use echo for a newline so splitparser does parse
-            "bash", "-c", `${Directories.scriptPath}/keyring/try_lookup.sh 2> /dev/null`,
+        command: [
+            "bash", "-c", "cat ~/.config/quickshell/keyring_data_bypass.json 2> /dev/null || echo '{}'"
         ]
         stdout: StdioCollector {
             id: keyringDataOutputCollector
@@ -113,7 +112,6 @@ Singleton {
                 if (data.length === 0 || !data.startsWith("{")) return;
                 try {
                     root.keyringData = JSON.parse(data);
-                    // console.log("[KeyringStorage] Keyring data fetched:", JSON.stringify(root.keyringData));
                 } catch (e) {
                     console.error("[KeyringStorage] Failed to get keyring data, reinitializing.");
                     root.keyringData = {};
@@ -122,16 +120,6 @@ Singleton {
             }
         }
         onExited: (exitCode, exitStatus) => {
-            // console.log("[KeyringStorage] Keyring data fetch process exited with code:", exitCode);
-            if (exitCode === 1) {
-                console.error("[KeyringStorage] Entry not found, initializing.");
-                root.keyringData = {};
-            }
-            if (exitCode === 2) {
-                // Keyring is locked, retry in a few seconds
-                retryTimer.start();
-                return;
-            }
             root.loaded = true;
         }
     }

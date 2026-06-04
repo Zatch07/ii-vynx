@@ -745,7 +745,7 @@ Item {
             spacing: 4
             z: 20
 
-            property bool showBrowser: root.htmlPath !== ""
+            property bool showBrowser: true
             property int attachmentCount: root.attachments ? root.attachments.count : 0
             visible: showBrowser || attachmentCount > 0 || root.detectedMeetings.length > 0 || root.detectedCodes.length > 0 || root.detectedPhones.length > 0
 
@@ -763,7 +763,10 @@ Item {
                 colBackground: Appearance.colors.colPrimary
                 colBackgroundHover: Appearance.colors.colPrimaryHover
                 colRipple: Appearance.m3colors.m3primaryContainer
-                onClicked: Qt.openUrlExternally("file://" + root.htmlPath)
+                onClicked: {
+                    Qt.openUrlExternally("https://mail.google.com/mail/u/0/#all/" + root.threadId);
+                    Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "cheatsheet", "close"]);
+                }
 
                 RowLayout {
                     id: browserFabRow

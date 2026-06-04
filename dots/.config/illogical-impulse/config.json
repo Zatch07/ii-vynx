@@ -11,7 +11,8 @@
                 ]
             },
             {
-                "google": []
+                "google": [
+                ]
             }
         ],
         "otherModels": [
@@ -29,7 +30,8 @@
         "tool": "functions"
     },
     "appearance": {
-        "customColorSchemes": [],
+        "customColorSchemes": [
+        ],
         "defaultBorderRadius": 18,
         "extraBackgroundTint": true,
         "fakeScreenRounding": 0,
@@ -44,7 +46,7 @@
             "title": "Google Sans Flex"
         },
         "palette": {
-            "accentColor": "#3c5f70",
+            "accentColor": "",
             "type": "scheme-monochrome"
         },
         "sharpMode": false,
@@ -70,7 +72,8 @@
     },
     "apps": {
         "bluetooth": "kcmshell6 kcm_bluetooth",
-        "bluetoothDeviceImages": [],
+        "bluetoothDeviceImages": [
+        ],
         "changePassword": "kitty -1 --hold=yes fish -i -c 'passwd'",
         "manageUser": "kcmshell6 kcm_users",
         "network": "kcmshell6 kcm_networkmanagement",
@@ -93,13 +96,13 @@
         "hideWhenFullscreen": true,
         "mediaMode": {
             "backgroundAnimation": {
-                "enable": true,
+                "enable": false,
                 "speedScale": 10
             },
             "backgroundBlurRadius": 120,
             "backgroundOpacity": 50,
             "backgroundShape": "Cookie9Sided",
-            "changeShellColor": true,
+            "changeShellColor": false,
             "enableBackgroundAnimation": true,
             "syllable": {
                 "textHighlightStyle": 0
@@ -116,7 +119,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Delorean Drifting [WE-2844585196]/preview.png",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white2.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white11.jpg",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -159,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 1519.08203125,
-                "y": 419.55859375
+                "x": 336.8203125,
+                "y": 1066.5234375
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -338,7 +341,8 @@
             "memoryWarningThreshold": 95,
             "swapWarningThreshold": 85
         },
-        "screenList": [],
+        "screenList": [
+        ],
         "sizes": {
             "height": 45,
             "width": 45
@@ -380,7 +384,8 @@
             "dynamicWorkspaces": false,
             "maxWindowCount": 1,
             "monochromeIcons": true,
-            "numberMap": [],
+            "numberMap": [
+            ],
             "showAppIcons": false,
             "showNumberDelay": 250,
             "shown": 10,
@@ -434,14 +439,16 @@
         "height": 60,
         "hoverRegionHeight": 2,
         "hoverToReveal": false,
-        "ignoredAppRegexes": [],
+        "ignoredAppRegexes": [
+        ],
         "isolateMonitors": false,
         "monochromeIcons": true,
         "pinnedApps": [
             "org.kde.dolphin",
             "kitty"
         ],
-        "pinnedFiles": [],
+        "pinnedFiles": [
+        ],
         "pinnedOnStartup": false,
         "position": "bottom"
     },
@@ -608,7 +615,7 @@
         "savePath": "/home/zatch/Videos"
     },
     "screenSnip": {
-        "savePath": ""
+        "savePath": "/home/zatch/Pictures/Screenshots"
     },
     "search": {
         "blurFileSearchResultPreviews": false,

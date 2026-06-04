@@ -474,7 +474,10 @@ Item {
 
                                                         colBackground: Appearance.colors.colSurfaceContainerHigh
                                                         colBackgroundHover: Appearance.colors.colSurfaceContainerHighestHover
-                                                        onClicked: Qt.openUrlExternally("https://mail.google.com/mail/u/0/#inbox/" + model.id)
+                                                        onClicked: {
+                                                            Qt.openUrlExternally("https://mail.google.com/mail/u/0/#all/" + model.threadId);
+                                                            Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "cheatsheet", "close"]);
+                                                        }
                                                         RowLayout {
                                                             id: browserRow
                                                             anchors.centerIn: parent
