@@ -1,0 +1,20 @@
+{
+    "discordBranch": "stable",
+    "minimizeToTray": true,
+    "arRPC": true,
+    "splashColor": "rgb(180, 202, 213)",
+    "splashBackground": "rgb(10, 21, 25)",
+    "audio": {
+        "granularSelect": false,
+        "ignoreDevices": true,
+        "deviceSelect": false,
+        "ignoreInputMedia": true,
+        "ignoreVirtual": true,
+        "onlyDefaultSpeakers": false,
+        "onlySpeakers": false
+    },
+    "spellCheckLanguages": [
+        "en-US",
+        "en"
+    ]
+}

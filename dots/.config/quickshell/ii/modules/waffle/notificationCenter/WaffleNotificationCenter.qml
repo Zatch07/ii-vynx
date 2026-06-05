@@ -80,6 +80,10 @@ Scope {
         name: "sidebarRightToggle"
         description: "Toggles notification center on press"
 
-        onPressed: root.toggleOpen();
+        onPressed: {
+            GlobalStates.sidebarRightToggledByShortcut = true;
+            root.toggleOpen();
+            GlobalStates.sidebarRightToggledByShortcut = false;
+        }
     }
 }

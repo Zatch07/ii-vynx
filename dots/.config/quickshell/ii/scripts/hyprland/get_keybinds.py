@@ -1,11 +1,11 @@
-#!/usr/bin/env -S\_/bin/sh\_-c\_"source\_\$(eval\_echo\_\$ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate&&exec\_python\_-E\_"\$0"\_"\$@""
+#!/usr/bin/env -S /bin/sh -c "source \$(eval echo \$ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate&&exec python -E \"\$0\" \"\$@\""
 import argparse
 import re
 import os
 from os.path import expandvars as os_expandvars
 from typing import Dict, List
 
-TITLE_REGEX = "#+!"
+TITLE_REGEX = r"^(?:#+|--#+)!"
 HIDE_COMMENT = "[hidden]"
 MOD_SEPARATORS = ['+', ' ']
 COMMENT_BIND_PATTERN = "#/#"
@@ -16,7 +16,6 @@ args = parser.parse_args()
 content_lines = []
 reading_line = 0
 
-# Little Parser made for hyprland keybindings conf file
 Variables: Dict[str, str] = {}
 
 
@@ -167,41 +166,94 @@ def get_keybind_at_line(line_number, line_start = 0):
     else:
         mods = []
 
-    return KeyBinding(mods, key, dispatcher, params, comment)
+    # Casing normalization for mods to match QML
+    mod_mapping = {
+        "ctrl": "Ctrl",
+        "control": "Ctrl",
+        "super": "Super",
+        "alt": "Alt",
+        "mod1": "Alt",
+        "shift": "Shift"
+    }
+    normalized_mods = [mod_mapping.get(m.lower(), m) for m in mods]
 
-def get_binds_recursive(current_content, scope):
+    return KeyBinding(normalized_mods, key, dispatcher, params, comment)
+
+def get_keybind_at_line_lua(line_number):
+    global content_lines
+    line = content_lines[line_number].strip()
+    
+    # We match hl.bind("keys", dispatcher, {options}) or hl.bind("keys", dispatcher)
+    # The regex allows semi-colon at the end, and optional trailing comments
+    match = re.match(r'^hl\.bind\(\s*"([^"]+)"\s*,\s*(.*?)\s*(?:,\s*\{\s*(.*?)\s*\})?\s*\);?(?:\s*--.*)?$', line)
+    if not match:
+        return None
+    
+    keys_part = match.group(1).strip()
+    dispatcher = match.group(2).strip()
+    options_part = match.group(3) or ""
+    
+    # Extract description from options
+    desc_match = re.search(r'description\s*=\s*"([^"]+)"', options_part)
+    comment = desc_match.group(1).strip() if desc_match else ""
+    
+    if not comment or comment.startswith("[hidden]"):
+        return None
+    
+    # Normalize mods and key
+    mods_and_key = [m.strip() for m in keys_part.split('+')]
+    mods = [m.strip() for m in mods_and_key[:-1] if m.strip()]
+    key = mods_and_key[-1].strip()
+    
+    # Casing normalization for mods to match QML
+    mod_mapping = {
+        "ctrl": "Ctrl",
+        "control": "Ctrl",
+        "super": "Super",
+        "alt": "Alt",
+        "mod1": "Alt",
+        "shift": "Shift"
+    }
+    normalized_mods = [mod_mapping.get(m.lower(), m) for m in mods]
+    
+    return KeyBinding(normalized_mods, key, "exec", dispatcher, comment)
+
+def get_binds_recursive(current_content, scope, is_lua=False):
     global content_lines
     global reading_line
-    # print("get_binds_recursive({0}, {1}) [@L{2}]".format(current_content, scope, reading_line + 1))
-    while reading_line < len(content_lines): # TODO: Adjust condition
-        line = content_lines[reading_line]
+    while reading_line < len(content_lines):
+        line = content_lines[reading_line].strip()
         heading_search_result = re.search(TITLE_REGEX, line)
-        # print("Read line {0}: {1}\tisHeading: {2}".format(reading_line + 1, content_lines[reading_line], "[{0}, {1}, {2}]".format(heading_search_result.start(), heading_search_result.start() == 0, ((heading_search_result != None) and (heading_search_result.start() == 0))) if heading_search_result != None else "No"))
-        if ((heading_search_result != None) and (heading_search_result.start() == 0)): # Found title
+        if heading_search_result:
             # Determine scope
-            heading_scope = line.find('!')
-            # Lower? Return
+            heading_scope = line.count('#')
+            
             if(heading_scope <= scope):
                 reading_line -= 1
                 return current_content
 
-            section_name = line[(heading_scope+1):].strip()
-            # print("[[ Found h{0} at line {1} ]] {2}".format(heading_scope, reading_line+1, content_lines[reading_line]))
+            section_name = line[(line.find('!')+1):].strip()
             reading_line += 1
-            current_content["children"].append(get_binds_recursive(Section([], [], section_name), heading_scope))
+            current_content["children"].append(get_binds_recursive(Section([], [], section_name), heading_scope, is_lua))
 
-        elif line.startswith(COMMENT_BIND_PATTERN):
-            keybind = get_keybind_at_line(reading_line, line_start=len(COMMENT_BIND_PATTERN))
-            if(keybind != None):
-                current_content["keybinds"].append(keybind)
+        elif is_lua:
+            if line.lstrip().startswith("hl.bind"):
+                keybind = get_keybind_at_line_lua(reading_line)
+                if(keybind != None):
+                    current_content["keybinds"].append(keybind)
+        else:
+            if line.startswith(COMMENT_BIND_PATTERN):
+                keybind = get_keybind_at_line(reading_line, line_start=len(COMMENT_BIND_PATTERN))
+                if(keybind != None):
+                    current_content["keybinds"].append(keybind)
 
-        elif line == "" or not line.lstrip().startswith("bind"): # Comment, ignore
-            pass
+            elif line == "" or not line.lstrip().startswith("bind"): # Comment, ignore
+                pass
 
-        else: # Normal keybind
-            keybind = get_keybind_at_line(reading_line)
-            if(keybind != None):
-                current_content["keybinds"].append(keybind)
+            else: # Normal keybind
+                keybind = get_keybind_at_line(reading_line)
+                if(keybind != None):
+                    current_content["keybinds"].append(keybind)
 
         reading_line += 1
 
@@ -212,7 +264,20 @@ def parse_keys(path: str) -> Dict[str, List[KeyBinding]]:
     content_lines = read_content(path).splitlines()
     if content_lines[0] == "error":
         return "error"
-    return get_binds_recursive(Section([], [], ""), 0)
+    is_lua = path.endswith(".lua")
+    result = get_binds_recursive(Section([], [], ""), 0, is_lua)
+    
+    # Ensure nested column structure: Root -> Column (name="") -> Sections
+    needs_wrapping = False
+    for child in result["children"]:
+        if len(child["keybinds"]) > 0 or len(child["children"]) == 0:
+            needs_wrapping = True
+            break
+    if needs_wrapping and len(result["children"]) > 0:
+        column = Section(result["children"], [], "")
+        result["children"] = [column]
+        
+    return result
 
 
 if __name__ == "__main__":

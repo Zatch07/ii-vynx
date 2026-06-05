@@ -62,7 +62,7 @@ Item {
             
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: EmailService.authenticating ? Translation.tr("Waiting for browser...") : Translation.tr("Connect your account")
+                text: EmailService.authenticating ? Translation.tr("Waiting for browser...") : (EmailService.keyringLocked ? Translation.tr("Keyring is Locked") : Translation.tr("Connect your account"))
                 font.pixelSize: 42
                 font.weight: Font.Bold
                 color: Appearance.colors.colOnSurface
@@ -70,7 +70,7 @@ Item {
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: EmailService.authenticating ? Translation.tr("Please complete the sign-in in your browser window.") : Translation.tr("Sync your email account to start")
+                text: EmailService.authenticating ? Translation.tr("Please complete the sign-in in your browser window.") : (EmailService.keyringLocked ? Translation.tr("Please unlock your keyring (e.g., using Seahorse) and try again.") : Translation.tr("Sync your email account to start"))
                 font.pixelSize: Appearance.font.pixelSize.huge
                 color: Appearance.colors.colOnSurfaceVariant
                 opacity: 0.8
@@ -101,14 +101,14 @@ Item {
                 spacing: 12
                 
                 StyledText {
-                    text: EmailService.authenticating ? Translation.tr("Connecting...") : Translation.tr("Connect Account")
+                    text: EmailService.authenticating ? Translation.tr("Connecting...") : (EmailService.keyringLocked ? Translation.tr("Retry Connection") : Translation.tr("Connect Account"))
                     font.pixelSize: Appearance.font.pixelSize.huge
                     font.weight: Font.Bold
                     color: connectBtn.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
                 }
 
                 MaterialSymbol {
-                    text: EmailService.authenticating ? "hourglass_empty" : "arrow_forward"
+                    text: EmailService.authenticating ? "hourglass_empty" : (EmailService.keyringLocked ? "refresh" : "arrow_forward")
                     iconSize: Appearance.font.pixelSize.huge
                     color: connectBtn.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
                     
@@ -128,7 +128,11 @@ Item {
                 hoverEnabled: true
                 cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: {
-                    EmailService.startOAuth()
+                    if (EmailService.keyringLocked) {
+                        EmailService._loadGmailKeyring();
+                    } else {
+                        EmailService.startOAuth();
+                    }
                 }
             }
             

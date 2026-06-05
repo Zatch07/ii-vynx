@@ -47,7 +47,7 @@
         },
         "palette": {
             "accentColor": "",
-            "type": "scheme-monochrome"
+            "type": "scheme-fruit-salad"
         },
         "sharpMode": false,
         "toggleWindowRounding": false,
@@ -119,7 +119,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Delorean Drifting [WE-2844585196]/preview.png",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Black&white11.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/a_chair_on_a_platform_with_a_halo_above_it.jpg",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -162,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 336.8203125,
-                "y": 1066.5234375
+                "x": 17.9453125,
+                "y": 1146.68359375
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -211,7 +211,7 @@
         "barBackgroundStyle": 1,
         "barGroupStyle": 0,
         "bottom": true,
-        "cornerStyle": 2,
+        "cornerStyle": 1,
         "floatStyleShadow": true,
         "indicators": {
             "notifications": {

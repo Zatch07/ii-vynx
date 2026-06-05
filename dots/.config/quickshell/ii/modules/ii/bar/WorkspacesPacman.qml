@@ -327,18 +327,23 @@ Item {
         Canvas {
             id: pacmanTrail2
             anchors.centerIn: parent
-            width: Appearance.font.pixelSize.title * 0.87
+            anchors.horizontalCenterOffset: root.vertical ? 0 : (root.isMovingLeft ? 0 : 3)
+            anchors.verticalCenterOffset: root.vertical ? (root.isMovingLeft ? 0 : 3) : 0
+            width: Math.round(Appearance.font.pixelSize.title * 0.87)
             height: width
             rotation: root.targetRotation
             Behavior on rotation { NumberAnimation { duration: 200 } }
             
             property real currentMouthAngle: root.mouthAngle
             onCurrentMouthAngleChanged: requestPaint()
+            
+            property color pacmanColor: Appearance.colors.colPrimary
+            onPacmanColorChanged: requestPaint()
 
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
-                ctx.fillStyle = Appearance.colors.colPrimary;
+                ctx.fillStyle = pacmanColor;
                 var r = width / 2;
                 ctx.beginPath();
                 var rad = (currentMouthAngle * Math.PI) / 180;
@@ -365,18 +370,23 @@ Item {
         Canvas {
             id: pacmanTrail1
             anchors.centerIn: parent
-            width: Appearance.font.pixelSize.title * 0.87
+            anchors.horizontalCenterOffset: root.vertical ? 0 : (root.isMovingLeft ? 0 : 3)
+            anchors.verticalCenterOffset: root.vertical ? (root.isMovingLeft ? 0 : 3) : 0
+            width: Math.round(Appearance.font.pixelSize.title * 0.87)
             height: width
             rotation: root.targetRotation
             Behavior on rotation { NumberAnimation { duration: 200 } }
             
             property real currentMouthAngle: root.mouthAngle
             onCurrentMouthAngleChanged: requestPaint()
+            
+            property color pacmanColor: Appearance.colors.colPrimary
+            onPacmanColorChanged: requestPaint()
 
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
-                ctx.fillStyle = Appearance.colors.colPrimary;
+                ctx.fillStyle = pacmanColor;
                 var r = width / 2;
                 ctx.beginPath();
                 var rad = (currentMouthAngle * Math.PI) / 180;
@@ -403,18 +413,23 @@ Item {
         Canvas {
             id: pacmanIcon 
             anchors.centerIn: parent
-            width: Appearance.font.pixelSize.title * 0.87
+            anchors.horizontalCenterOffset: root.vertical ? 0 : (root.isMovingLeft ? 0 : 3)
+            anchors.verticalCenterOffset: root.vertical ? (root.isMovingLeft ? 0 : 3) : 0
+            width: Math.round(Appearance.font.pixelSize.title * 0.87)
             height: width
             rotation: root.targetRotation
             Behavior on rotation { NumberAnimation { duration: 200 } }
             
             property real currentMouthAngle: root.mouthAngle
             onCurrentMouthAngleChanged: requestPaint()
+            
+            property color pacmanColor: Appearance.colors.colPrimary
+            onPacmanColorChanged: requestPaint()
 
             onPaint: {
                 var ctx = getContext("2d");
                 ctx.reset();
-                ctx.fillStyle = Appearance.colors.colPrimary;
+                ctx.fillStyle = pacmanColor;
                 var r = width / 2;
                 ctx.beginPath();
                 var rad = (currentMouthAngle * Math.PI) / 180;

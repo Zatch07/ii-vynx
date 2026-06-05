@@ -33,6 +33,7 @@ Singleton {
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
+    property bool sidebarRightToggledByShortcut: false
 
     property bool videoEditorPopupOpen: false
     property bool videoEditorOpen: false
@@ -80,7 +81,6 @@ Singleton {
                 GlobalStates.policiesPanelOpen = false
             }
         }
-        
     }
 
     GlobalShortcut {

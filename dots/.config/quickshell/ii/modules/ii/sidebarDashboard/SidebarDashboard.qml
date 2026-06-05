@@ -122,7 +122,9 @@ Scope {
         name: "sidebarRightToggle"
         description: "Toggles right sidebar on press"
         onPressed: {
+            GlobalStates.sidebarRightToggledByShortcut = true;
             GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
+            GlobalStates.sidebarRightToggledByShortcut = false;
         }
     }
 
@@ -130,7 +132,9 @@ Scope {
         name: "sidebarRightOpen"
         description: "Opens right sidebar on press"
         onPressed: {
+            GlobalStates.sidebarRightToggledByShortcut = true;
             GlobalStates.sidebarRightOpen = true;
+            GlobalStates.sidebarRightToggledByShortcut = false;
         }
     }
 
@@ -138,7 +142,9 @@ Scope {
         name: "sidebarRightClose"
         description: "Closes right sidebar on press"
         onPressed: {
+            GlobalStates.sidebarRightToggledByShortcut = true;
             GlobalStates.sidebarRightOpen = false;
+            GlobalStates.sidebarRightToggledByShortcut = false;
         }
     }
 }

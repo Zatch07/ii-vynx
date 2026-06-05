@@ -16,6 +16,8 @@ Singleton {
 
     // public state
     property bool authenticated: false
+    property bool hasLoggedInBefore: false
+    property bool keyringLocked: false
     property bool loading: false
     property bool sendingEmail: false
     property string userEmail: ""
@@ -242,6 +244,7 @@ Singleton {
         property alias composeDraftSubject: root.composeDraftSubject
         property alias composeDraftBody: root.composeDraftBody
         property alias composeDraftAttachments: root.composeDraftAttachments
+        property alias hasLoggedInBefore: root.hasLoggedInBefore
     }
 
     function _startDebouncedSync() {
@@ -304,12 +307,14 @@ Singleton {
     IpcHandler {
         target: "gmail"
         function onAuthComplete(refreshToken: string, email: string, picture: string) {
-            KeyringStorage.setNestedField(["gmail_refresh_token"], refreshToken);
-            KeyringStorage.setNestedField(["gmail_user_email"], email);
-            KeyringStorage.setNestedField(["gmail_user_avatar"], picture);
+            root._gmailKeyringData["gmail_refresh_token"] = refreshToken;
+            root._gmailKeyringData["gmail_user_email"] = email;
+            root._gmailKeyringData["gmail_user_avatar"] = picture;
             root.userEmail = email;
             root.userAvatar = picture;
             root._refreshToken = refreshToken;
+            root.hasLoggedInBefore = true;
+            root._saveGmailKeyring();
             root._refreshAndFetch();
         }
         function onTokenRefreshed(accessToken: string, expiresIn: int) {
@@ -323,23 +328,13 @@ Singleton {
     // initialization — keyring might not have loaded yet
     Component.onCompleted: {
         root.checkCredentials();
-        if (KeyringStorage.loaded) {
-            _tryInit();
-        }
-    }
-
-    Connections {
-        target: KeyringStorage
-        function onLoadedChanged() {
-            if (KeyringStorage.loaded && !root.authenticated)
-                root._tryInit();
-        }
+        root._loadGmailKeyring();
     }
 
     function _tryInit() {
-        const storedToken = KeyringStorage.keyringData["gmail_refresh_token"];
-        const storedEmail = KeyringStorage.keyringData["gmail_user_email"];
-        const storedAvatar = KeyringStorage.keyringData["gmail_user_avatar"];
+        const storedToken = root._gmailKeyringData["gmail_refresh_token"];
+        const storedEmail = root._gmailKeyringData["gmail_user_email"];
+        const storedAvatar = root._gmailKeyringData["gmail_user_avatar"];
 
         if (storedEmail) {
             root.userEmail = storedEmail;
@@ -356,6 +351,60 @@ Singleton {
     }
 
     // public functions
+    // --- Isolated Gmail Keyring ---
+    property var _gmailKeyringData: ({})
+    property bool _gmailKeyringLoaded: false
+
+    function _saveGmailKeyring() {
+        saveGmailKeyringProcess.stdinEnabled = true;
+        saveGmailKeyringProcess.running = true;
+    }
+
+    function _loadGmailKeyring() {
+        loadGmailKeyringProcess.running = true;
+    }
+
+    Process {
+        id: saveGmailKeyringProcess
+        command: ["secret-tool", "store", "--label=Gmail Safe Storage", "application", "illogical-impulse-gmail"]
+        onRunningChanged: {
+            if (running) {
+                write(JSON.stringify(root._gmailKeyringData) + "\n");
+                stdinEnabled = false;
+            }
+        }
+    }
+
+    Process {
+        id: loadGmailKeyringProcess
+        command: ["secret-tool", "lookup", "application", "illogical-impulse-gmail"]
+        stdout: StdioCollector {
+            id: loadGmailKeyringCollector
+            onStreamFinished: {
+                const data = text;
+                if (data.length === 0 || !data.startsWith("{")) return;
+                try {
+                    root._gmailKeyringData = JSON.parse(data);
+                } catch (e) {
+                    root._gmailKeyringData = {};
+                }
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                if (root.hasLoggedInBefore) {
+                    root.keyringLocked = true;
+                    Quickshell.execDetached(["notify-send", "Keyring Locked", "Please unlock your keyring (e.g. using Seahorse) to access Gmail.", "-a", "illogical-impulse"]);
+                }
+            } else {
+                root._gmailKeyringLoaded = true;
+                root.keyringLocked = false;
+                root._tryInit();
+            }
+        }
+    }
+    // ------------------------------
+
     function startOAuth() {
         if (!credentialsConfigured)
             return;
@@ -365,14 +414,16 @@ Singleton {
     }
 
     function removeAccount() {
-        KeyringStorage.setNestedField(["gmail_refresh_token"], "");
-        KeyringStorage.setNestedField(["gmail_user_email"], "");
-        KeyringStorage.setNestedField(["gmail_user_avatar"], "");
+        root._gmailKeyringData["gmail_refresh_token"] = "";
+        root._gmailKeyringData["gmail_user_email"] = "";
+        root._gmailKeyringData["gmail_user_avatar"] = "";
+        root._saveGmailKeyring();
         _accessToken = "";
         _refreshToken = "";
         userEmail = "";
         userAvatar = "";
         authenticated = false;
+        hasLoggedInBefore = false;
         inboxMessages.clear();
         sentMessages.clear();
         spamMessages.clear();
@@ -380,7 +431,7 @@ Singleton {
     }
 
     function syncAll() {
-        const stored = KeyringStorage.keyringData["gmail_refresh_token"];
+        const stored = root._gmailKeyringData["gmail_refresh_token"];
         if (stored && stored !== "") {
             _refreshToken = stored;
             _refreshAndFetch();

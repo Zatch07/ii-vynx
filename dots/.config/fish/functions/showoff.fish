@@ -1,0 +1,1 @@
+/home/zatch/.config/hypr/custom/scripts/showoff.fish

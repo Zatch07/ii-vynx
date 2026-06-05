@@ -2,4 +2,4 @@
 -- This file is managed by Quickshell Extras settings
 
 fileManager = "dolphin"
-codeEditor = "code"
+codeEditor = "zeditor"

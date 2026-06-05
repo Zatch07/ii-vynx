@@ -20,6 +20,9 @@ sync_target() {
                 rsync -a --delete "$source_dir/quickshell/ii/" "$target_dir/quickshell/ii/"
                 # Remove submodule .git to avoid nested git repo issues
                 rm -rf "$target_dir/quickshell/ii/modules/common/widgets/shapes/.git"
+            elif [ "$basename" == "vesktop" ]; then
+                # Exclude session data, crash reports, and singletons for vesktop
+                rsync -a --delete --exclude="sessionData" --exclude="Crashpad" --exclude="Singleton*" "$source_dir/vesktop/" "$target_dir/vesktop/"
             else
                 rsync -a --delete "$source_dir/$basename/" "$target_dir/$basename/"
             fi

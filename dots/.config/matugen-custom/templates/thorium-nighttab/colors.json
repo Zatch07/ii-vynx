@@ -1,7 +1,7 @@
 {
-  "primary": "#ffffff",
-  "surface": "#131313",
-  "surface_container": "#1f1f1f",
-  "surface_container_high": "#2a2a2a",
-  "secondary_container": "#474747"
+  "primary": "#5ddbbc",
+  "surface": "#0a1519",
+  "surface_container": "#172126",
+  "surface_container_high": "#212b30",
+  "secondary_container": "#005142"
 }

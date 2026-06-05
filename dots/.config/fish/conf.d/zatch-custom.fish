@@ -8,8 +8,8 @@
 # Path & Environment
 # -----------------------------------------------------
 fish_add_path -p ~/.local/bin
-set -gx EDITOR "code --wait"
-set -gx VISUAL "code --wait"
+set -gx EDITOR "zeditor --wait"
+set -gx VISUAL "zeditor --wait"
 
 # -----------------------------------------------------
 # Dynamic Colors Hook (End-4)
@@ -90,9 +90,9 @@ function yazi
     rm -f -- "$tmp"
 end
 
-# Code: Silent launch
-function code
-    command code -r $argv 2>/dev/null
+# Zed: Silent launch
+function zeditor
+    command zeditor $argv 2>/dev/null
 end
 
 # -----------------------------------------------------

@@ -77,11 +77,11 @@ Singleton {
     Process {
         id: saveData
         command: [
-            "bash", "-c", "cat > ~/.config/quickshell/keyring_data_bypass.json"
-        ]
+            "secret-tool", "store", "--label=" + root.keyringLabel
+        ].concat(root.propertiesAsArgs)
         onRunningChanged: {
             if (saveData.running) {
-                console.log("[KeyringStorage] Saving keyring data to file bypass...");
+                // console.log("[KeyringStorage] Saving keyring data...");
                 saveData.write(JSON.stringify(root.keyringData) + "\n");
                 root.dataChanged()
                 stdinEnabled = false // End input stream
@@ -103,8 +103,8 @@ Singleton {
     Process {
         id: getData
         command: [
-            "bash", "-c", "cat ~/.config/quickshell/keyring_data_bypass.json 2> /dev/null || echo '{}'"
-        ]
+            "secret-tool", "lookup"
+        ].concat(root.propertiesAsArgs)
         stdout: StdioCollector {
             id: keyringDataOutputCollector
             onStreamFinished: {
