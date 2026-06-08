@@ -92,7 +92,9 @@ Access via `Config.options.bar.vertical`, `Config.options.appearance.sharpMode`,
 
 ## Extension System
 
-The details of the extension system are in the file named `EXTENSIONS.md` located at `.github/EXTENSIONS.md`
+The details of creating a new extension is in the file `EXTENSIONS.md` located at `.github/EXTENSIONS.md`.
+
+The details of the implementation of the extension system is in the file `EXTENSIONARCHITECTURE.md` located at `.github/EXTENSIONSARCHITECTURE`.
 
 ## Git Setup
 
