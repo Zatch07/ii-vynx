@@ -21,34 +21,32 @@ Singleton {
 
     function set(key: string, value: var) {
         Quickshell.execDetached(["bash", "-c", //
-            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --set "${key}" "${value}"` //
+            `${Directories.cliPath} hyprset key '${key}' '${value}' >/dev/null 2>&1 || true; hyprctl reload` //
         ])
     }
     
     function setMany(entries: var) {
-        let args = ""
+        let cmds = ""
         for (let key in entries) {
-            args += `--set "${key}" "${entries[key]}" `
+            cmds += `${Directories.cliPath} hyprset key '${key}' '${entries[key]}' >/dev/null 2>&1; `
         }
-        Quickshell.execDetached(["bash", "-c", //
-            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} ${args}` //
-        ])
+        cmds += "hyprctl reload;"
+        Quickshell.execDetached(["bash", "-c", cmds])
     }
     
     function reset(key: string) {
         Quickshell.execDetached(["bash", "-c", //
-            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --reset "${key}"` //
+            `${Directories.cliPath} hyprset reset '${key}' >/dev/null 2>&1 || true; hyprctl reload` //
         ])
     }
     
     function resetMany(keys: list<string>) {
-        let args = ""
+        let cmds = ""
         for (let i = 0; i < keys.length; i++) {
-            args += `--reset "${keys[i]}" `
+            cmds += `${Directories.cliPath} hyprset reset '${keys[i]}' >/dev/null 2>&1; `
         }
-        Quickshell.execDetached(["bash", "-c", //
-            `${root.configuratorScriptPath} --file ${root.shellOverridesPath} ${args}` //
-        ])
+        cmds += "hyprctl reload;"
+        Quickshell.execDetached(["bash", "-c", cmds])
     }
 
     Connections {

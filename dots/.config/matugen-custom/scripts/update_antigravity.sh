@@ -1,4 +1,4 @@
 #!/bin/bash
-jq -s '.[0].userSettings.customThemeSeedsDark = .[1] | .[0]' ~/.gemini/config/config.json ~/.gemini/config/customThemeSeedsDark.json > ~/.gemini/config/config.tmp
-cat ~/.gemini/config/config.tmp > ~/.gemini/config/config.json
-rm ~/.gemini/config/config.tmp
+jq -s '.[0].userSettings.customThemeSeedsDark = .[1] | .[0]' ~/.gemini/antigravity-ide/config.json ~/.gemini/antigravity-ide/customThemeSeedsDark.json > ~/.gemini/antigravity-ide/config.tmp
+cat ~/.gemini/antigravity-ide/config.tmp > ~/.gemini/antigravity-ide/config.json
+rm ~/.gemini/antigravity-ide/config.tmp

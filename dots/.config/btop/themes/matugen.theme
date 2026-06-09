@@ -2,63 +2,63 @@
 theme[main_bg]=""
 
 # Main text color
-theme[main_fg]="#d9e4eb"
+theme[main_fg]="#e0e2ef"
 
 # Title color for boxes (Using primary so the category names stand out)
-theme[title]="#5ddbbc"
+theme[title]="#58d6f7"
 
 # Highlight color for keyboard shortcuts
-theme[hi_fg]="#8ad0ee"
+theme[hi_fg]="#b1c5ff"
 
 # Selected item background/foreground
-theme[selected_bg]="#5ddbbc"
-theme[selected_fg]="#00382d"
+theme[selected_bg]="#58d6f7"
+theme[selected_fg]="#003641"
 
 # Inactive/disabled text (Softened so it doesn't compete with active data)
-theme[inactive_fg]="#7e949f"
+theme[inactive_fg]="#8a90a5"
 
 # Text atop graphs
-theme[graph_text]="#b4cad5"
+theme[graph_text]="#c0c6dc"
 
 # Background color of percentage meters (Slightly darker for better meter contrast)
-theme[meter_bg]="#354a53"
+theme[meter_bg]="#404659"
 
 # Misc colors for processes box 
-theme[proc_misc]="#86d6bf"
+theme[proc_misc]="#86d1e9"
 
 # Box outline colors (Using standard outline for a clean, non-distracting UI)
-theme[cpu_box]="#7e949f"
-theme[mem_box]="#7e949f"
-theme[net_box]="#7e949f"
-theme[proc_box]="#7e949f"
+theme[cpu_box]="#8a90a5"
+theme[mem_box]="#8a90a5"
+theme[net_box]="#8a90a5"
+theme[proc_box]="#8a90a5"
 
 # Divider lines (Dimmed to keep focus on the data)
-theme[div_line]="#354a53"
+theme[div_line]="#404659"
 
 # Temperature graph colors
-theme[temp_start]="#5ddbbc"
-theme[temp_mid]="#86d6bf"
+theme[temp_start]="#58d6f7"
+theme[temp_mid]="#86d1e9"
 theme[temp_end]="#ffb4ab"
 
 # CPU graph colors
-theme[cpu_start]="#5ddbbc"
-theme[cpu_mid]="#86d6bf"
+theme[cpu_start]="#58d6f7"
+theme[cpu_mid]="#86d1e9"
 theme[cpu_end]="#ffb4ab"
 
 # Mem/Disk free meter
-theme[free_start]="#005142"
+theme[free_start]="#004e5e"
 theme[free_mid]=""
-theme[free_end]="#5ddbbc"
+theme[free_end]="#58d6f7"
 
 # Mem/Disk cached meter
-theme[cached_start]="#005142"
+theme[cached_start]="#004e5e"
 theme[cached_mid]=""
-theme[cached_end]="#86d6bf"
+theme[cached_end]="#86d1e9"
 
 # Mem/Disk available meter
-theme[available_start]="#004d63"
+theme[available_start]="#2f4578"
 theme[available_mid]=""
-theme[available_end]="#8ad0ee"
+theme[available_end]="#b1c5ff"
 
 # Mem/Disk used meter
 theme[used_start]="#93000a"
@@ -66,14 +66,14 @@ theme[used_mid]=""
 theme[used_end]="#ffb4ab"
 
 # Download/Upload/Process gradients
-theme[download_start]="#5ddbbc"
-theme[download_mid]="#86d6bf"
-theme[download_end]="#8ad0ee"
+theme[download_start]="#58d6f7"
+theme[download_mid]="#86d1e9"
+theme[download_end]="#b1c5ff"
 
-theme[upload_start]="#5ddbbc"
-theme[upload_mid]="#86d6bf"
-theme[upload_end]="#8ad0ee"
+theme[upload_start]="#58d6f7"
+theme[upload_mid]="#86d1e9"
+theme[upload_end]="#b1c5ff"
 
-theme[process_start]="#5ddbbc"
-theme[process_mid]="#86d6bf"
-theme[process_end]="#8ad0ee"
+theme[process_start]="#58d6f7"
+theme[process_mid]="#86d1e9"
+theme[process_end]="#b1c5ff"

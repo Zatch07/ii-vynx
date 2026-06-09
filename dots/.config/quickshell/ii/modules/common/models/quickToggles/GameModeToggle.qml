@@ -10,8 +10,7 @@ QuickToggleModel {
     icon: "gamepad"
 
     mainAction: () => {
-        root.toggled = !root.toggled;
-        if (root.toggled) {
+        if (!root.toggled) {
             HyprlandConfig.setMany({
                 "animations:enabled": 0,
                 "decoration:shadow:enabled": 0,

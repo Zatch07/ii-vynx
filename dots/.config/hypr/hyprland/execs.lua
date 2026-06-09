@@ -22,4 +22,7 @@ hl.on("hyprland.start", function ()
 
     -- Cursor
     hl.exec_cmd("hyprctl setcursor Bibata-Ghost 36")
+
+    -- Apps
+    hl.exec_cmd("[workspace special:special silent] ferdium")
 end)

@@ -1,7 +1,8 @@
 -- Custom startup applications
 -- This file will not be overwritten across dots-hyprland updates.
 
-hl.on("hyprland.start", function ()
+hl.on("hyprland.start", function()
+    hl.exec_cmd("bash -c 'sleep 3 && discord-canary --enable-features=UseOzonePlatform --ozone-platform=wayland --enable-features=WebRTCPipeWireCapturer --enable-gpu-rasterization --enable-zero-copy'")
     hl.exec_cmd("bash -c 'sleep 3 && vesktop'")
     hl.exec_cmd("jamesdsp --tray")
     hl.exec_cmd("valent --gapplication-service")
