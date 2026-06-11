@@ -89,9 +89,11 @@ ContentPage {
 
     ContentSection {
         icon: "extension"
-        title: Translation.tr("Extensions")
+        title: Translation.tr("Extensions (beta)")
+        tooltip: Translation.tr("Extension system is still on beta, expect some bugs. PLEASE report any issues you encounter.")
 
         ButtonGroup {
+            Layout.topMargin: 10
             Layout.fillWidth: true
 
             GroupButtonWithIcon {
