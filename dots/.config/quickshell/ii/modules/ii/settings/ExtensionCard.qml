@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions as CF
 import "."
 Item {
     id: root
@@ -45,14 +46,8 @@ Item {
         return ExtensionAudit.getExtensionAuditState(ext.name)
     }
 
-    property real topRadius: {
-        if (listCount == 1 || index == 0) return Appearance.rounding.large
-        return Appearance.rounding.verysmall
-    }
-    property real bottomRadius: {
-        if (listCount == 1 || index == listCount - 1) return Appearance.rounding.large
-        return Appearance.rounding.verysmall
-    }
+    property real topRadius: CF.LayoutUtils.listCardTopRadius(index, listCount, Appearance.rounding.large)
+    property real bottomRadius: CF.LayoutUtils.listCardBottomRadius(index, listCount, Appearance.rounding.large)
 
     Layout.fillWidth: true
     Layout.preferredHeight: 90

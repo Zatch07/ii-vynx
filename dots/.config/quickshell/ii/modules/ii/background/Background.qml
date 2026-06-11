@@ -154,7 +154,6 @@ Variants {
             }
         }
 
-        property var extensionBgWidgets: []
         property var _extensionBgWidgetEntries: []
         property var _pendingWidgetSaves: ({})
 
@@ -254,7 +253,6 @@ Variants {
                 }
             }
 
-            bgRoot.extensionBgWidgets = list
         }
 
         Component.onCompleted: {
