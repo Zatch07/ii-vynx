@@ -49,20 +49,20 @@ Item {
                 Layout.rightMargin: 10
                 spacing: 12
 
-                MaterialShape {
-                    Layout.preferredWidth: 60
-                    Layout.preferredHeight: 60
-                    shapeString: ext.shapeString || ""
-                    color: iconArea.containsMouse && !iconArea.held ? Appearance.colors.colPrimaryContainerHover
-                        : ext.enabled ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
+                    MaterialShape {
+                        Layout.preferredWidth: 60
+                        Layout.preferredHeight: 60
+                        shapeString: ext.shapeString || ""
+                        color: iconArea.containsMouse && !iconArea.held ? Appearance.colors.colPrimaryContainerHover
+                            : ext.enabled && Config.options.extensions.enable ? Appearance.colors.colPrimaryContainer : Appearance.colors.colLayer3
 
-                    MaterialSymbol {
-                        anchors.centerIn: parent
-                        text: iconArea.containsMouse ? "info" : (ext.icon || "extension")
-                        iconSize: 28
-                        color: iconArea.containsMouse ? Appearance.colors.colOnPrimaryContainer
-                            : ext.enabled ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colSubtext
-                    }
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: iconArea.containsMouse ? "info" : (ext.icon || "extension")
+                            iconSize: 28
+                            color: iconArea.containsMouse ? Appearance.colors.colOnPrimaryContainer
+                                : ext.enabled && Config.options.extensions.enable ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colSubtext
+                        }
 
                     MouseArea {
                         id: iconArea
@@ -138,6 +138,7 @@ Item {
                 }
 
                 StyledSwitch {
+                    enabled: Config.options.extensions.enable
                     checked: ext.enabled
                     onClicked: ExtensionManager.toggleExtension(ext.id, !ext.enabled)
                 }
@@ -182,6 +183,7 @@ Item {
                     }
 
                     RowLayout {
+                        enabled: Config.options.extensions.enable
                         Layout.fillWidth: true
                         Layout.leftMargin: 10
                         Layout.rightMargin: 10

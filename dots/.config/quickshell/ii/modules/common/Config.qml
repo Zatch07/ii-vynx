@@ -88,6 +88,10 @@ Singleton {
                 property int translator: 0 // 0: No | 1: Yes
             }
 
+            property JsonObject extensions: JsonObject {
+                property bool enable: true
+            }
+
             property JsonObject localsend: JsonObject {
                 property bool autoStart: true
                 property string downloadPath: Directories.localSendDownloadPath.replace("file://", "")
@@ -262,9 +266,6 @@ Singleton {
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 400
                         property real y: 100
-                    }
-                    property JsonObject extensions: JsonObject {
-                        property bool enable: true
                     }
                 }
                 property bool animateWallpaperChanges: true

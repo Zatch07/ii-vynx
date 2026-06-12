@@ -26,6 +26,22 @@ Singleton {
     property bool _updateCheckRunning: false
     property bool watchFileChanges: true
 
+    Connections {
+        target: Config.options.extensions
+        function onEnableChanged() {
+            if (Config.options.extensions.enable) {
+                root.reloadFromFile()
+            } else {
+                for (let id in root.installedExtensions) {
+                    if (root.installedExtensions[id].enabled) {
+                        root.unloadExtensionServices(id)
+                    }
+                }
+                root.refreshExtensions()
+            }
+        }
+    }
+
     onInstalledExtensionsChanged: { root.refreshExtensions() }
     onUpdateStatesChanged: { root.refreshExtensions() }
     onReadyChanged: { root.refreshExtensions() }
@@ -39,6 +55,10 @@ Singleton {
     signal updateCheckDone(string extId, bool available, string error)
 
     Component.onCompleted: {
+        if (!Config.options.extensions.enable) {
+            root.ready = true
+            return
+        }
         Quickshell.execDetached(["mkdir", "-p", Directories.extensionsCachePath])
         Quickshell.execDetached(["mkdir", "-p", Directories.extensionsInstalledPath])
     }
@@ -113,8 +133,10 @@ Singleton {
     // ── Install / Uninstall ──
 
     function installExtension(repoUrl, extId, defaultBranch, htmlUrl, isCustomUrl) {
+        if (!Config.options.extensions.enable) { root.error = "Extensions are disabled"; return }
         root.loading = true
         root.error = ""
+
         let dest = Directories.extensionsInstalledPath + "/" + extId
         installProc._pendingExtId = extId
         installProc._pendingDest = dest
@@ -126,6 +148,7 @@ Singleton {
     }
 
     function installLocalExtension(localPath) {
+        if (!Config.options.extensions.enable) { root.error = "Extensions are disabled"; return }
         root.loading = true
         root.error = ""
         let resolvedPath = localPath.replace(/^~/, Directories.home).replace(/\/+$/, "")
@@ -135,6 +158,7 @@ Singleton {
     }
 
     function reinstallLocalExtension(extId) {
+        if (!Config.options.extensions.enable) { root.error = "Extensions are disabled"; return }
         let ext = root.installedExtensions[extId]
         if (!ext || !ext.isLocal) return
 
@@ -311,6 +335,7 @@ Singleton {
     }
 
     function toggleExtension(extId, enabled) {
+        if (!Config.options.extensions.enable) return
         if (!root.installedExtensions[extId]) return
         let updated = Object.assign({}, root.installedExtensions[extId], { enabled: enabled })
         root.installedExtensions = Object.assign({}, root.installedExtensions, { [extId]: updated })
@@ -328,6 +353,7 @@ Singleton {
     // ── Update management ──
 
     function checkUpdate(extId) {
+        if (!Config.options.extensions.enable) { root.updateCheckDone(extId, false, "Extensions are disabled"); return }
         let ext = root.installedExtensions[extId]
         if (!ext || !ext.repoUrl) {
             root.updateCheckDone(extId, false, ext ? "No repo URL" : "Not installed")
@@ -367,6 +393,7 @@ Singleton {
     }
 
     function updateExtension(extId) {
+        if (!Config.options.extensions.enable) { root.error = "Extensions are disabled"; root.loading = false; return }
         let ext = root.installedExtensions[extId]
         if (!ext || !ext.repoUrl) return
 
@@ -432,6 +459,7 @@ Singleton {
     }
 
     function checkAllUpdates() {
+        if (!Config.options.extensions.enable) return
         let ids = []
         for (let id in root.installedExtensions) {
             let ext = root.installedExtensions[id]
@@ -460,6 +488,7 @@ Singleton {
     // ── Contribution points ──
 
     function getContributionPoint(pointName) {
+        if (!Config.options.extensions.enable) return []
         let result = []
         for (let id in root.installedExtensions) {
             let ext = root.installedExtensions[id]
@@ -578,6 +607,10 @@ Singleton {
         watchChanges: root.watchFileChanges
         onFileChanged: reload()
         onLoaded: {
+            if (!Config.options.extensions.enable) {
+                root.ready = true
+                return
+            }
             root.installedExtensions = extensionsAdapter.extensions || {}
             root.extensionWidgetConfigs = extensionsAdapter.extensionWidgetConfigs || {}
             root.extensionOverlayConfigs = extensionsAdapter.extensionOverlayConfigs || {}
