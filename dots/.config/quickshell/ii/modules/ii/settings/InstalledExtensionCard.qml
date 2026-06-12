@@ -147,7 +147,6 @@ Item {
                     implicitWidth: 28
                     implicitHeight: 28
                     buttonRadius: Appearance.rounding.full
-                    visible: ext.enabled
                     colBackground: "transparent"
                     colBackgroundHover: Appearance.colors.colLayer2
 
