@@ -1,6 +1,5 @@
 -- put former exec-once commands inside the func and former exec commands outside
-hl.on("hyprland.start", function ()
-
+hl.on("hyprland.start", function()
     -- Bar, wallpaper
     hl.exec_cmd("$HOME/.config/hypr/hyprland/scripts/start_geoclue_agent.sh")
     hl.exec_cmd("qs -c $qsConfig")
@@ -11,18 +10,18 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("hypridle")
     hl.exec_cmd("dbus-update-activation-environment --all")
     hl.exec_cmd("sleep 1 && dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP") -- Some fix idk
+    hl.exec_cmd("systemctl --user start hyprland-session.target")                                              -- Start graphical session for portals
 
     -- Audio
-    hl.exec_cmd("easyeffects --hide-window --service-mode")
+    -- hl.exec_cmd("easyeffects --hide-window --service-mode")
 
     -- Clipboard: history
     --hl.exec_cmd("wl-paste --watch cliphist store")
-    hl.exec_cmd("wl-paste --type text --watch bash -c 'cliphist store && qs -c $qsConfig ipc call cliphistService update'")
-    hl.exec_cmd("wl-paste --type image --watch bash -c 'cliphist store && qs -c $qsConfig ipc call cliphistService update'")
+    hl.exec_cmd(
+        "wl-paste --type text --watch bash -c 'cliphist store && qs -c $qsConfig ipc call cliphistService update'")
+    hl.exec_cmd(
+        "wl-paste --type image --watch bash -c 'cliphist store && qs -c $qsConfig ipc call cliphistService update'")
 
     -- Cursor
-    hl.exec_cmd("hyprctl setcursor Bibata-Ghost 36")
-
-    -- Apps
-    hl.exec_cmd("[workspace special:special silent] ferdium")
+    hl.exec_cmd("hyprctl setcursor Bibata-Original-Ice 36")
 end)

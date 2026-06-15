@@ -67,11 +67,6 @@ ApplicationWindow {
             component: "modules/settings/AdvancedConfig.qml"
         },
         {
-            name: Translation.tr("Extras"),
-            icon: "more",
-            component: "modules/settings/ExtrasConfig.qml"
-        },
-        {
             name: Translation.tr("About"),
             icon: "info",
             component: "modules/settings/About.qml"

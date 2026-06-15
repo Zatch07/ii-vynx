@@ -13,6 +13,113 @@ ContentPage {
     property bool register: parent.register ?? false
     forceWidth: true
 
+    // --- Cursor Properties ---
+    property string currentCursor: ""
+    property int    currentCursorSize: 24
+    property var    cursorSizes: ({})
+    readonly property string sizesFilePath: Directories.shellConfig + "/custom_cursor_sizes.json"
+
+    // --- Cursor Processes ---
+    Process {
+        id: readSizesProc
+        running: true
+        command: ["cat", page.sizesFilePath]
+        stdout: StdioCollector {
+            onRead: data => {
+                try {
+                    let parsed = JSON.parse(data);
+                    if (parsed) {
+                        page.cursorSizes = parsed;
+                        if (page.currentCursor && page.cursorSizes[page.currentCursor]) {
+                            page.currentCursorSize = page.cursorSizes[page.currentCursor];
+                        }
+                    }
+                } catch (e) {}
+            }
+        }
+    }
+    
+    Process {
+        id: getCursorProc
+        running: true
+        command: ["bash", "-c", "gsettings get org.gnome.desktop.interface cursor-theme | tr -d \"'\""]
+        stdout: SplitParser {
+            onRead: data => { 
+                currentCursor = data.trim(); 
+                if (page.cursorSizes[currentCursor]) {
+                    currentCursorSize = page.cursorSizes[currentCursor];
+                }
+            }
+        }
+    }
+
+    Process {
+        id: getCursorSizeProc
+        running: true
+        command: ["bash", "-c", "gsettings get org.gnome.desktop.interface cursor-size"]
+        stdout: SplitParser {
+            onRead: data => {
+                let v = parseInt(data.trim());
+                if (!isNaN(v) && v > 0) {
+                    if (!page.cursorSizes[page.currentCursor]) {
+                        currentCursorSize = v;
+                    }
+                }
+            }
+        }
+    }
+
+    Process {
+        id: listCursorsProc
+        running: true
+        command: ["bash", "-c", "~/.local/bin/generate_cursor_previews.sh"]
+        stdout: SplitParser {
+            onRead: data => {
+                let line = data.trim();
+                if (line === "") return;
+                let lines = line.split("\n");
+                for (let l of lines) {
+                    let bar = l.indexOf("|");
+                    let name = bar >= 0 ? l.substring(0, bar) : l;
+                    let preview = bar >= 0 ? l.substring(bar + 1) : "";
+                    if (name !== "") cursorModel.append({ name: name, preview: preview });
+                }
+            }
+        }
+    }
+
+    ListModel { id: cursorModel }
+    
+    function getPreviewFor(name) {
+        for (let i = 0; i < cursorModel.count; i++) {
+            if (cursorModel.get(i).name === name) return cursorModel.get(i).preview;
+        }
+        return "";
+    }
+
+    Timer {
+        id: saveCursorTimer
+        interval: 1000
+        repeat: false
+        onTriggered: {
+            Quickshell.execDetached(["bash", "-c", "echo '" + JSON.stringify(page.cursorSizes) + "' > " + page.sizesFilePath]);
+        }
+    }
+
+    function saveSize(theme, size) {
+        if (!theme) return;
+        let updated = page.cursorSizes;
+        updated[theme] = size;
+        page.cursorSizes = updated;
+        saveCursorTimer.restart();
+    }
+    
+    function applyCursorSize(size) {
+        if (page.currentCursor === "") return;
+        Quickshell.execDetached(["bash", "-c", "~/.local/bin/cursor-set '" + page.currentCursor + "' " + size]);
+        saveSize(page.currentCursor, size);
+    }
+
     ContentSection {
         icon: "keyboard"
         title: Translation.tr("Cheat sheet")
@@ -264,6 +371,211 @@ ContentPage {
                 Config.options.sidebar.ai.showProviderAndModelButtons = checked;
             }
         }    
+    }
+
+    ContentSection {
+        icon: "near_me"
+        title: Translation.tr("Cursors")
+        
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 250 
+            color: Appearance.colors.colLayer2
+            radius: Appearance.rounding.normal
+            clip: true
+
+            StyledFlickable {
+                id: cursorFlickable
+                anchors.fill: parent
+                contentHeight: cursorColumn.implicitHeight
+
+                Column {
+                    id: cursorColumn
+                    width: cursorFlickable.width
+                    spacing: 2
+                    padding: 4
+
+                    Repeater {
+                        model: cursorModel
+                        delegate: RippleButton {
+                            id: cursorEntry
+                            required property string name
+                            required property string preview
+                            required property int index
+
+                            width: cursorColumn.width - cursorColumn.padding * 2
+                            implicitHeight: 44
+                            buttonRadius: Appearance.rounding.small
+                            colBackground: name === currentCursor
+                                ? Appearance.colors.colSecondaryContainer
+                                : Appearance.colors.colLayer2
+                            onClicked: {
+                                let targetSize = page.cursorSizes[name] || page.currentCursorSize;
+                                Quickshell.execDetached(["bash", "-c",
+                                    "~/.local/bin/cursor-set '" + name + "' " + targetSize
+                                ]);
+                                currentCursor = name;
+                                currentCursorSize = targetSize;
+                                customSizeInput.value = targetSize;
+                            }
+
+                            contentItem: RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 12
+                                anchors.rightMargin: 12
+                                spacing: 10
+
+                                Rectangle {
+                                    Layout.preferredWidth: 32
+                                    Layout.preferredHeight: 32
+                                    color: Appearance.colors.colLayer3
+                                    radius: 5
+                                    visible: preview !== ""
+                                    Image {
+                                        anchors.fill: parent
+                                        anchors.margins: 3
+                                        source: preview !== "" ? ("file://" + preview) : ""
+                                        fillMode: Image.PreserveAspectFit
+                                        smooth: true
+                                    }
+                                }
+                                MaterialSymbol {
+                                    text: "near_me"
+                                    iconSize: Appearance.font.pixelSize.larger
+                                    color: Appearance.colors.colSubtext
+                                    visible: preview === ""
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: name
+                                    color: name === currentCursor
+                                        ? Appearance.colors.colOnSecondaryContainer
+                                        : Appearance.colors.colOnLayer3
+                                    font.pixelSize: Appearance.font.pixelSize.normal
+                                    elide: Text.ElideRight
+                                }
+
+                                MaterialSymbol {
+                                    text: "check"
+                                    iconSize: Appearance.font.pixelSize.larger
+                                    color: Appearance.colors.colOnSecondaryContainer
+                                    visible: name === currentCursor
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Cursor Size Control
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: 52
+            color: Appearance.colors.colLayer2
+            radius: Appearance.rounding.normal
+
+            RowLayout {
+                anchors {
+                    fill: parent
+                    leftMargin: 14
+                    rightMargin: 14
+                }
+                spacing: 12
+
+                Rectangle {
+                    Layout.preferredWidth: 32
+                    Layout.preferredHeight: 32
+                    color: Appearance.colors.colLayer3
+                    radius: 5
+                    property string currentPreview: page.getPreviewFor(page.currentCursor)
+                    Image {
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        visible: parent.currentPreview !== ""
+                        source: parent.currentPreview !== "" ? ("file://" + parent.currentPreview) : ""
+                        fillMode: Image.PreserveAspectFit
+                        smooth: true
+                    }
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "near_me"
+                        iconSize: 20
+                        color: Appearance.colors.colSubtext
+                        visible: parent.currentPreview === ""
+                    }
+                }
+
+                StyledText {
+                    text: Translation.tr("Size")
+                    color: Appearance.colors.colOnLayer2
+                    font.pixelSize: Appearance.font.pixelSize.normal
+                    Layout.fillWidth: true
+                }
+
+                Row {
+                    spacing: 6
+                    Repeater {
+                        model: [16, 24, 32, 48, 64]
+                        delegate: RippleButton {
+                            id: presetChip
+                            required property int modelData
+                            implicitWidth: 40
+                            implicitHeight: 32
+                            buttonRadius: Appearance.rounding.small
+                            colBackground: page.currentCursorSize === presetChip.modelData
+                                ? Appearance.colors.colPrimaryContainer
+                                : Appearance.colors.colLayer3
+                            onClicked: {
+                                page.currentCursorSize = presetChip.modelData;
+                                page.applyCursorSize(presetChip.modelData);
+                            }
+                            contentItem: StyledText {
+                                anchors.centerIn: parent
+                                text: presetChip.modelData
+                                color: page.currentCursorSize === presetChip.modelData
+                                    ? Appearance.colors.colOnPrimaryContainer
+                                    : Appearance.colors.colOnLayer3
+                                font {
+                                    pixelSize: Appearance.font.pixelSize.smaller
+                                    family: Appearance.font.family.numbers
+                                }
+                            }
+                        }
+                    }
+                }
+
+                StyledSpinBox {
+                    id: customSizeInput
+                    from: 1
+                    to: 256
+                    value: page.currentCursorSize
+                    implicitWidth: 100
+                    baseHeight: 32
+                }
+
+                RippleButton {
+                    implicitWidth: 50
+                    implicitHeight: 32
+                    buttonRadius: Appearance.rounding.small
+                    colBackground: Appearance.colors.colPrimaryContainer
+                    onClicked: {
+                        page.currentCursorSize = customSizeInput.value;
+                        page.applyCursorSize(customSizeInput.value);
+                    }
+                    contentItem: StyledText {
+                        anchors.centerIn: parent
+                        text: "Set"
+                        color: Appearance.colors.colOnPrimaryContainer
+                        font {
+                            pixelSize: Appearance.font.pixelSize.smaller
+                            bold: true
+                        }
+                    }
+                }
+            }
+        }
     }
 
     ContentSection {
