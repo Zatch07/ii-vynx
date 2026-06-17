@@ -4,6 +4,7 @@ import Quickshell
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.services
+import qs.modules.common.functions
 
 Item {
     id: root
@@ -72,72 +73,10 @@ Item {
     readonly property string processedBody: root.displayBody
 
     function updateDetections() {
-        if (!root.body) {
-            root.detectedMeetings = [];
-            root.detectedPhones = [];
-            root.detectedCodes = [];
-            return;
-        }
-        var bodyRaw = root.body;
-        var clean = root.body.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<[^>]*>?/gm, ' ');
-        var textNoUrls = clean.replace(/https?:\/\/[^\s]+/gi, ' ');
-
-        var meetings = [];
-        var m;
-        // Meet
-        var meetRegex = /https?:\/\/meet\.google\.com\/[a-z0-9-]+/gi;
-        while ((m = meetRegex.exec(bodyRaw)) !== null)
-            meetings.push({
-                type: "Meet",
-                url: m[0],
-                icon: "video_chat"
-            });
-        // Teams
-        var teamsRegex1 = /https?:\/\/teams\.microsoft\.com\/l\/meetup-join\/[^\s"<>'{}|\\^`[\]]+/gi;
-        while ((m = teamsRegex1.exec(bodyRaw)) !== null)
-            meetings.push({
-                type: "Teams",
-                url: m[0],
-                icon: "groups"
-            });
-        var teamsRegex2 = /https?:\/\/teams\.microsoft\.com\/v2\/\?meetingjoin=true#\/meet\/[^\s"<>'{}|\\^`[\]]+/gi;
-        while ((m = teamsRegex2.exec(bodyRaw)) !== null)
-            meetings.push({
-                type: "Teams",
-                url: m[0],
-                icon: "groups"
-            });
-        // Zoom
-        var zoomRegex = /https?:\/\/zoom\.us\/j\/[0-9]+(?:\?pwd=[a-zA-Z0-9]+)?/gi;
-        while ((m = zoomRegex.exec(bodyRaw)) !== null)
-            meetings.push({
-                type: "Zoom",
-                url: m[0],
-                icon: "video_call"
-            });
-
-        root.detectedMeetings = meetings.filter((v, i, a) => a.findIndex(t => t.url === v.url) === i);
-
-        var phones = [];
-        var phoneRegex = /(?:\+?55\s?)?(?:\(?\d{2}\)?\s?)?9?\d{4}[-.\s]?\d{4}/g;
-        while ((m = phoneRegex.exec(clean)) !== null) {
-            var p = m[0].trim();
-            if (p.length >= 8)
-                phones.push(p);
-        }
-        root.detectedPhones = phones.filter((v, i, a) => a.indexOf(v) === i);
-
-        // Codes (OTP) - alphanumeric 4-10 chars near keywords
-        var codes = [];
-        var keywords = "(código|code|token|senha|password|verificação|verification|acesso|access|pin)";
-        var codeRegex = new RegExp(keywords + "[:\\s]+([A-Z0-9]{4,10})(?![A-Z0-9])", "gi");
-        while ((m = codeRegex.exec(textNoUrls)) !== null) {
-            if (m[2] && !/^[0-9]{1,3}$/.test(m[2])) { // Filter out small numbers
-                if (codes.indexOf(m[2]) === -1)
-                    codes.push(m[2]);
-            }
-        }
-        root.detectedCodes = codes;
+        var res = EmailDetections.detectAll(root.body);
+        root.detectedMeetings = res.meetings;
+        root.detectedPhones = res.phones;
+        root.detectedCodes = res.codes;
     }
 
     function getCustomLabels(str) {
@@ -274,6 +213,25 @@ Item {
     function startClose() {
         root.closeStarted();
         isClosing = true;
+
+        if (contentAvatarRect) {
+            var avatarPos = contentAvatarRect.mapToItem(root, 0, 0);
+            ghostIcon.x = avatarPos.x;
+            ghostIcon.y = avatarPos.y;
+            ghostIcon.width = contentAvatarRect.width;
+            ghostIcon.height = contentAvatarRect.height;
+            ghostIcon.opacity = 1;
+        }
+
+        if (contentSubjectText) {
+            var subjectPos = contentSubjectText.mapToItem(root, 0, 0);
+            ghostSubject.x = subjectPos.x;
+            ghostSubject.y = subjectPos.y;
+            ghostSubject.width = contentSubjectText.width;
+            ghostSubject.height = subjectPos.height;
+            ghostSubject.opacity = 1;
+        }
+
         closeAnim.start();
     }
 
@@ -657,9 +615,34 @@ Item {
                             width: parent.width
                             spacing: 16
 
+                            // Skeleton loading screen
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                visible: root.loadingBody
+                                spacing: 12
+
+                                Repeater {
+                                    model: [0.9, 0.8, 0.95, 0.7, 0.5]
+                                    delegate: Rectangle {
+                                        Layout.preferredWidth: parent.width * modelData
+                                        Layout.preferredHeight: 16
+                                        radius: Appearance.rounding.small
+                                        color: Appearance.colors.colSurfaceContainerHighest
+
+                                        SequentialAnimation on opacity {
+                                            loops: Animation.Infinite
+                                            running: root.loadingBody
+                                            NumberAnimation { from: 0.3; to: 0.7; duration: 800; easing.type: Easing.InOutQuad }
+                                            NumberAnimation { from: 0.7; to: 0.3; duration: 800; easing.type: Easing.InOutQuad }
+                                        }
+                                    }
+                                }
+                            }
+
                             StyledText {
                                 id: bodyText
                                 Layout.fillWidth: true
+                                visible: !root.loadingBody
                                 text: root.loadingBody ? "" : root.processedBody
                                 textFormat: Text.RichText
                                 font.family: Appearance.font.family.reading
@@ -702,23 +685,40 @@ Item {
                                     }
                                 }
 
-                                StyledText {
+                                Item {
+                                    id: quotedTextContainer
                                     Layout.fillWidth: true
-                                    visible: root.showQuoted
-                                    text: root.quotedBody
-                                    textFormat: Text.RichText
-                                    font.family: Appearance.font.family.reading
-                                    font.pixelSize: EmailService.bodyFontSize - 1
-                                    font.weight: Font.Normal
-                                    color: Appearance.colors.colOnSurfaceVariant
-                                    opacity: 0.7
-                                    wrapMode: Text.Wrap
-                                    linkColor: Appearance.colors.colPrimary
-                                    onLinkActivated: link => {
-                                        if (link.startsWith("copy:")) {
-                                            Quickshell.clipboardText = link.substring(5);
-                                        } else {
-                                            Qt.openUrlExternally(link);
+                                    Layout.preferredHeight: root.showQuoted ? quotedText.implicitHeight : 0
+                                    clip: true
+                                    Behavior on Layout.preferredHeight {
+                                        NumberAnimation {
+                                            duration: 350
+                                            easing.type: Easing.BezierSpline
+                                            easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
+                                        }
+                                    }
+
+                                    StyledText {
+                                        id: quotedText
+                                        width: parent.width
+                                        text: root.quotedBody
+                                        textFormat: Text.RichText
+                                        font.family: Appearance.font.family.reading
+                                        font.pixelSize: EmailService.bodyFontSize - 1
+                                        font.weight: Font.Normal
+                                        color: Appearance.colors.colOnSurfaceVariant
+                                        opacity: root.showQuoted ? 0.7 : 0
+                                        Behavior on opacity {
+                                            NumberAnimation { duration: 250 }
+                                        }
+                                        wrapMode: Text.Wrap
+                                        linkColor: Appearance.colors.colPrimary
+                                        onLinkActivated: link => {
+                                            if (link.startsWith("copy:")) {
+                                                Quickshell.clipboardText = link.substring(5);
+                                            } else {
+                                                Qt.openUrlExternally(link);
+                                            }
                                         }
                                     }
                                 }
@@ -726,12 +726,7 @@ Item {
                         }
                     }
 
-                    MaterialLoadingIndicator {
-                        anchors.centerIn: parent
-                        visible: root.loadingBody
-                        implicitSize: 48
-                        loading: root.loadingBody
-                    }
+                    // Generic loading indicator hidden since we use a pulsing skeleton now
                 }
             }
         }
@@ -745,7 +740,7 @@ Item {
             spacing: 4
             z: 20
 
-            property bool showBrowser: true
+            property bool showBrowser: root.htmlPath !== ""
             property int attachmentCount: root.attachments ? root.attachments.count : 0
             visible: showBrowser || attachmentCount > 0 || root.detectedMeetings.length > 0 || root.detectedCodes.length > 0 || root.detectedPhones.length > 0
 
@@ -763,10 +758,7 @@ Item {
                 colBackground: Appearance.colors.colPrimary
                 colBackgroundHover: Appearance.colors.colPrimaryHover
                 colRipple: Appearance.m3colors.m3primaryContainer
-                onClicked: {
-                    Qt.openUrlExternally("https://mail.google.com/mail/u/0/#all/" + root.threadId);
-                    Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "cheatsheet", "close"]);
-                }
+                onClicked: Qt.openUrlExternally("file://" + root.htmlPath)
 
                 RowLayout {
                     id: browserFabRow
@@ -1116,5 +1108,19 @@ Item {
             iconSize: Appearance.font.pixelSize.huge
             color: Appearance.colors.colOnSurfaceVariant
         }
+    }
+
+    StyledText {
+        id: ghostSubject
+        opacity: 0
+        z: 30
+        visible: (root.isClosing || root.isAnimating) && opacity > 0.01
+        text: root.subject
+        font.pixelSize: Appearance.font.pixelSize.large
+        font.weight: Font.Bold
+        font.family: Appearance.font.family.main
+        color: Appearance.colors.colOnSurface
+        elide: Text.ElideRight
+        maximumLineCount: 1
     }
 }

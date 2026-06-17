@@ -26,9 +26,21 @@ Singleton {
         "116": "partly_cloudy_day",
         "119": "cloud",
         "122": "cloud",
+        "125": "foggy",
+        "128": "foggy",
+        "131": "foggy",
+        "134": "foggy",
+        "137": "foggy",
+        "140": "foggy",
         "143": "foggy",
+        "146": "foggy",
+        "149": "foggy",
+        "152": "foggy",
+        "155": "foggy",
+        "158": "foggy",
+        "161": "foggy",
         "176": "rainy",
-        "179": "rainy",
+        "179": "cloudy_snowing",
         "182": "rainy",
         "185": "rainy",
         "200": "thunderstorm",
@@ -43,9 +55,9 @@ Singleton {
         "293": "rainy",
         "296": "rainy",
         "299": "rainy",
-        "302": "weather_hail",
+        "302": "rainy",
         "305": "rainy",
-        "308": "weather_hail",
+        "308": "rainy",
         "311": "rainy",
         "314": "rainy",
         "317": "rainy",
@@ -59,7 +71,7 @@ Singleton {
         "350": "rainy",
         "353": "rainy",
         "356": "rainy",
-        "359": "weather_hail",
+        "359": "rainy",
         "362": "rainy",
         "365": "rainy",
         "368": "cloudy_snowing",
@@ -78,5 +90,6 @@ Singleton {
         if (weatherIconMap.hasOwnProperty(key)) {
             return weatherIconMap[key]
         }
+        return "cloud"
     }
 }

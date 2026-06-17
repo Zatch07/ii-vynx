@@ -4,6 +4,7 @@ import Quickshell
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.services
+import qs.modules.common.functions
 
 Item {
     id: root
@@ -23,6 +24,21 @@ Item {
     signal closeStarted
     signal closeRequested
     signal replyRequested(string to, string subject, string body, string threadId, string inReplyTo)
+
+    property int newestIndex: {
+        var count = EmailService.currentThreadMessages.count;
+        if (count === 0) return -1;
+        var maxTs = -1;
+        var maxIdx = -1;
+        for (var i = 0; i < count; i++) {
+            var item = EmailService.currentThreadMessages.get(i);
+            if (item && item.timestamp > maxTs) {
+                maxTs = item.timestamp;
+                maxIdx = i;
+            }
+        }
+        return maxIdx;
+    }
 
     opacity: 0
 
@@ -227,66 +243,37 @@ Item {
                                     Layout.fillWidth: true
                                     Layout.preferredHeight: isExpanded ? (contentCol.implicitHeight + 32) : 64
 
-                                    property bool isExpanded: index === 0 // Newest email expanded by default
+                                    property bool isExpanded: index === root.newestIndex // Newest email expanded by default
                                     property var detectedMeetings: []
                                     property var detectedPhones: []
                                     property var detectedCodes: []
+                                    property bool confirmDeleteMode: false
+
+                                    Timer {
+                                        id: confirmTimer
+                                        interval: 3000
+                                        repeat: false
+                                        onTriggered: msgRoot.confirmDeleteMode = false
+                                    }
+
+                                    onIsExpandedChanged: {
+                                        if (isExpanded && model.unread) {
+                                            EmailService.markAsRead(model.id);
+                                            EmailService.currentThreadMessages.setProperty(index, "unread", false);
+                                        }
+                                        confirmDeleteMode = false;
+                                        confirmTimer.stop();
+                                    }
 
                                     function toggleExpand() {
                                         isExpanded = !isExpanded;
                                     }
 
                                     function updateDetections() {
-                                        if (!model.body) {
-                                            detectedMeetings = [];
-                                            detectedPhones = [];
-                                            detectedCodes = [];
-                                            return;
-                                        }
-                                        var bodyRaw = model.body;
-                                        var clean = model.body.replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>/gi, '\n').replace(/<\/div>/gi, '\n').replace(/<[^>]*>?/gm, ' ');
-                                        var textNoUrls = clean.replace(/https?:\/\/[^\s]+/gi, ' ');
-
-                                        var meetings = [];
-                                        var m;
-                                        // Meet
-                                        var meetRegex = /https?:\/\/meet\.google\.com\/[a-z0-9-]+/gi;
-                                        while ((m = meetRegex.exec(bodyRaw)) !== null)
-                                            meetings.push({
-                                                type: "Meet",
-                                                url: m[0],
-                                                icon: "video_chat"
-                                            });
-                                        // Teams
-                                        var teamsRegex1 = /https?:\/\/teams\.microsoft\.com\/l\/meetup-join\/[^\s"<>'{}|\\^`[\]]+/gi;
-                                        while ((m = teamsRegex1.exec(bodyRaw)) !== null)
-                                            meetings.push({
-                                                type: "Teams",
-                                                url: m[0],
-                                                icon: "groups"
-                                            });
-                                        detectedMeetings = meetings;
-
-                                        // Codes (OTP) - alphanumeric 4-10 chars near keywords
-                                        var codes = [];
-                                        var keywords = "(código|code|token|senha|password|verificação|verification|acesso|access|pin)";
-                                        var codeRegex = new RegExp(keywords + "[:\\s]+([A-Z0-9]{4,10})(?![A-Z0-9])", "gi");
-                                        while ((m = codeRegex.exec(textNoUrls)) !== null) {
-                                            if (m[2] && !/^[0-9]{1,3}$/.test(m[2])) { // Filter out small numbers
-                                                if (codes.indexOf(m[2]) === -1)
-                                                    codes.push(m[2]);
-                                            }
-                                        }
-                                        detectedCodes = codes;
-
-                                        // Phones
-                                        var phones = [];
-                                        var phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\(?\d{2,3}\)?[-.\s]?)?\d{4,5}[-.\s]?\d{4}/g;
-                                        while ((m = phoneRegex.exec(textNoUrls)) !== null) {
-                                            if (phones.indexOf(m[0].trim()) === -1)
-                                                phones.push(m[0].trim());
-                                        }
-                                        detectedPhones = phones;
+                                        var res = EmailDetections.detectAll(model.body);
+                                        detectedMeetings = res.meetings;
+                                        detectedPhones = res.phones;
+                                        detectedCodes = res.codes;
                                     }
 
                                     Component.onCompleted: updateDetections()
@@ -333,6 +320,17 @@ Item {
                                         Behavior on color {
                                             ColorAnimation {
                                                 duration: 250
+                                            }
+                                        }
+                                        Behavior on border.width {
+                                            NumberAnimation {
+                                                duration: 350
+                                                easing.type: Easing.OutCubic
+                                            }
+                                        }
+                                        Behavior on border.color {
+                                            ColorAnimation {
+                                                duration: 350
                                             }
                                         }
 
@@ -474,10 +472,7 @@ Item {
 
                                                         colBackground: Appearance.colors.colSurfaceContainerHigh
                                                         colBackgroundHover: Appearance.colors.colSurfaceContainerHighestHover
-                                                        onClicked: {
-                                                            Qt.openUrlExternally("https://mail.google.com/mail/u/0/#all/" + model.threadId);
-                                                            Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "cheatsheet", "close"]);
-                                                        }
+                                                        onClicked: Qt.openUrlExternally("https://mail.google.com/mail/u/0/#inbox/" + model.id)
                                                         RowLayout {
                                                             id: browserRow
                                                             anchors.centerIn: parent
@@ -696,23 +691,32 @@ Item {
                                                         topLeftRadius: Appearance.rounding.verysmall
                                                         bottomLeftRadius: Appearance.rounding.verysmall
 
-                                                        colBackground: Appearance.colors.colErrorContainer
-                                                        colBackgroundHover: Appearance.colors.colErrorContainerHover
-                                                        onClicked: EmailService.trashMessage(model.id)
+                                                        colBackground: msgRoot.confirmDeleteMode ? Appearance.colors.colError : Appearance.colors.colErrorContainer
+                                                        colBackgroundHover: msgRoot.confirmDeleteMode ? Appearance.colors.colErrorHover : Appearance.colors.colErrorContainerHover
+                                                        onClicked: {
+                                                            if (EmailService.confirmDelete && !msgRoot.confirmDeleteMode) {
+                                                                msgRoot.confirmDeleteMode = true;
+                                                                confirmTimer.start();
+                                                            } else {
+                                                                confirmTimer.stop();
+                                                                msgRoot.confirmDeleteMode = false;
+                                                                EmailService.trashMessage(model.id);
+                                                            }
+                                                        }
                                                         RowLayout {
                                                             id: deleteRow
                                                             anchors.centerIn: parent
                                                             spacing: 6
                                                             MaterialSymbol {
-                                                                text: "delete"
+                                                                text: msgRoot.confirmDeleteMode ? "check" : "delete"
                                                                 iconSize: 18
-                                                                color: Appearance.colors.colOnErrorContainer
+                                                                color: msgRoot.confirmDeleteMode ? Appearance.colors.colOnError : Appearance.colors.colOnErrorContainer
                                                             }
                                                             StyledText {
-                                                                text: Translation.tr("Delete")
+                                                                text: msgRoot.confirmDeleteMode ? Translation.tr("Confirm?") : Translation.tr("Delete")
                                                                 font.weight: Font.Bold
                                                                 font.pixelSize: Appearance.font.pixelSize.small
-                                                                color: Appearance.colors.colOnErrorContainer
+                                                                color: msgRoot.confirmDeleteMode ? Appearance.colors.colOnError : Appearance.colors.colOnErrorContainer
                                                             }
                                                         }
                                                     }

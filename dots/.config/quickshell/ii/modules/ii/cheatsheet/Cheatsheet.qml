@@ -44,6 +44,12 @@ Scope { // Scope
                 "name": Translation.tr("Email")
             });
         }
+        if (Config.options.cheatsheet.enableTasks) {
+            list.push({
+                "icon": "task_alt",
+                "name": Translation.tr("Tasks")
+            });
+        }
         return list;
     }
 
@@ -113,8 +119,11 @@ Scope { // Scope
                 border.color: Appearance.colors.colLayer0Border
                 radius: Appearance.rounding.windowRounding
                 property real padding: 20
-                implicitWidth: cheatsheetColumnLayout.implicitWidth + padding * 2
-                implicitHeight: cheatsheetColumnLayout.implicitHeight + padding * 2
+                property real maxBgWidth: cheatsheetRoot.screen ? cheatsheetRoot.screen.width * 0.95 : 1900
+                property real maxBgHeight: cheatsheetRoot.screen ? cheatsheetRoot.screen.height * 0.80 : 1000
+                
+                implicitWidth: Math.min(maxBgWidth, cheatsheetColumnLayout.implicitWidth + padding * 2)
+                implicitHeight: Math.min(maxBgHeight, cheatsheetColumnLayout.implicitHeight + padding * 2)
 
                 Keys.onPressed: event => { // Esc to close
                     if (event.key === Qt.Key_Escape) {
@@ -165,6 +174,8 @@ Scope { // Scope
                 ColumnLayout { // Real content
                     id: cheatsheetColumnLayout
                     anchors.centerIn: parent
+                    width: Math.min(implicitWidth, parent.width - parent.padding * 2)
+                    height: Math.min(implicitHeight, parent.height - parent.padding * 2)
                     spacing: 10
 
                     Toolbar {
@@ -185,10 +196,19 @@ Scope { // Scope
                         Layout.topMargin: 5
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+
+                        property real calculatedWidth: cheatsheetRoot.screen ? cheatsheetRoot.screen.width * 0.92 : 1700
+                        property real calculatedHeight: cheatsheetRoot.screen ? cheatsheetRoot.screen.height * 0.75 : 650
+                        
+                        Layout.preferredWidth: Math.min(1800, Math.max(900, calculatedWidth))
+                        Layout.preferredHeight: Math.min(850, Math.max(500, calculatedHeight))
                         spacing: 10
                         currentIndex: Persistent.states.cheatsheet.tabIndex
                         onCurrentIndexChanged: {
                             Persistent.states.cheatsheet.tabIndex = currentIndex;
+                            if (currentItem && currentItem.status === Loader.Ready && currentItem.item) {
+                                currentItem.item.forceActiveFocus();
+                            }
                         }
 
                         implicitWidth: Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0))
@@ -231,6 +251,8 @@ Scope { // Scope
                                         return "commands/CheatsheetCommands.qml";
                                     case "mail":
                                         return "CheatsheetEmail.qml";
+                                    case "task_alt":
+                                        return "CheatsheetTasks.qml";
                                     default:
                                         return "";
                                     }

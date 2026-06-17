@@ -6,9 +6,52 @@
     "extensionWidgetConfigs": {
     },
     "extensions": {
+        "my-vynx-extension": {
+            "author": "zatch",
+            "configDefaults": {
+            },
+            "configSchema": {
+            },
+            "contributes": {
+                "barComponents": [
+                    {
+                        "component": "bar/SkwdButton.qml",
+                        "icon": "view_carousel",
+                        "identifier": "skwdLauncher",
+                        "title": "App Switcher"
+                    },
+                    {
+                        "component": "bar/WallpaperButton.qml",
+                        "icon": "wallpaper",
+                        "identifier": "wallpaperSwitcher",
+                        "title": "Wallpapers"
+                    },
+                    {
+                        "component": "bar/HoverboardButton.qml",
+                        "icon": "space_dashboard",
+                        "identifier": "caelestiaHoverboard",
+                        "title": "Hoverboard"
+                    }
+                ]
+            },
+            "defaultBranch": "main",
+            "description": "My custom integrations for skwd, wallpaper switcher, and Caelestia Hoverboard",
+            "enabled": true,
+            "htmlUrl": "",
+            "icon": "build",
+            "id": "my-vynx-extension",
+            "installedAt": "2026-06-15T16:20:00.000Z",
+            "installedPath": "/home/zatch/my-vynx-extension",
+            "isCustomUrl": false,
+            "isLocal": true,
+            "name": "Custom Tools",
+            "repoUrl": "",
+            "shapeString": "",
+            "version": "1.0.0"
+        }
     },
     "searchCache": {
-        "cachedAt": "2026-06-15T07:35:53.186Z",
+        "cachedAt": "2026-06-17T04:21:17.820Z",
         "results": [
             {
                 "avatarUrl": "https://avatars.githubusercontent.com/u/173799252?v=4",

@@ -179,9 +179,8 @@ def get_keybind_at_line(line_number, line_start = 0):
 
     return KeyBinding(normalized_mods, key, dispatcher, params, comment)
 
-def get_keybind_at_line_lua(line_number):
-    global content_lines
-    line = content_lines[line_number].strip()
+def get_keybind_at_line_lua(line_text):
+    line = line_text.strip()
     
     # We match hl.bind("keys", dispatcher, {options}) or hl.bind("keys", dispatcher)
     # The regex allows semi-colon at the end, and optional trailing comments
@@ -201,9 +200,22 @@ def get_keybind_at_line_lua(line_number):
         return None
     
     # Normalize mods and key
-    mods_and_key = [m.strip() for m in keys_part.split('+')]
-    mods = [m.strip() for m in mods_and_key[:-1] if m.strip()]
-    key = mods_and_key[-1].strip()
+    dispatcher_part = match.group(2).strip()
+    if dispatcher_part.startswith('"'):
+        # Two-string signature: hl.bind("MODS", "KEY", ...)
+        second_arg_match = re.match(r'^"([^"]+)"\s*,\s*(.*)$', dispatcher_part)
+        if second_arg_match:
+            key = second_arg_match.group(1).strip()
+            mods = [m.strip() for m in keys_part.split('+') if m.strip()]
+        else:
+            mods_and_key = [m.strip() for m in keys_part.split('+')]
+            mods = [m.strip() for m in mods_and_key[:-1] if m.strip()]
+            key = mods_and_key[-1].strip()
+    else:
+        # Single-string signature: hl.bind("MODS + KEY", ...)
+        mods_and_key = [m.strip() for m in keys_part.split('+')]
+        mods = [m.strip() for m in mods_and_key[:-1] if m.strip()]
+        key = mods_and_key[-1].strip()
     
     # Casing normalization for mods to match QML
     mod_mapping = {
@@ -238,9 +250,35 @@ def get_binds_recursive(current_content, scope, is_lua=False):
 
         elif is_lua:
             if line.lstrip().startswith("hl.bind"):
-                keybind = get_keybind_at_line_lua(reading_line)
+                full_line = line
+                offset = 0
+                while full_line.count('(') > full_line.count(')'):
+                    offset += 1
+                    if reading_line + offset >= len(content_lines):
+                        break
+                    full_line += " " + content_lines[reading_line + offset].strip()
+                
+                keybind = get_keybind_at_line_lua(full_line)
                 if(keybind != None):
                     current_content["keybinds"].append(keybind)
+                reading_line += offset
+            elif line.lstrip().startswith("--#/#"):
+                match = re.search(r'--#/#\s*binde?\s*=\s*(.+?)\s*,,?\s*--\s*(.+)', line)
+                if match:
+                    comment = match.group(2).strip()
+                    if "[hidden]" not in comment:
+                        keys_str = match.group(1).replace(',', '+')
+                        parts = keys_str.split('+')
+                        mods = [m.strip() for m in parts[:-1] if m.strip()]
+                        key = parts[-1].strip()
+                        
+                        mod_mapping = {
+                            "ctrl": "Ctrl", "control": "Ctrl", "super": "Super",
+                            "alt": "Alt", "mod1": "Alt", "shift": "Shift"
+                        }
+                        normalized_mods = [mod_mapping.get(m.lower(), m) for m in mods]
+                        
+                        current_content["keybinds"].append(KeyBinding(normalized_mods, key, "exec", "", comment))
         else:
             if line.startswith(COMMENT_BIND_PATTERN):
                 keybind = get_keybind_at_line(reading_line, line_start=len(COMMENT_BIND_PATTERN))
@@ -273,8 +311,8 @@ def parse_keys(path: str) -> Dict[str, List[KeyBinding]]:
         if len(child["keybinds"]) > 0 or len(child["children"]) == 0:
             needs_wrapping = True
             break
-    if needs_wrapping and len(result["children"]) > 0:
-        column = Section(result["children"], [], "")
+    if needs_wrapping and (len(result["children"]) > 0 or len(result["keybinds"]) > 0):
+        column = Section(result["children"], result["keybinds"], "")
         result["children"] = [column]
         
     return result

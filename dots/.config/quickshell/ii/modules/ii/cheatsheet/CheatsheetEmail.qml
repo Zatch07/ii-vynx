@@ -86,6 +86,11 @@ Item {
                 anchors.fill: parent
                 visible: EmailService.authenticated && root.activeTab !== "settings"
 
+                onComposeRequested: {
+                    root.activeTab = "compose";
+                    emailSidebar.activeTab = "compose";
+                }
+
                 opacity: (root.emailActive || root.activeTab === "compose") ? 0.0 : 1.0
                 scale: (root.emailActive || root.activeTab === "compose") ? 0.95 : 1.0
                 enabled: !root.emailActive && root.activeTab !== "compose"
@@ -105,8 +110,8 @@ Item {
 
                 loading: EmailService.loading
                 activeTab: root.activeTab
-                model: root.activeTab === "spam" ? EmailService.spamMessages : root.activeTab === "sent" ? EmailService.sentMessages : root.activeTab === "trash" ? EmailService.trashMessages : root.activeTab === "starred" ? EmailService.starredMessages : root.activeTab === "important" ? EmailService.importantMessages : root.activeTab === "purchases" ? EmailService.purchasesMessages : root.activeTab === "search" ? EmailService.searchMessagesModel : root.activeTab.indexOf("label_") === 0 ? EmailService.searchMessagesModel : EmailService.inboxMessages
-                onEmailSelected: function(messageId, threadId, isStack, startX, startY, startWidth, startHeight, iconX, iconY, iconW, iconH, subjectX, subjectY, subjectW, subjectH) {
+                model: root.activeTab === "all_inboxes" ? EmailService.allInboxesMessages : root.activeTab === "spam" ? EmailService.spamMessages : root.activeTab === "sent" ? EmailService.sentMessages : root.activeTab === "trash" ? EmailService.trashMessages : root.activeTab === "starred" ? EmailService.starredMessages : root.activeTab === "important" ? EmailService.importantMessages : root.activeTab === "purchases" ? EmailService.purchasesMessages : root.activeTab === "search" ? EmailService.searchMessagesModel : root.activeTab.indexOf("label_") === 0 ? EmailService.searchMessagesModel : EmailService.inboxMessages
+                onEmailSelected: function (messageId, threadId, isStack, startX, startY, startWidth, startHeight, iconX, iconY, iconW, iconH, subjectX, subjectY, subjectW, subjectH) {
                     // Buscar dados do email no model ativo
                     var currentModel = emailInbox.model;
                     for (var i = 0; i < currentModel.count; i++) {
@@ -177,7 +182,7 @@ Item {
                     root.selectedMessageId = "";
                     EmailService.currentThreadMessages.clear();
                 }
-                onReplyRequested: function(to, subject, body, threadId, inReplyTo) {
+                onReplyRequested: function (to, subject, body, threadId, inReplyTo) {
                     emailStackedContent.startClose();
                     root.activeTab = "compose";
                     emailCompose.setReplyMode(to, subject, body, threadId, inReplyTo);
@@ -294,6 +299,12 @@ Item {
         function onAuthenticatedChanged() {
             if (!EmailService.authenticated) {
                 root.activeTab = "inbox";
+            }
+        }
+        function onActiveAccountIndexChanged() {
+            if (!EmailService.stayInSettingsAfterAccountSwitch && root.activeTab === "settings") {
+                root.activeTab = "inbox";
+                emailSidebar.activeTab = "inbox";
             }
         }
     }

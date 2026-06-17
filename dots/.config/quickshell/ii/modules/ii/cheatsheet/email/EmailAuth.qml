@@ -2,7 +2,9 @@ import QtQuick
 import QtQuick.Layouts
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import qs.services
+import Quickshell
 
 Item {
     id: root
@@ -62,7 +64,7 @@ Item {
             
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: EmailService.authenticating ? Translation.tr("Waiting for browser...") : (EmailService.keyringLocked ? Translation.tr("Keyring is Locked") : Translation.tr("Connect your account"))
+                text: EmailService.authenticating ? Translation.tr("Waiting for browser...") : Translation.tr("Connect your account")
                 font.pixelSize: 42
                 font.weight: Font.Bold
                 color: Appearance.colors.colOnSurface
@@ -70,7 +72,7 @@ Item {
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
-                text: EmailService.authenticating ? Translation.tr("Please complete the sign-in in your browser window.") : (EmailService.keyringLocked ? Translation.tr("Please unlock your keyring (e.g., using Seahorse) and try again.") : Translation.tr("Sync your email account to start"))
+                text: EmailService.authenticating ? Translation.tr("Please complete the sign-in in your browser window.") : Translation.tr("Sync your email account to start")
                 font.pixelSize: Appearance.font.pixelSize.huge
                 color: Appearance.colors.colOnSurfaceVariant
                 opacity: 0.8
@@ -101,14 +103,14 @@ Item {
                 spacing: 12
                 
                 StyledText {
-                    text: EmailService.authenticating ? Translation.tr("Connecting...") : (EmailService.keyringLocked ? Translation.tr("Retry Connection") : Translation.tr("Connect Account"))
+                    text: EmailService.authenticating ? Translation.tr("Connecting...") : Translation.tr("Connect Account")
                     font.pixelSize: Appearance.font.pixelSize.huge
                     font.weight: Font.Bold
                     color: connectBtn.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
                 }
 
                 MaterialSymbol {
-                    text: EmailService.authenticating ? "hourglass_empty" : (EmailService.keyringLocked ? "refresh" : "arrow_forward")
+                    text: EmailService.authenticating ? "hourglass_empty" : "arrow_forward"
                     iconSize: Appearance.font.pixelSize.huge
                     color: connectBtn.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSurfaceVariant
                     
@@ -128,11 +130,7 @@ Item {
                 hoverEnabled: true
                 cursorShape: parent.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onClicked: {
-                    if (EmailService.keyringLocked) {
-                        EmailService._loadGmailKeyring();
-                    } else {
-                        EmailService.startOAuth();
-                    }
+                    EmailService.startOAuth()
                 }
             }
             
@@ -183,7 +181,7 @@ Item {
                         { "step": "1", "text": "Go to Google Cloud Console", "url": "https://console.cloud.google.com" },
                         { "step": "2", "text": "Create a new project (or select an existing one)", "url": "" },
                         { "step": "3", "text": "Enable Gmail API (APIs & Services → Library → search 'Gmail API')", "url": "" },
-                        { "step": "4", "text": "Configure OAuth Consent Screen (External, add scopes: gmail.modify, gmail.send, email, profile)", "url": "" },
+                        { "step": "4", "text": "Configure OAuth Consent Screen (External, and add the following Scopes:\n  • https://www.googleapis.com/auth/gmail.modify (read, write, send, delete emails)\n  • https://www.googleapis.com/auth/gmail.send (send emails on your behalf)\n  • https://www.googleapis.com/auth/userinfo.email (view your email address)\n  • https://www.googleapis.com/auth/userinfo.profile (view your basic profile info))", "url": "" },
                         { "step": "5", "text": "Add your email as a test user in the OAuth consent screen", "url": "" },
                         { "step": "6", "text": "Create OAuth 2.0 credentials (APIs & Services → Credentials → Create → OAuth Client ID → Desktop App)", "url": "" },
                         { "step": "7", "text": "Copy Client ID and Client Secret into your .env file (see .env.example in .config/quickshell/ii)", "url": "" }
@@ -281,8 +279,8 @@ Item {
                     colBackground: Appearance.colors.colSurfaceContainerHigh
                     colBackgroundHover: Appearance.colors.colSurfaceContainerHighest
                     onClicked: {
-                        var envPath = FileUtils.trimFileProtocol(Directories.config + "/quickshell/ii/.env");
-                        Qt.openUrlExternally("file://" + envPath);
+                        var envDir = FileUtils.trimFileProtocol(Directories.config + "/quickshell/ii");
+                        Quickshell.execDetached(["xdg-open", envDir]);
                     }
                     
                     RowLayout {
@@ -331,16 +329,29 @@ Item {
 
         MaterialLoadingIndicator {
             Layout.alignment: Qt.AlignHCenter
-            implicitSize: 120
+            implicitSize: 160
             loading: parent.visible
         }
 
-        StyledText {
+        ColumnLayout {
             Layout.alignment: Qt.AlignHCenter
-            text: EmailService.checkingCredentials ? Translation.tr("Checking environment...") : Translation.tr("Authenticating with Google...")
-            font.pixelSize: Appearance.font.pixelSize.huge
-            color: Appearance.colors.colOnSurface
-            opacity: 0.8
+            spacing: 8
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: EmailService.checkingCredentials ? Translation.tr("Checking environment...") : Translation.tr("Authenticating with Google...")
+                font.pixelSize: 32
+                font.weight: Font.Bold
+                color: Appearance.colors.colOnSurface
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: Translation.tr("Connecting to Gmail and retrieving your updates...")
+                font.pixelSize: Appearance.font.pixelSize.larger
+                color: Appearance.colors.colOnSurfaceVariant
+                opacity: 0.8
+            }
         }
     }
 }

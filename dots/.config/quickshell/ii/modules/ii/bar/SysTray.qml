@@ -154,4 +154,24 @@ Item {
             }
         }
     }
+
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/uri-list"]
+        onDropped: (drop) => {
+            if (drop.hasUrls) {
+                let paths = [];
+                for (let i = 0; i < drop.urls.length; i++) {
+                    let path = drop.urls[i].toString();
+                    if (path.startsWith("file://")) {
+                        path = decodeURIComponent(path.substring(7));
+                    }
+                    paths.push(path);
+                }
+                if (paths.length > 0) {
+                    Quickshell.execDetached(["localsend"].concat(paths));
+                }
+            }
+        }
+    }
 }

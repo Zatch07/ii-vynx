@@ -8,6 +8,8 @@ import qs.services
 Item {
     id: root
 
+    signal composeRequested
+
     // Magnetic swipe tracking (Android 16 style)
     property int swipingIndex: -1
     property real activeSwipeX: 0
@@ -151,7 +153,7 @@ Item {
         }
 
         onDragEnded: {
-            if (contentY < -100 && !root.isPullRefreshing) {
+            if (contentY < -140 && !root.isPullRefreshing) {
                 root.isPullRefreshing = true;
                 EmailService.syncLabel(root.activeTab, 0, true); // force = true
 
@@ -175,17 +177,17 @@ Item {
 
                 function getPullShape(yVal) {
                     var dist = Math.max(0, -yVal - 12);
-                    if (dist < 15)
+                    if (dist < 20)
                         return MaterialShape.Shape.Circle;
-                    if (dist < 30)
+                    if (dist < 40)
                         return MaterialShape.Shape.Cookie4Sided;
-                    if (dist < 45)
+                    if (dist < 60)
                         return MaterialShape.Shape.Pentagon;
-                    if (dist < 55)
+                    if (dist < 80)
                         return MaterialShape.Shape.Cookie6Sided;
-                    if (dist < 65)
+                    if (dist < 100)
                         return MaterialShape.Shape.Cookie7Sided;
-                    if (dist < 75)
+                    if (dist < 120)
                         return MaterialShape.Shape.Cookie9Sided;
                     return MaterialShape.Shape.Burst;
                 }
@@ -195,8 +197,8 @@ Item {
                     implicitSize: 36
                     visible: !root.refreshing
                     shape: parent.getPullShape(flickable.contentY)
-                    color: flickable.contentY < -87 ? Appearance.colors.colPrimary : Appearance.colors.colOnSurfaceVariant
-                    rotation: flickable.contentY < -12 ? Math.max(0, -flickable.contentY - 20) * 3 : 0
+                    color: flickable.contentY < -120 ? Appearance.colors.colPrimary : Appearance.colors.colOnSurfaceVariant
+                    rotation: flickable.contentY < -12 ? Math.max(0, -flickable.contentY - 20) * 2.5 : 0
                     Behavior on color {
                         animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(parent)
                     }
@@ -219,11 +221,26 @@ Item {
                     anchors.centerIn: parent
                     spacing: 24
 
-                    MaterialShape {
+                    Item {
                         Layout.alignment: Qt.AlignHCenter
-                        implicitSize: 180
-                        shape: MaterialShape.Shape.Clover8Leaf
-                        color: Appearance.colors.colSurfaceContainerHighest
+                        implicitWidth: 180
+                        implicitHeight: 180
+
+                        MaterialShape {
+                            id: emptyStateShape
+                            anchors.fill: parent
+                            shape: MaterialShape.Shape.Clover8Leaf
+                            color: Appearance.colors.colSurfaceContainerHighest
+
+                            RotationAnimator {
+                                target: emptyStateShape
+                                from: 0
+                                to: 360
+                                duration: 20000
+                                loops: Animation.Infinite
+                                running: root.model.count === 0 && !root.loading
+                            }
+                        }
 
                         MaterialSymbol {
                             anchors.centerIn: parent
@@ -235,22 +252,55 @@ Item {
 
                     ColumnLayout {
                         Layout.alignment: Qt.AlignHCenter
-                        spacing: 8
+                        spacing: 16
 
-                        StyledText {
+                        ColumnLayout {
                             Layout.alignment: Qt.AlignHCenter
-                            text: root.activeTab === "spam" ? Translation.tr("No Spam Found") : root.activeTab === "sent" ? Translation.tr("No Sent Messages") : root.activeTab === "search" ? Translation.tr("No Results Found") : root.activeTab.startsWith("label_") ? Translation.tr("No Messages for this Label") : Translation.tr("Your Inbox is Clean")
-                            font.pixelSize: 32
-                            font.weight: Font.Bold
-                            color: Appearance.colors.colOnSurface
+                            spacing: 8
+
+                            StyledText {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: root.activeTab === "spam" ? Translation.tr("No Spam Found") : root.activeTab === "sent" ? Translation.tr("No Sent Messages") : root.activeTab === "search" ? Translation.tr("No Results Found") : root.activeTab.startsWith("label_") ? Translation.tr("No Messages for this Label") : Translation.tr("Your Inbox is Clean")
+                                font.pixelSize: 32
+                                font.weight: Font.Bold
+                                color: Appearance.colors.colOnSurface
+                            }
+
+                            StyledText {
+                                Layout.alignment: Qt.AlignHCenter
+                                text: root.activeTab === "spam" ? Translation.tr("Looks like you're safe from junk for now.") : root.activeTab === "sent" ? Translation.tr("You haven't sent any emails from this account yet.") : root.activeTab === "search" ? Translation.tr("Try adjusting your filters or keywords.") : Translation.tr("You've cleared everything. Enjoy the peace!")
+                                font.pixelSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnSurfaceVariant
+                                opacity: 0.8
+                            }
                         }
 
-                        StyledText {
+                        // Contextual CTA
+                        RippleButton {
                             Layout.alignment: Qt.AlignHCenter
-                            text: root.activeTab === "spam" ? Translation.tr("Looks like you're safe from junk for now.") : root.activeTab === "sent" ? Translation.tr("You haven't sent any emails from this account yet.") : root.activeTab === "search" ? Translation.tr("Try adjusting your filters or keywords.") : Translation.tr("You've cleared everything. Enjoy the peace!")
-                            font.pixelSize: Appearance.font.pixelSize.larger
-                            color: Appearance.colors.colOnSurfaceVariant
-                            opacity: 0.8
+                            implicitHeight: 40
+                            implicitWidth: ctaLabel.implicitWidth + 32
+                            buttonRadius: Appearance.rounding.full
+                            colBackground: Appearance.colors.colPrimary
+                            colBackgroundHover: Appearance.colors.colPrimaryHover
+                            colRipple: Appearance.colors.colPrimaryActive
+                            visible: root.activeTab === "inbox" || root.activeTab === "spam"
+
+                            onClicked: {
+                                if (root.activeTab === "inbox") {
+                                    root.composeRequested();
+                                } else if (root.activeTab === "spam") {
+                                    EmailService.syncLabel("spam", 0, true);
+                                }
+                            }
+
+                            StyledText {
+                                id: ctaLabel
+                                anchors.centerIn: parent
+                                text: root.activeTab === "spam" ? Translation.tr("Sync Spam") : Translation.tr("Compose Email")
+                                font.weight: Font.Bold
+                                color: Appearance.colors.colOnPrimary
+                            }
                         }
                     }
                 }
@@ -675,18 +725,6 @@ Item {
                                             }
                                         }
 
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            Layout.alignment: Qt.AlignVCenter
-                                            text: model.from.split("<")[0].trim() || model.from
-                                            font.family: Appearance.font.family.main
-                                            font.pixelSize: Appearance.font.pixelSize.normal
-                                            font.weight: model.unread ? Font.Bold : Font.Normal
-                                            color: model.unread ? Appearance.colors.colOnSurface : Appearance.colors.colOnSurfaceVariant
-                                            elide: Text.ElideRight
-                                            maximumLineCount: 1
-                                        }
-
                                         Rectangle {
                                             Layout.preferredWidth: 8
                                             Layout.preferredHeight: 8
@@ -699,6 +737,18 @@ Item {
                                                 animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                                             }
                                         }
+
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            Layout.alignment: Qt.AlignVCenter
+                                            text: model.from.split("<")[0].trim() || model.from
+                                            font.family: Appearance.font.family.main
+                                            font.pixelSize: Appearance.font.pixelSize.normal
+                                            font.weight: model.unread ? Font.Bold : Font.Normal
+                                            color: model.unread ? Appearance.colors.colOnSurface : Appearance.colors.colOnSurfaceVariant
+                                            elide: Text.ElideRight
+                                            maximumLineCount: 1
+                                        }
                                     }
                                 }
 
@@ -710,6 +760,16 @@ Item {
                                         anchors.margins: EmailService.compactMode ? 8 : 16
                                         anchors.leftMargin: EmailService.compactMode ? 12 : 24
                                         spacing: EmailService.compactMode ? 2 : 4
+
+                                        StyledText {
+                                            visible: root.activeTab === "all_inboxes" && model.recipientAccount !== "" && !EmailService.compactMode
+                                            text: model.recipientAccount
+                                            font.pixelSize: Appearance.font.pixelSize.smallest
+                                            font.weight: Font.DemiBold
+                                            color: Appearance.colors.colPrimary
+                                            opacity: 0.6
+                                            Layout.fillWidth: true
+                                        }
 
                                         RowLayout {
                                             Layout.fillWidth: true

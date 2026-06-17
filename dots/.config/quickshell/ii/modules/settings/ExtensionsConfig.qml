@@ -101,7 +101,6 @@ ContentPage {
             GroupButtonWithIcon {
                 buttonIcon: "info"
                 baseHeight: 44
-                extraWidth: 26
                 onClicked: Qt.openUrlExternally("https://github.com/vaguesyntax/ii-vynx/blob/main/.github/EXTENSIONS.md")
                 StyledToolTip { text: Translation.tr("Developer documentation to develop extensions") }
             }
@@ -109,7 +108,6 @@ ContentPage {
             GroupButtonWithIcon {
                 buttonIcon: "link"
                 baseHeight: 44
-                extraWidth: 26
                 onClicked: page.showCustomUrlInput = !page.showCustomUrlInput
                 toggled: page.showCustomUrlInput
                 StyledToolTip { text: Translation.tr("Install from custom URL (for developers)") }
@@ -129,7 +127,6 @@ ContentPage {
             GroupButtonWithIcon {
                 Layout.fillWidth: true
                 baseHeight: 44
-                extraWidth: 26
                 buttonIcon: ExtensionManager.loading ? "hourglass_bottom" : "refresh"
                 toggled: ExtensionManager.loading
                 onClicked: ExtensionSearch.refreshAvailableExtensions()
@@ -159,7 +156,6 @@ ContentPage {
             GroupButtonWithIcon {
                 Layout.fillWidth: true
                 baseHeight: 44
-                extraWidth: 26
                 buttonIcon: "download"
                 onClicked: page.installFromUrl()
                 StyledToolTip { text: Translation.tr("Install a custom extension") }

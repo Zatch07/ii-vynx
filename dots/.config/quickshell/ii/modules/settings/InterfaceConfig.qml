@@ -251,6 +251,14 @@ ContentPage {
             }
         }
         ConfigSwitch {
+            buttonIcon: "task_alt"
+            text: Translation.tr("Enable Tasks")
+            checked: Config.options.cheatsheet.enableTasks
+            onCheckedChanged: {
+                Config.options.cheatsheet.enableTasks = checked;
+            }
+        }
+        ConfigSwitch {
             buttonIcon: "table_rows_narrow"
             enabled: Config.options.cheatsheet.enableCommands
             text: Translation.tr("Commands: sidebar tag layout")

@@ -17,8 +17,10 @@ Item {
     }]
     property bool showAddDialog: false
     property int dialogMargins: 20
-    property int fabSize: 48
+    property int fabSize: 40
     property int fabMargins: 14
+
+    property bool isValidKey: Todo.apiKey !== "" && Todo.apiKey !== "YOUR_TODOIST_API_KEY_HERE"
 
     Keys.onPressed: (event) => {
         // Open add dialog on "N" (any modifiers)
@@ -30,7 +32,7 @@ Item {
             else if (event.key === Qt.Key_PageUp)
                 tabBar.decrementCurrentIndex();
             event.accepted = true;
-        } else if (event.key === Qt.Key_N) {
+        } else if (event.key === Qt.Key_N && root.isValidKey) {
             root.showAddDialog = true;
             event.accepted = true;
         } else if (event.key === Qt.Key_Escape && root.showAddDialog) {
@@ -40,6 +42,7 @@ Item {
     }
 
     ColumnLayout {
+        visible: root.isValidKey
         anchors.fill: parent
         spacing: 0
 
@@ -72,7 +75,7 @@ Item {
 
             // To Do tab
             TaskList {
-                listBottomPadding: root.fabSize + root.fabMargins * 2
+                listBottomPadding: root.fabSize + root.fabMargins * 2 + 20 // Add extra padding so scroll reaches past FAB
                 emptyPlaceholderIcon: "check_circle"
                 emptyPlaceholderText: Translation.tr("Nothing here!")
                 taskList: Todo.list.map(function(item, i) {
@@ -86,7 +89,7 @@ Item {
             }
 
             TaskList {
-                listBottomPadding: root.fabSize + root.fabMargins * 2
+                listBottomPadding: root.fabSize + root.fabMargins * 2 + 20
                 emptyPlaceholderIcon: "checklist"
                 emptyPlaceholderText: Translation.tr("Finished tasks will go here")
                 taskList: Todo.list.map(function(item, i) {
@@ -103,16 +106,51 @@ Item {
 
     }
 
+    // Missing API Key State (Sidebar)
+    ColumnLayout {
+        anchors.centerIn: parent
+        visible: !root.isValidKey
+        spacing: 12
+
+        MaterialSymbol {
+            Layout.alignment: Qt.AlignHCenter
+            text: "vpn_key_alert"
+            font.pixelSize: 48
+            color: Appearance.colors.colError
+        }
+
+        StyledText {
+            Layout.alignment: Qt.AlignHCenter
+            text: Translation.tr("Todoist Setup Required")
+            font.pixelSize: Appearance.font.pixelSize.title
+            font.weight: Font.Bold
+            color: Appearance.colors.colOnSurface
+        }
+
+        StyledText {
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredWidth: 260
+            text: Translation.tr("Please open the Cheatsheet (Super + /) for setup instructions.")
+            font.pixelSize: Appearance.font.pixelSize.normal
+            color: Appearance.colors.colOnSurfaceVariant
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.Wrap
+        }
+    }
+
     // + FAB
     StyledRectangularShadow {
         target: fabButton
+        visible: root.isValidKey
         radius: fabButton.buttonRadius
         blur: 0.6 * Appearance.sizes.elevationMargin
     }
 
     FloatingActionButton {
         id: fabButton
+        visible: root.isValidKey
 
+        baseSize: root.fabSize
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.rightMargin: root.fabMargins
@@ -124,12 +162,12 @@ Item {
     Item {
         anchors.fill: parent
         z: 9999
-        visible: opacity > 0
+        visible: opacity > 0 && root.isValidKey
         opacity: root.showAddDialog ? 1 : 0
         onVisibleChanged: {
             if (!visible) {
                 todoInput.text = "";
-                fabButton.focus = true;
+                if (root.isValidKey) fabButton.focus = true;
             }
         }
 

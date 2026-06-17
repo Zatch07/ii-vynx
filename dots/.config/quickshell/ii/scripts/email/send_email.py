@@ -16,8 +16,11 @@ import mimetypes
 import os
 import gmail_config
 
-def send_message(token, raw_msg):
-    data = json.dumps({"raw": raw_msg}).encode('utf-8')
+def send_message(token, raw_msg, thread_id=None):
+    payload = {"raw": raw_msg}
+    if thread_id:
+        payload["threadId"] = thread_id
+    data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(
         "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
         data=data,
@@ -39,6 +42,38 @@ def main():
     subject       = sys.argv[3]
     body_html     = sys.argv[4]
 
+    # Parse optional arguments and attachments
+    cc_address = None
+    bcc_address = None
+    thread_id = None
+    in_reply_to = None
+    references = None
+    attachments = []
+
+    i = 5
+    while i < len(sys.argv):
+        arg = sys.argv[i]
+        if arg == '--cc' and i + 1 < len(sys.argv):
+            cc_address = sys.argv[i+1]
+            i += 2
+        elif arg == '--bcc' and i + 1 < len(sys.argv):
+            bcc_address = sys.argv[i+1]
+            i += 2
+        elif arg == '--thread-id' and i + 1 < len(sys.argv):
+            thread_id = sys.argv[i+1]
+            i += 2
+        elif arg == '--in-reply-to' and i + 1 < len(sys.argv):
+            in_reply_to = sys.argv[i+1]
+            i += 2
+        elif arg == '--references' and i + 1 < len(sys.argv):
+            references = sys.argv[i+1]
+            i += 2
+        elif arg == '--attachments':
+            i += 1
+        else:
+            attachments.append(arg)
+            i += 1
+
     try:
         # 1. Resolve token (access or refresh)
         try:
@@ -51,7 +86,16 @@ def main():
         message = MIMEMultipart('mixed')
         message['To'] = to_address
         message['From'] = 'me'
+        if cc_address:
+            message['Cc'] = cc_address
+        if bcc_address:
+            message['Bcc'] = bcc_address
         message['Subject'] = subject
+
+        if in_reply_to:
+            message['In-Reply-To'] = in_reply_to
+        if references:
+            message['References'] = references
 
         alt_part = MIMEMultipart('alternative')
         html_part = MIMEText(body_html, 'html', 'utf-8')
@@ -59,7 +103,7 @@ def main():
         message.attach(alt_part)
 
         # Attachments
-        for att_path in sys.argv[5:]:
+        for att_path in attachments:
             if not os.path.isfile(att_path):
                 continue
             ctype, encoding = mimetypes.guess_type(att_path)
@@ -81,7 +125,7 @@ def main():
 
         # 4. Send message
         try:
-            response = send_message(token, raw_msg)
+            response = send_message(token, raw_msg, thread_id)
             if 'id' in response:
                 print(json.dumps({"success": True}))
             else:

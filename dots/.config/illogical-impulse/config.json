@@ -119,7 +119,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Watchcat[WE-3588262443]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/5826337.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/Solitary-Glow.png",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -162,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 17.9453125,
-                "y": 1146.68359375
+                "x": 64.34765625,
+                "y": 1109.8515625
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -413,6 +413,7 @@
         "enableCommands": true,
         "enableGmail": true,
         "enablePeriodicTable": false,
+        "enableTasks": true,
         "enableTimetable": true,
         "fontSize": {
             "comment": 12,
@@ -422,7 +423,7 @@
         "superKey": "󰣇",
         "useFnSymbol": false,
         "useMacSymbol": false,
-        "useMouseSymbol": false
+        "useMouseSymbol": true
     },
     "conflictKiller": {
         "autoKillNotificationDaemons": false,
@@ -451,6 +452,9 @@
         ],
         "pinnedOnStartup": false,
         "position": "bottom"
+    },
+    "extensions": {
+        "enable": true
     },
     "hacks": {
         "arbitraryRaceConditionDelay": 20

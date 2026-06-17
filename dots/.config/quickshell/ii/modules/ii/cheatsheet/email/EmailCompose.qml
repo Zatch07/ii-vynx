@@ -17,9 +17,15 @@ Item {
     property bool isAnimating: false
     signal closeRequested
 
+    property var imageFilters: ["*.png", "*.jpg", "*.jpeg", "*.gif", "*.webp", "*.svg"]
+    property bool imageOnlyMode: false
+    property bool linkDialogVisible: false
+    property string linkTextVal: ""
+    property string linkUrlVal: ""
+
     // Draft persistence - load on start
     Component.onCompleted: {
-        toInput.text = EmailService.composeDraftTo;
+        toInput.text = EmailService.composeDraftTo || "";
         subjectInput.text = EmailService.composeDraftSubject;
         bodyInput.text = EmailService.composeDraftBody;
         root.attachments = EmailService.composeDraftAttachments || [];
@@ -182,14 +188,7 @@ Item {
 
         var start = edit.selectionStart;
         var end = edit.selectionEnd;
-
-        // Simple alpha markers to avoid HTML escaping issues
-        var sM = "XXSTRTXX";
-        var eM = "XXENDXX";
-
-        // Insert markers into the document
-        edit.insert(end, eM);
-        edit.insert(start, sM);
+        var selectedText = edit.getText(start, end);
 
         var tag = "b";
         if (fmt === "italic")
@@ -199,13 +198,11 @@ Item {
         else if (fmt === "strike")
             tag = "s";
 
-        // Get the full HTML and replace markers with tags
-        var html = edit.text;
-        var newHtml = html.split(sM).join("<" + tag + ">").split(eM).join("</" + tag + ">");
-
-        edit.text = newHtml;
+        // Remove and replace selected text with tags
+        edit.remove(start, end);
+        edit.insert(start, "<" + tag + ">" + selectedText + "</" + tag + ">");
+        edit.select(start, start + selectedText.length);
         edit.forceActiveFocus();
-        // Note: selection is lost on text replacement, but formatting is applied.
     }
 
     // Alignment helpers (applied globally to the document)
@@ -219,7 +216,7 @@ Item {
             return;
         root.lastError = "";
         // bodyInput.text is already HTML because textFormat is RichText
-        EmailService.sendEmail(toText.trim(), subjectText.trim(), bodyInput.text, root.attachments, root.threadId, root.inReplyTo);
+        EmailService.sendEmail(toInput.text.trim(), subjectInput.text.trim(), bodyInput.text, root.attachments, root.threadId, root.inReplyTo);
     }
 
     Connections {
@@ -260,7 +257,8 @@ Item {
 
     // ── Internal QML File Picker Logic ──────────────────────────────────────
     property url currentFolder: Directories.home
-    function toggleFilePicker() {
+    function toggleFilePicker(imageOnly) {
+        root.imageOnlyMode = !!imageOnly;
         qmlFilePicker.visible = !qmlFilePicker.visible;
     }
 
@@ -630,7 +628,7 @@ Item {
                                         Rectangle {
                                             anchors.fill: parent
                                             radius: Appearance.rounding.full
-                                            color: removeBtn.pressed ? Appearance.colors.colSurfaceActive : removeBtn.containsMouse ? Appearance.colors.colSurfaceHover : "transparent"
+                                            color: removeBtn.pressed ? Appearance.colors.colLayer4Active : removeBtn.containsMouse ? Appearance.colors.colLayer4Hover : "transparent"
 
                                             MaterialSymbol {
                                                 anchors.centerIn: parent
@@ -806,7 +804,7 @@ Item {
                                 colBackground: "transparent"
                                 colBackgroundHover: Appearance.colors.colLayer2Hover
                                 colRipple: Appearance.colors.colLayer2Active
-                                onClicked: root.toggleFilePicker()
+                                onClicked: root.toggleFilePicker(false)
                                 MaterialSymbol {
                                     anchors.centerIn: parent
                                     text: "attach_file"
@@ -821,7 +819,7 @@ Item {
                                 colBackground: "transparent"
                                 colBackgroundHover: Appearance.colors.colLayer2Hover
                                 colRipple: Appearance.colors.colLayer2Active
-                                onClicked: root.toggleFilePicker()
+                                onClicked: root.toggleFilePicker(true)
                                 MaterialSymbol {
                                     anchors.centerIn: parent
                                     text: "image"
@@ -844,7 +842,13 @@ Item {
                                 colBackground: "transparent"
                                 colBackgroundHover: Appearance.colors.colLayer2Hover
                                 colRipple: Appearance.colors.colLayer2Active
-                                onClicked: {}
+                                onClicked: {
+                                    var edit = bodyInput;
+                                    var selected = edit.getText(edit.selectionStart, edit.selectionEnd);
+                                    root.linkTextVal = selected;
+                                    root.linkUrlVal = "https://";
+                                    root.linkDialogVisible = true;
+                                }
                                 MaterialSymbol {
                                     anchors.centerIn: parent
                                     text: "link"
@@ -962,14 +966,14 @@ Item {
 
                     MaterialSymbol {
                         anchors.centerIn: parent
-                        text: "attach_file"
+                        text: root.imageOnlyMode ? "image" : "attach_file"
                         iconSize: 18
                         color: Appearance.colors.colOnPrimaryContainer
                     }
                 }
 
                 StyledText {
-                    text: qsTr("Select Attachment")
+                    text: root.imageOnlyMode ? qsTr("Select Image") : qsTr("Select Attachment")
                     font.pixelSize: Appearance.font.pixelSize.large
                     font.weight: Font.Bold
                     color: Appearance.colors.colOnSurface
@@ -1101,6 +1105,7 @@ Item {
                         showDirs: true
                         showDotAndDotDot: false
                         sortField: FolderListModel.Name
+                        nameFilters: root.imageOnlyMode ? root.imageFilters : []
                     }
 
                     // Empty state
@@ -1257,6 +1262,149 @@ Item {
                     text: qsTr("Click a folder to enter, or a file to attach it")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colOnSurfaceVariant
+                }
+            }
+        }
+    }
+
+    // ── Link Insertion Dialog ────────────────────────────────────────────────
+    Rectangle {
+        id: linkDialogOverlay
+        anchors.fill: parent
+        color: Qt.rgba(0, 0, 0, 0.4)
+        visible: root.linkDialogVisible
+        z: 200
+
+        MouseArea {
+            anchors.fill: parent
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: Math.min(parent.width - 48, 400)
+            height: linkCol.implicitHeight + 32
+            radius: Appearance.rounding.large
+            color: Appearance.m3colors.m3surfaceContainerHigh
+            border.color: Appearance.colors.colOutlineVariant
+            border.width: 1
+
+            ColumnLayout {
+                id: linkCol
+                anchors.fill: parent
+                anchors.margins: 16
+                spacing: 16
+
+                StyledText {
+                    text: qsTr("Insert Link")
+                    font.pixelSize: Appearance.font.pixelSize.large
+                    font.weight: Font.Bold
+                    color: Appearance.colors.colOnSurface
+                }
+
+                ColumnLayout {
+                    spacing: 4
+                    Layout.fillWidth: true
+                    StyledText {
+                        text: qsTr("Text to display")
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: Appearance.colors.colOnSurfaceVariant
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 36
+                        radius: Appearance.rounding.small
+                        color: Appearance.colors.colLayer1Base
+                        border.color: textInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colOutlineVariant
+                        border.width: textInput.activeFocus ? 2 : 1
+                        TextInput {
+                            id: textInput
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            verticalAlignment: TextInput.AlignVCenter
+                            color: Appearance.colors.colOnSurface
+                            text: root.linkTextVal
+                            onTextChanged: root.linkTextVal = text
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    spacing: 4
+                    Layout.fillWidth: true
+                    StyledText {
+                        text: qsTr("To what URL should this link go?")
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: Appearance.colors.colOnSurfaceVariant
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        height: 36
+                        radius: Appearance.rounding.small
+                        color: Appearance.colors.colLayer1Base
+                        border.color: urlInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colOutlineVariant
+                        border.width: urlInput.activeFocus ? 2 : 1
+                        TextInput {
+                            id: urlInput
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            verticalAlignment: TextInput.AlignVCenter
+                            color: Appearance.colors.colOnSurface
+                            text: root.linkUrlVal
+                            onTextChanged: root.linkUrlVal = text
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 8
+                    spacing: 12
+                    Item { Layout.fillWidth: true }
+
+                    RippleButton {
+                        implicitWidth: 80
+                        implicitHeight: 36
+                        buttonRadius: Appearance.rounding.full
+                        colBackground: "transparent"
+                        colBackgroundHover: Appearance.colors.colLayer2Hover
+                        colRipple: Appearance.colors.colLayer2Active
+                        onClicked: root.linkDialogVisible = false
+                        StyledText {
+                            anchors.centerIn: parent
+                            text: qsTr("Cancel")
+                            color: Appearance.colors.colPrimary
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    RippleButton {
+                        implicitWidth: 80
+                        implicitHeight: 36
+                        buttonRadius: Appearance.rounding.full
+                        colBackground: Appearance.colors.colPrimary
+                        colBackgroundHover: Appearance.colors.colPrimaryHover
+                        colRipple: Appearance.colors.colPrimaryActive
+                        onClicked: {
+                            root.linkDialogVisible = false;
+                            var edit = bodyInput;
+                            var start = edit.selectionStart;
+                            var end = edit.selectionEnd;
+                            var txt = root.linkTextVal || root.linkUrlVal;
+                            var url = root.linkUrlVal;
+                            var htmlLink = "<a href=\"" + url + "\">" + txt + "</a>";
+                            edit.remove(start, end);
+                            edit.insert(start, htmlLink);
+                            edit.forceActiveFocus();
+                        }
+                        StyledText {
+                            anchors.centerIn: parent
+                            text: qsTr("OK")
+                            color: Appearance.colors.colOnPrimary
+                            font.weight: Font.Bold
+                        }
+                    }
                 }
             }
         }

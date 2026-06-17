@@ -15,10 +15,12 @@ Item {
     property int todoListItemSpacing: 5
     property int todoListItemPadding: 8
     property int listBottomPadding: 80
+    property int taskFontSize: Appearance.font.pixelSize.normal
 
     StyledListView {
         id: listView
         anchors.fill: parent
+        clip: true
         spacing: root.todoListItemSpacing
         animateAppearance: false
         model: ScriptModel {
@@ -61,16 +63,18 @@ Item {
                     StyledText {
                         id: todoContentText
                         Layout.fillWidth: true // Needed for wrapping
-                        Layout.leftMargin: 10
-                        Layout.rightMargin: 10
-                        Layout.topMargin: todoListItemPadding
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.topMargin: 16
+                        Layout.bottomMargin: 4
                         text: todoItem.modelData.content
+                        font.pixelSize: root.taskFontSize
                         wrapMode: Text.Wrap
                     }
                     RowLayout {
-                        Layout.leftMargin: 10
-                        Layout.rightMargin: 10
-                        Layout.bottomMargin: todoListItemPadding
+                        Layout.leftMargin: 16
+                        Layout.rightMargin: 16
+                        Layout.bottomMargin: 16
                         Item {
                             Layout.fillWidth: true
                         }
