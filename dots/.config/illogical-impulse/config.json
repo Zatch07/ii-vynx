@@ -453,9 +453,6 @@
         "pinnedOnStartup": false,
         "position": "bottom"
     },
-    "extensions": {
-        "enable": true
-    },
     "hacks": {
         "arbitraryRaceConditionDelay": 20
     },
