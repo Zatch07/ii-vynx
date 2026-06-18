@@ -70,6 +70,6 @@ MouseArea {
 
     Bar.MediaPopup {
         hoverTarget: root
-        active: GlobalStates.mediaControlsOpen ? false : root.containsMouse
+        active: (GlobalStates.mediaControlsOpen || Config.options.bar.tooltips.clickToShow) ? false : root.containsMouse
     }
 }

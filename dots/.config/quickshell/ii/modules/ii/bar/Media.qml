@@ -132,7 +132,7 @@ Item {
 
         MediaPopup {
             hoverTarget: mouseArea
-            active: hoverTarget && hoverTarget.containsMouse && !GlobalStates.mediaControlsOpen
+            active: hoverTarget && hoverTarget.containsMouse && !GlobalStates.mediaControlsOpen && !Config.options.bar.tooltips.clickToShow
         }
     }
 

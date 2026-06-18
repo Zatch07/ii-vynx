@@ -132,6 +132,7 @@ StyledPopup {
             // CPU Card
             Rectangle {
                 Layout.fillWidth: true
+                implicitWidth: 184
                 implicitHeight: 165
                 radius: Appearance.rounding.large
                 color: Appearance.colors.colSurfaceContainerHigh
@@ -201,6 +202,7 @@ StyledPopup {
             // GPU Card
             Rectangle {
                 Layout.fillWidth: true
+                implicitWidth: 184
                 implicitHeight: 165
                 radius: Appearance.rounding.large
                 color: Appearance.colors.colSurfaceContainerHigh
@@ -274,6 +276,7 @@ StyledPopup {
             implicitHeight: 64
             radius: Appearance.rounding.full
             color: Appearance.colors.colSecondaryContainer
+            visible: !Config.options.bar.tooltips.compactPopups
             
             RowLayout {
                 anchors.fill: parent
@@ -320,13 +323,68 @@ StyledPopup {
                 }
             }
         }
-        
+
+        // Swap Pill
+        Rectangle {
+            implicitWidth: 380
+            implicitHeight: 64
+            radius: Appearance.rounding.full
+            color: Appearance.colors.colSecondaryContainer
+            visible: Config.options.bar.tooltips.showSwap && !Config.options.bar.tooltips.compactPopups
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: 12
+                spacing: 12
+
+                MaterialShape {
+                    shapeString: "Circle"
+                    implicitSize: 40
+                    color: Appearance.colors.colLayer3
+
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "swap_horiz"
+                        iconSize: 22
+                        color: Appearance.colors.colOnLayer3
+                    }
+                }
+
+                ColumnLayout {
+                    spacing: -2
+                    StyledText {
+                        text: Translation.tr("Swap")
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        font.weight: Font.Bold
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                    StyledText {
+                        text: (ResourceUsage.swapUsed / (1024*1024)).toFixed(1) + " GB / " + (ResourceUsage.swapTotal / (1024*1024)).toFixed(0) + " GB"
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                }
+
+                Item { Layout.fillWidth: true }
+
+                StyledText {
+                    text: Math.round(ResourceUsage.swapUsedPercentage * 100) + "%"
+                    font.pixelSize: 24
+                    font.weight: Font.Black
+                    color: Appearance.colors.colOnSecondaryContainer
+                    Layout.rightMargin: 12
+                }
+            }
+        }
+
         // Disk Pill
         Rectangle {
             implicitWidth: 380
             implicitHeight: 64
             radius: Appearance.rounding.full
             color: Appearance.colors.colSecondaryContainer
+            visible: !Config.options.bar.tooltips.compactPopups
             
             RowLayout {
                 anchors.fill: parent

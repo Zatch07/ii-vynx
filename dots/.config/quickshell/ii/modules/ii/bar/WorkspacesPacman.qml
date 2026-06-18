@@ -36,18 +36,17 @@ Item {
     property int previousWorkspaceId: effectiveActiveWorkspaceId
     property bool isMovingLeft: false
     
-    function getTargetPos(wsId) {
-        return ((wsId - 1) % root.workspacesShown) * workspaceButtonWidth;
-    }
+    property var activeBtn: repeater ? repeater.itemAt(workspaceIndexInGroup) : null
+    property real targetPosRaw: activeBtn ? (root.vertical ? activeBtn.y : activeBtn.x) : 0
     
-    property real delayedTargetPos: getTargetPos(effectiveActiveWorkspaceId)
+    property real delayedTargetPos: targetPosRaw
     property bool directionChanged: false
     
     Timer {
         id: delayTimer
         interval: 200
         onTriggered: {
-            root.delayedTargetPos = root.getTargetPos(root.effectiveActiveWorkspaceId);
+            root.delayedTargetPos = Qt.binding(() => root.targetPosRaw);
         }
     }
 
@@ -102,9 +101,10 @@ Item {
         previousWorkspaceId = effectiveActiveWorkspaceId;
         
         if (directionChanged) {
+            root.delayedTargetPos = root.delayedTargetPos; // Lock value
             delayTimer.restart();
         } else {
-            delayedTargetPos = getTargetPos(effectiveActiveWorkspaceId);
+            root.delayedTargetPos = Qt.binding(() => root.targetPosRaw);
         }
     }
 
@@ -142,8 +142,11 @@ Item {
         updateWorkspaceOccupied();
     }
 
-    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : (root.workspaceButtonWidth * root.workspacesShown)
-    implicitHeight: root.vertical ? (root.workspaceButtonWidth * root.workspacesShown) : Appearance.sizes.barHeight
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : buttonGrid.implicitWidth
+    implicitHeight: root.vertical ? buttonGrid.implicitHeight : Appearance.sizes.barHeight
+
+    Behavior on implicitWidth { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
+    Behavior on implicitHeight { NumberAnimation { duration: 300; easing.type: Easing.OutExpo } }
 
     // Scroll to switch workspaces
     WheelHandler {
@@ -154,6 +157,42 @@ Item {
                 Hyprland.dispatch(`hl.dsp.focus({workspace = "r-1"})`);
         }
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
+    }
+
+    property int hoverIndex: -1
+
+    Rectangle {
+        id: hoverIndicator
+        z: 2
+        property var hoveredItem: root.hoverIndex !== -1 ? repeater.itemAt(root.hoverIndex) : null
+        
+        visible: root.hoverIndex !== -1
+        opacity: visible ? 0.1 : 0
+        
+        width: workspaceButtonWidth
+        height: workspaceButtonWidth
+        x: hoveredItem ? buttonGrid.x + hoveredItem.x + (root.vertical ? (root.width - width) / 2 : 0) : x
+        y: hoveredItem ? buttonGrid.y + hoveredItem.y + (root.vertical ? 0 : (root.height - height) / 2) : y
+        
+        radius: Appearance.rounding.full
+        color: Appearance.colors.colPrimary
+        
+        property bool wasVisible: false
+        onVisibleChanged: {
+            if (visible && !wasVisible) {
+                xBehavior.enabled = false;
+                yBehavior.enabled = false;
+                Qt.callLater(function() {
+                    xBehavior.enabled = true;
+                    yBehavior.enabled = true;
+                });
+            }
+            wasVisible = visible;
+        }
+
+        Behavior on x { id: xBehavior; NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+        Behavior on y { id: yBehavior; NumberAnimation { duration: 150; easing.type: Easing.OutCubic } }
+        Behavior on opacity { animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(hoverIndicator) }
     }
 
     MouseArea {
@@ -181,6 +220,9 @@ Item {
 
             Rectangle {
                 z: 1
+                property int workspaceValue: workspaceGroup * root.workspacesShown + index + 1
+                property bool isVisible: !Config.options.bar.workspaces.dynamicWorkspaces || (root.effectiveActiveWorkspaceId === workspaceValue) || workspaceOccupied[index]
+                visible: isVisible
                 implicitWidth: workspaceButtonWidth
                 implicitHeight: workspaceButtonWidth
                 radius: (width / 2)
@@ -244,6 +286,7 @@ Item {
 
     // Workspaces - numbers
     Grid {
+        id: buttonGrid
         z: 3
 
         columns: root.vertical ? 1 : root.workspacesShown
@@ -254,16 +297,26 @@ Item {
         anchors.fill: parent
 
         Repeater {
+            id: repeater
             model: root.workspacesShown
 
             Button {
                 id: button
                 property int workspaceValue: workspaceGroup * root.workspacesShown + index + 1
+                property bool isVisible: !Config.options.bar.workspaces.dynamicWorkspaces || (root.effectiveActiveWorkspaceId === workspaceValue) || workspaceOccupied[index]
+                visible: isVisible
                 implicitHeight: vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
                 implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.verticalBarWidth
                 onPressed: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${workspaceValue} })`)
                 width: vertical ? root.width : workspaceButtonWidth
                 height: vertical ? workspaceButtonWidth : root.height
+
+                HoverHandler {
+                    onHoveredChanged: {
+                        if (hovered) root.hoverIndex = index;
+                        else if (root.hoverIndex === index) root.hoverIndex = -1;
+                    }
+                }
 
                 background: Item {
                     id: workspaceButtonBackground

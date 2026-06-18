@@ -567,7 +567,9 @@ ContentPage {
                 }
                 options: [
                     { displayName: Translation.tr("Default"), icon: "timer_10", value: "default" },
-                    { displayName: Translation.tr("Pacman"), icon: "videogame_asset", value: "pacman" }
+                    { displayName: Translation.tr("Pacman"), icon: "videogame_asset", value: "pacman" },
+                    { displayName: Translation.tr("Pill"), icon: "horizontal_rule", value: "pill" },
+                    { displayName: Translation.tr("Jackpot"), icon: "casino", value: "jackpot" }
                 ]
             }
         }
@@ -576,6 +578,7 @@ ContentPage {
             uniform: true
 
             ConfigSwitch {
+                enabled: Config.options.bar.workspaces.theme !== "pill" && Config.options.bar.workspaces.theme !== "jackpot" && Config.options.bar.workspaces.theme !== "pacman"
                 buttonIcon: "grid_3x3"
                 text: Translation.tr('Use workspace map')
                 checked: Config.options.bar.workspaces.useWorkspaceMap
@@ -588,12 +591,15 @@ ContentPage {
             }
 
             ConfigSwitch {
-                enabled: Config.options.bar.workspaces.theme !== "pacman"
+                enabled: Config.options.bar.workspaces.theme !== "pacman" && Config.options.bar.workspaces.theme !== "pill" && Config.options.bar.workspaces.theme !== "jackpot"
                 buttonIcon: "counter_1"
                 text: Translation.tr('Always show numbers')
                 checked: Config.options.bar.workspaces.alwaysShowNumbers
                 onCheckedChanged: {
                     Config.options.bar.workspaces.alwaysShowNumbers = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Always displays the workspace numbers instead of hiding them when inactive")
                 }
             }
         }
@@ -602,21 +608,29 @@ ContentPage {
             uniform: true
 
             ConfigSwitch {
+                visible: Config.options.bar.workspaces.theme !== "pill" && Config.options.bar.workspaces.theme !== "jackpot"
+                enabled: Config.options.bar.workspaces.theme !== "pacman"
                 buttonIcon: "award_star"
                 text: Translation.tr('Show app icons')
                 checked: Config.options.bar.workspaces.showAppIcons
                 onCheckedChanged: {
                     Config.options.bar.workspaces.showAppIcons = checked;
                 }
+                StyledToolTip {
+                    text: Translation.tr("Displays the icons of the applications currently open in each workspace")
+                }
             }
 
             ConfigSwitch {
-                enabled: Config.options.bar.workspaces.showAppIcons
+                visible: Config.options.bar.workspaces.theme === "pill" || Config.options.bar.workspaces.theme === "jackpot" || Config.options.bar.workspaces.showAppIcons
                 buttonIcon: "colors"
                 text: Translation.tr('Tint app icons')
                 checked: Config.options.bar.workspaces.monochromeIcons
                 onCheckedChanged: {
                     Config.options.bar.workspaces.monochromeIcons = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Applies a monochrome color tint to the application icons to match the theme")
                 }
             }
         }
@@ -643,9 +657,13 @@ ContentPage {
             onValueChanged: {
                 Config.options.bar.workspaces.shown = value;
             }
+            StyledToolTip {
+                text: Translation.tr("The maximum number of workspaces to display in the switcher")
+            }
         }
 
         ConfigSpinBox {
+            enabled: Config.options.bar.workspaces.theme !== "pacman"
             icon: "select_window"
             text: Translation.tr("Maximum window count per workspace")
             value: Config.options.bar.workspaces.maxWindowCount
@@ -655,9 +673,13 @@ ContentPage {
             onValueChanged: {
                 Config.options.bar.workspaces.maxWindowCount = value;
             }
+            StyledToolTip {
+                text: Translation.tr("The maximum number of application icons to display inside a single workspace pill")
+            }
         }
 
         ConfigSpinBox {
+            enabled: Config.options.bar.workspaces.theme !== "pill" && Config.options.bar.workspaces.theme !== "jackpot" && Config.options.bar.workspaces.theme !== "pacman"
             icon: "touch_long"
             text: Translation.tr("Number show delay when pressing Super (ms)")
             value: Config.options.bar.workspaces.showNumberDelay
@@ -667,33 +689,55 @@ ContentPage {
             onValueChanged: {
                 Config.options.bar.workspaces.showNumberDelay = value;
             }
+            StyledToolTip {
+                text: Translation.tr("How long to wait before showing workspace numbers when holding the Super key")
+            }
         }
 
         ContentSubsection {
             title: Translation.tr("Number style")
 
             ConfigSelectionArray {
+                enabled: Config.options.bar.workspaces.theme !== "pacman"
                 currentValue: JSON.stringify(Config.options.bar.workspaces.numberMap)
                 onSelected: newValue => {
                     Config.options.bar.workspaces.numberMap = JSON.parse(newValue)
                 }
-                options: [
-                    {
-                        displayName: Translation.tr("Normal"),
-                        icon: "timer_10",
-                        value: '[]'
-                    },
-                    {
-                        displayName: Translation.tr("Han chars"),
-                        icon: "square_dot",
-                        value: '["一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"]'
-                    },
-                    {
-                        displayName: Translation.tr("Roman"),
-                        icon: "account_balance",
-                        value: '["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"]'
+                options: {
+                    let base = [
+                        {
+                            displayName: Translation.tr("Normal"),
+                            icon: "timer_10",
+                            value: '[]'
+                        },
+                        {
+                            displayName: Translation.tr("Han chars"),
+                            icon: "square_dot",
+                            value: '["一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"]'
+                        },
+                        {
+                            displayName: Translation.tr("Roman"),
+                            icon: "account_balance",
+                            value: '["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"]'
+                        }
+                    ];
+                    const theme = Config.options.bar.workspaces.theme;
+                    if (theme === "pill" || theme === "jackpot") {
+                        base.push({
+                            displayName: Translation.tr("Pacman"),
+                            icon: "videogame_asset",
+                            value: '["pacman"]'
+                        });
                     }
-                ]
+                    if (theme === "jackpot") {
+                        base.push({
+                            displayName: Translation.tr("Dots"),
+                            icon: "radio_button_unchecked",
+                            value: '["dots"]'
+                        });
+                    }
+                    return base;
+                }
             }
         }
     }
