@@ -163,11 +163,17 @@ Item {
 
                     StyledText {
                         id: fileLabel
-                        anchors.centerIn: parent
+                        anchors {
+                            verticalCenter: parent.verticalCenter
+                            horizontalCenter: parent.horizontalCenter
+                            horizontalCenterOffset: 4
+                        }
                         property string fileName: modelData.filePath.split("/")[modelData.filePath.split("/").length - 1]
-                        text: fileName.length > 30 ? fileName.slice(27) + "..." : fileName
+                        text: fileName
                         color: Appearance.colors.colOnPrimary
                         font.pixelSize: Appearance.font.pixelSize.smaller
+                        elide: Text.ElideMiddle
+                        width: parent.implicitWidth - 10
                     }
                 }
 
