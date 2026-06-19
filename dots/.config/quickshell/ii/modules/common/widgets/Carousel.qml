@@ -175,6 +175,18 @@ Item {
                     cursorShape: Qt.PointingHandCursor
                     onClicked: root.itemClicked(itemContainer.index, itemContainer.modelData)
                     hoverEnabled: true
+
+                    onWheel: event => {
+                        root.pressedAny()
+                        if (event.angleDelta.y < 0) {
+                            root.currentIndex += 1
+                            root.snapToIndex(currentIndex);
+                        } else if (event.angleDelta.y > 0) {
+                            root.currentIndex -= 1
+                            root.snapToIndex(currentIndex);
+                        }
+                    }
+
                     onPressed: {
                         root.pressedAny()
                     }

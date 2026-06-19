@@ -138,6 +138,8 @@ ContentPage {
                     easing.type: Easing.OutCubic
                 }
 
+                
+
                 Carousel {
                     id: favouritesCarousel
                     implicitWidth: parent.implicitWidth
