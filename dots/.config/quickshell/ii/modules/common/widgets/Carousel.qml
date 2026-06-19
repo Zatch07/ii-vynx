@@ -7,6 +7,7 @@ import qs.modules.common.functions
 /*
  * As close to as possible recreation of Material 3 Expressive Carousel. 
  * See https://m3.material.io/components/carousel/overview
+ * NOTE: Use bigger sourceSize and thumbnailSizeName in ThumbnailImage for better resolution (512x512)
 */
 
 Item {

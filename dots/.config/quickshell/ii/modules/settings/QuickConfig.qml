@@ -26,11 +26,12 @@ ContentPage {
         const currentWallpaper = Config.options.background.wallpaperPath
         const currentIndex = favs.indexOf(currentWallpaper)
         
+        if (favs.length === 0) return
         if (currentIndex !== -1) {
             const elementsBefore = favs.slice(0, currentIndex)
             const elementsFromCurrent = favs.slice(currentIndex)
             favs = elementsFromCurrent.concat(elementsBefore)
-        } else {
+        } else if (currentWallpaper !== "") {
             favs.unshift(currentWallpaper)
         }
         
@@ -153,6 +154,7 @@ ContentPage {
 
                     model: page.favouritesCarouselModel
                     carouselType: "multibrowse"
+                    visible: page.favouritesCarouselModel.count > 0
                     onItemClicked: (index, modelData) => {
                         shrinkAnimation.running = true
                         favouritesCarousel.currentIndex = 0
@@ -174,8 +176,21 @@ ContentPage {
                             sourcePath: carouselItem.modelData.filePath
                             fillMode: Image.PreserveAspectCrop
                             generateThumbnail: true
+
+                            // fix for resolution
+                            thumbnailSizeName: Images.thumbnailSizeNameForDimensions(512, 512)
+                            sourceSize: (512,512)
                         }
                     }
+                }
+
+                StyledText {
+                    anchors.centerIn: parent
+                    visible: page.favouritesCarouselModel.count === 0
+                    text: Translation.tr("No favourites yet\nAdd some from wallpaper selector")
+                    font.pixelSize: Appearance.font.pixelSize.body
+                    color: Appearance.colors.colOnLayer3
+                    horizontalAlignment: Text.AlignHCenter
                 }
             }
 

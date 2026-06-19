@@ -14,8 +14,7 @@ StyledImage {
 
     property bool generateThumbnail: true
     required property string sourcePath
-    property int thumbnailMaxSize: 512
-    property string thumbnailSizeName: Images.thumbnailSizeNameForDimensions(thumbnailMaxSize, thumbnailMaxSize)
+    property string thumbnailSizeName: Images.thumbnailSizeNameForDimensions(sourceSize.width, sourceSize.height)
     property string thumbnailPath: {
         if (sourcePath.length == 0) return;
         const resolvedUrlWithoutFileProtocol = FileUtils.trimFileProtocol(`${Qt.resolvedUrl(sourcePath)}`);
@@ -24,34 +23,27 @@ StyledImage {
         return `${Directories.genericCache}/thumbnails/${thumbnailSizeName}/${md5Hash}.png`;
     }
     source: thumbnailPath
-    sourceSize: Qt.size(thumbnailMaxSize, thumbnailMaxSize)
 
     asynchronous: true
     smooth: true
     mipmap: false
 
     opacity: status === Image.Ready ? 1 : 0
-    Behavior on opacity { enabled: false }
+    Behavior on opacity {
+        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+    }
 
-    onSourcePathChanged: {
+    onSourceSizeChanged: {
         if (!root.generateThumbnail) return;
         thumbnailGeneration.running = false;
         thumbnailGeneration.running = true;
     }
-
-    Component.onCompleted: {
-        if (root.generateThumbnail && status !== Image.Ready) {
-            thumbnailGeneration.running = true;
-        }
-    }
-
     Process {
         id: thumbnailGeneration
         command: {
-            const maxSize = root.thumbnailMaxSize;
-            const thumbFile = FileUtils.trimFileProtocol(root.thumbnailPath)
-            return ["bash", "-c",
-                `[ -f '${thumbFile}' ] && exit 0 || { mkdir -p "$(dirname '${thumbFile}')" && magick '${root.sourcePath}' -resize ${maxSize}x${maxSize} '${thumbFile}' && exit 1; }`
+            const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
+            return ["bash", "-c", 
+                `[ -f '${FileUtils.trimFileProtocol(root.thumbnailPath)}' ] && exit 0 || { magick '${root.sourcePath}' -resize ${maxSize}x${maxSize} '${FileUtils.trimFileProtocol(root.thumbnailPath)}' && exit 1; }`
             ]
         }
         onExited: (exitCode, exitStatus) => {
