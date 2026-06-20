@@ -367,18 +367,98 @@ else
 fi
 
 echo ""
-echo -e "${NC}• Copying...${NC}"
+echo -e "${NC}• Copying dotfiles...${NC}"
+
+# 1. Copy ii-vynx quickshell theme
 log_verbose "Copying from $SOURCE_DIR to $TARGET_DIR"
 cp -r "$SOURCE_DIR/." "$TARGET_DIR/"
-
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Successfully copied: $TARGET_DIR${NC}"
-    sleep 1.0
-    setup_hyprland_overrides
 else
-    echo -e "${RED}✗ An error occurred while copying!${NC}"
-    exit 1
+    echo -e "${RED}✗ An error occurred while copying quickshell/ii!${NC}"
 fi
+
+# 2. Copy all other .config files
+echo -e "${BLUE}• Copying dots/.config to ~/.config...${NC}"
+if [ -d "$SCRIPT_DIR/dots/.config" ]; then
+    cp -r "$SCRIPT_DIR/dots/.config/." "$HOME/.config/"
+    echo -e "${GREEN}✓ Copied dots/.config${NC}"
+fi
+
+# 3. Copy all .local files
+echo -e "${BLUE}• Copying dots/.local to ~/.local...${NC}"
+if [ -d "$SCRIPT_DIR/dots/.local" ]; then
+    mkdir -p "$HOME/.local"
+    cp -r "$SCRIPT_DIR/dots/.local/." "$HOME/.local/"
+    echo -e "${GREEN}✓ Copied dots/.local${NC}"
+fi
+
+# 4. Copy dots-extra
+echo -e "${BLUE}• Copying dots-extra configurations...${NC}"
+if [ -d "$SCRIPT_DIR/dots-extra/emacs" ]; then
+    mkdir -p "$HOME/.emacs.d"
+    cp -r "$SCRIPT_DIR/dots-extra/emacs/." "$HOME/.emacs.d/"
+    echo -e "${GREEN}✓ Copied dots-extra/emacs${NC}"
+fi
+if [ -d "$SCRIPT_DIR/dots-extra/fcitx5" ]; then
+    mkdir -p "$HOME/.config/fcitx5"
+    cp -r "$SCRIPT_DIR/dots-extra/fcitx5/." "$HOME/.config/fcitx5/"
+    echo -e "${GREEN}✓ Copied dots-extra/fcitx5${NC}"
+fi
+if [ -d "$SCRIPT_DIR/dots-extra/swaylock" ]; then
+    mkdir -p "$HOME/.config/swaylock"
+    cp -r "$SCRIPT_DIR/dots-extra/swaylock/." "$HOME/.config/swaylock/"
+    echo -e "${GREEN}✓ Copied dots-extra/swaylock${NC}"
+fi
+
+setup_hyprland_overrides
+
+install_apps() {
+    echo ""
+    echo -e "${NC}• Installing requested applications...${NC}"
+    local apps=(
+        discord-canary
+        vencord-hook
+        vencord-installer
+        ferdium
+        antigravity-ide
+        spotify-launcher
+        spicetify
+    )
+    
+    local pkg_manager=""
+    if command -v yay &> /dev/null; then
+        pkg_manager="yay"
+    elif command -v paru &> /dev/null; then
+        pkg_manager="paru"
+    else
+        echo -e "${YELLOW}⚠ Neither yay nor paru found. Installing yay automatically...${NC}"
+        sudo pacman -S --needed --noconfirm git base-devel
+        
+        # Clone and build yay-bin
+        if [ -d "/tmp/yay-bin" ]; then rm -rf "/tmp/yay-bin"; fi
+        git clone https://aur.archlinux.org/yay-bin.git /tmp/yay-bin
+        (cd /tmp/yay-bin && makepkg -si --noconfirm)
+        rm -rf /tmp/yay-bin
+        
+        if command -v yay &> /dev/null; then
+            echo -e "${GREEN}✓ yay installed successfully.${NC}"
+            pkg_manager="yay"
+        else
+            echo -e "${RED}✗ Failed to install yay automatically. Skipping app installation.${NC}"
+            return
+        fi
+    fi
+    
+    for app in "${apps[@]}"; do
+        echo -e "${BLUE}• Checking and installing ${app}...${NC}"
+        # --needed skips the package if it's already installed
+        "$pkg_manager" -S --noconfirm --needed "$app"
+    done
+    echo -e "${GREEN}✓ Application installation complete.${NC}"
+}
+
+install_apps
 
 echo ""
 echo -e "${NC}• Restarting Hyprland & Quickshell...${NC}"
