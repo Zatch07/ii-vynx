@@ -1,20 +1,20 @@
 [Background]
-Color=28,16,21
+Color=23,15,15
 
 [BackgroundIntense]
-Color=32,19,24
+Color=29,20,20
 
 [BackgroundFaint]
-Color=89,70,94
+Color=98,69,68
 
 [Color0]
-Color=28,16,21
+Color=23,15,15
 
 [Color0Intense]
-Color=189,173,201
+Color=202,171,170
 
 [Color0Faint]
-Color=166,151,176
+Color=177,149,148
 
 [Color1]
 Color=244,172,182
@@ -23,7 +23,7 @@ Color=244,172,182
 Color=246,183,192
 
 [Color1Faint]
-Color=171,117,126
+Color=169,117,124
 
 [Color2]
 Color=193,227,183
@@ -32,7 +32,7 @@ Color=193,227,183
 Color=202,231,193
 
 [Color2Faint]
-Color=138,156,127
+Color=135,155,124
 
 [Color3]
 Color=242,223,190
@@ -41,7 +41,7 @@ Color=242,223,190
 Color=244,227,199
 
 [Color3Faint]
-Color=170,152,131
+Color=168,152,129
 
 [Color4]
 Color=173,197,247
@@ -50,7 +50,7 @@ Color=173,197,247
 Color=184,204,248
 
 [Color4Faint]
-Color=124,135,171
+Color=121,134,168
 
 [Color5]
 Color=247,207,236
@@ -59,7 +59,7 @@ Color=247,207,236
 Color=248,213,239
 
 [Color5Faint]
-Color=173,142,163
+Color=171,141,161
 
 [Color6]
 Color=177,224,217
@@ -68,7 +68,7 @@ Color=177,224,217
 Color=188,227,222
 
 [Color6Faint]
-Color=127,153,150
+Color=125,152,148
 
 [Color7]
 Color=248,194,168
@@ -77,16 +77,16 @@ Color=248,194,168
 Color=249,202,180
 
 [Color7Faint]
-Color=174,133,116
+Color=172,132,114
 
 [Foreground]
-Color=231,215,249
+Color=249,213,211
 
 [ForegroundIntense]
-Color=236,220,255
+Color=255,218,216
 
 [ForegroundFaint]
-Color=207,191,222
+Color=223,189,188
 
 [General]
 Description=MaterialYou

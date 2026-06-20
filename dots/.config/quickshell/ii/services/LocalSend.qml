@@ -22,7 +22,7 @@ Singleton {
     property bool available: false
     property bool serverRunning: receiveProc.running
     property bool autoStart: Config.options?.localsend?.autoStart ?? false
-    property string downloadPath: Config.options?.localsend?.downloadPath
+    property string downloadPath: Config.options?.localsend?.downloadPath || "~/Downloads"
     property bool showNotifications: Config.options?.localsend?.showNotifications ?? true
 
     // Receive state
@@ -78,7 +78,7 @@ Singleton {
         if (!root.available || root.sending || root.droppedFiles.length === 0) return
         root.sending = true
         const filePaths = root.droppedFiles.map(f => f.path)
-        sendProc.command = ["bash", "-lc",`localsend-cli send ${deviceIp} ${filePaths.join(" ")} --json`]
+        sendProc.command = ["bash", "-lc",`PATH=~/.local/bin:$PATH localsend-cli send ${deviceIp} ${filePaths.join(" ")} --json`]
         sendProc.running = true
     }
 
@@ -91,10 +91,7 @@ Singleton {
     Process {
         id: checkAvailabilityProc
         running: true
-        command: ["bash", "-lc", "which localsend-cli"]
-        environment: ({
-            "PATH": Directories.home + "/.local/bin:/usr/local/bin:/usr/bin:/bin"
-        })
+        command: ["bash", "-lc", "PATH=~/.local/bin:$PATH which localsend-cli"]
         onExited: (exitCode, exitStatus) => {
             root.available = (exitCode === 0)
             if (root.available && root.autoStart) {
@@ -149,10 +146,6 @@ Singleton {
         running: false
         stdinEnabled: true
 
-        environment: ({
-            "PATH": Directories.home + "/.local/bin:/usr/local/bin:/usr/bin:/bin"
-        })
-
         stdout: SplitParser {
             onRead: line => {
                 if (!line || line.trim().length === 0) return
@@ -181,10 +174,6 @@ Singleton {
     Process {
         id: sendProc
         running: false
-
-        environment: ({
-            "PATH": Directories.home + "/.local/bin:/usr/local/bin:/usr/bin:/bin"
-        })
 
         stdout: SplitParser {
             onRead: line => {
@@ -316,7 +305,7 @@ Singleton {
         id: serverStartDelayTimer
         interval: 500
         onTriggered: {
-            receiveProc.command = ["bash", "-lc", `localsend-cli receive --interactive-json --output ${root.downloadPath}`]
+            receiveProc.command = ["bash", "-lc", `PATH=~/.local/bin:$PATH localsend-cli receive --interactive-json --output ${root.downloadPath}`]
             console.log("[LocalSend] Starting receive server with output dir:", root.downloadPath)
             receiveProc.running = true
         }

@@ -42,13 +42,9 @@ Item {
         if (visible && root.isValidKey) Todo.refresh();
     }
 
-    Rectangle {
+    Item {
         anchors.fill: parent
-        color: Appearance.colors.colSurfaceContainer
         visible: root.isValidKey
-        radius: Appearance.rounding.large
-        border.width: 1
-        border.color: Appearance.colors.colOutlineVariant
 
         RowLayout {
             anchors.fill: parent
@@ -59,65 +55,70 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "transparent"
+                color: Appearance.colors.colLayer4
+                radius: Appearance.rounding.large
+                clip: true
 
                 ColumnLayout {
                     anchors.fill: parent
-                    spacing: 0
+                    anchors.margins: 16
+                    spacing: 12
 
-                    // Header
+                    // Header Row
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        MaterialShape {
+                            shapeString: "squircle"
+                            implicitSize: 32
+                            color: Appearance.colors.colPrimaryContainer
+
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                text: "format_list_bulleted"
+                                color: Appearance.colors.colOnPrimaryContainer
+                                iconSize: Appearance.font.pixelSize.normal
+                                fill: 1.0
+                            }
+                        }
+
+                        StyledText {
+                            text: Translation.tr("Active Tasks")
+                            font.pixelSize: Appearance.font.pixelSize.title
+                            font.weight: Font.Bold
+                            color: Appearance.colors.colOnSurface
+                            Layout.fillWidth: true
+                        }
+
+                        MaterialLoadingIndicator {
+                            Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
+                            loading: Todo._isFetching
+                            visible: Todo._isFetching && Todo.list.length > 0
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 32
+                            Layout.preferredHeight: 32
+                            radius: 16
+                            color: Appearance.colors.colPrimaryContainer
+                            StyledText {
+                                anchors.centerIn: parent
+                                text: activeList.taskList.length
+                                color: Appearance.colors.colOnPrimaryContainer
+                                font.weight: Font.Bold
+                            }
+                        }
+                    }
+
+                    // Divider
                     Rectangle {
                         Layout.fillWidth: true
-                        implicitHeight: 60
-                        color: Appearance.colors.colSurfaceContainer
-                        radius: Appearance.rounding.medium
-                        
-                        Rectangle {
-                            width: parent.width
-                            height: 1
-                            anchors.bottom: parent.bottom
-                            color: Appearance.colors.colOutlineVariant
-                        }
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 20
-                            
-                            MaterialSymbol {
-                                text: "format_list_bulleted"
-                                color: Appearance.colors.colPrimary
-                                font.pixelSize: 24
-                            }
-
-                            StyledText {
-                                text: Translation.tr("Active Tasks")
-                                font.pixelSize: Appearance.font.pixelSize.title
-                                font.weight: 600
-                                color: Appearance.colors.colOnSurface
-                                Layout.fillWidth: true
-                            }
-
-                            MaterialLoadingIndicator {
-                                width: 24
-                                height: 24
-                                loading: Todo._isFetching
-                                visible: Todo._isFetching && Todo.list.length > 0
-                            }
-
-                            Rectangle {
-                                width: 32
-                                height: 32
-                                radius: 16
-                                color: Appearance.colors.colPrimaryContainer
-                                StyledText {
-                                    anchors.centerIn: parent
-                                    text: activeList.taskList.length
-                                    color: Appearance.colors.colOnPrimaryContainer
-                                    font.weight: 600
-                                }
-                            }
-                        }
+                        Layout.preferredHeight: 1
+                        radius: 1
+                        color: Appearance.colors.colOutlineVariant
+                        opacity: 0.3
                     }
 
                     // Task List
@@ -125,9 +126,6 @@ Item {
                         id: activeList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.leftMargin: 20
-                        Layout.rightMargin: 20
-                        Layout.topMargin: 16
                         listBottomPadding: root.fabSize + root.fabMargins * 2
                         taskFontSize: Appearance.font.pixelSize.larger
                         emptyPlaceholderIcon: "check_circle"
@@ -145,65 +143,70 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                color: "transparent"
+                color: Appearance.colors.colLayer4
+                radius: Appearance.rounding.large
+                clip: true
 
                 ColumnLayout {
                     anchors.fill: parent
-                    spacing: 0
+                    anchors.margins: 16
+                    spacing: 12
 
-                    // Header
+                    // Header Row
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 10
+
+                        MaterialShape {
+                            shapeString: "circle"
+                            implicitSize: 32
+                            color: Appearance.colors.colSecondaryContainer
+
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                text: "checklist"
+                                color: Appearance.colors.colOnSecondaryContainer
+                                iconSize: Appearance.font.pixelSize.normal
+                                fill: 1.0
+                            }
+                        }
+
+                        StyledText {
+                            text: Translation.tr("Completed Tasks")
+                            font.pixelSize: Appearance.font.pixelSize.title
+                            font.weight: Font.Bold
+                            color: Appearance.colors.colOnSurface
+                            Layout.fillWidth: true
+                        }
+
+                        MaterialLoadingIndicator {
+                            Layout.preferredWidth: 24
+                            Layout.preferredHeight: 24
+                            loading: Todo._isFetching
+                            visible: Todo._isFetching && Todo.list.length > 0
+                        }
+
+                        Rectangle {
+                            Layout.preferredWidth: 32
+                            Layout.preferredHeight: 32
+                            radius: 16
+                            color: Appearance.colors.colSecondaryContainer
+                            StyledText {
+                                anchors.centerIn: parent
+                                text: doneList.taskList.length
+                                color: Appearance.colors.colOnSecondaryContainer
+                                font.weight: Font.Bold
+                            }
+                        }
+                    }
+
+                    // Divider
                     Rectangle {
                         Layout.fillWidth: true
-                        implicitHeight: 60
-                        color: Appearance.colors.colSurfaceContainer
-                        radius: Appearance.rounding.medium
-                        
-                        Rectangle {
-                            width: parent.width
-                            height: 1
-                            anchors.bottom: parent.bottom
-                            color: Appearance.colors.colOutlineVariant
-                        }
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 20
-                            anchors.rightMargin: 20
-                            
-                            MaterialSymbol {
-                                text: "checklist"
-                                color: Appearance.colors.colSecondary
-                                font.pixelSize: 24
-                            }
-
-                            StyledText {
-                                text: Translation.tr("Completed Tasks")
-                                font.pixelSize: Appearance.font.pixelSize.title
-                                font.weight: 600
-                                color: Appearance.colors.colOnSurface
-                                Layout.fillWidth: true
-                            }
-
-                            MaterialLoadingIndicator {
-                                width: 24
-                                height: 24
-                                loading: Todo._isFetching
-                                visible: Todo._isFetching && Todo.list.length > 0
-                            }
-
-                            Rectangle {
-                                width: 32
-                                height: 32
-                                radius: 16
-                                color: Appearance.colors.colSecondaryContainer
-                                StyledText {
-                                    anchors.centerIn: parent
-                                    text: doneList.taskList.length
-                                    color: Appearance.colors.colOnSecondaryContainer
-                                    font.weight: 600
-                                }
-                            }
-                        }
+                        Layout.preferredHeight: 1
+                        radius: 1
+                        color: Appearance.colors.colOutlineVariant
+                        opacity: 0.3
                     }
 
                     // Task List
@@ -211,9 +214,6 @@ Item {
                         id: doneList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.leftMargin: 20
-                        Layout.rightMargin: 20
-                        Layout.topMargin: 16
                         listBottomPadding: 20
                         taskFontSize: Appearance.font.pixelSize.larger
                         emptyPlaceholderIcon: "checklist"

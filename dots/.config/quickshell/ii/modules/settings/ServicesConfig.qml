@@ -393,6 +393,41 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "devices"
+        title: Translation.tr("LocalSend")
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "power_settings_new"
+                text: Translation.tr("Start server automatically")
+                checked: Config.options.localsend.autoStart
+                onCheckedChanged: {
+                    Config.options.localsend.autoStart = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "notifications"
+                text: Translation.tr("Show notifications")
+                checked: Config.options.localsend.showNotifications
+                onCheckedChanged: {
+                    Config.options.localsend.showNotifications = checked;
+                }
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Download Path (leave empty for default ~/Downloads)")
+            text: Config.options.localsend.downloadPath
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.localsend.downloadPath = text;
+            }
+        }
+    }
+
+    ContentSection {
         id: btImagesSection
         icon: "bluetooth"
         title: Translation.tr("Bluetooth Device Images")
@@ -402,7 +437,7 @@ ContentPage {
         readonly property string manageScript: Quickshell.shellPath("scripts/services/manage_device_image.sh")
 
         function getDeviceImages() {
-            let images = (Config.options.apps && Config.options.apps.bluetoothDeviceImages) ? Config.options.apps.bluetoothDeviceImages : [];
+            let images = (Config.options && Config.options.bluetoothDeviceImages) ? Config.options.bluetoothDeviceImages : [];
             // Convert to real JS array if it isn't already (though it should be now)
             return Array.from(images);
         }
@@ -467,7 +502,7 @@ ContentPage {
                         } else {
                             list.push({ "mac": btImagesSection.pendingMac, "image": filename });
                         }
-                        Config.options.apps.bluetoothDeviceImages = list;
+                        Config.options.bluetoothDeviceImages = list;
                         btImagesSection.pendingMac = ""; 
                     }
                 }
@@ -680,7 +715,7 @@ ContentPage {
                                     onClicked: {
                                         let list = btImagesSection.getDeviceImages();
                                         list.splice(index, 1);
-                                        Config.options.apps.bluetoothDeviceImages = list;
+                                        Config.options.bluetoothDeviceImages = list;
                                     }
                                 }
                             }

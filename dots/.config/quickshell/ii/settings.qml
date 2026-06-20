@@ -61,6 +61,11 @@ ApplicationWindow {
             icon: "api",
             component: "modules/settings/ServicesConfig.qml"
         },
+        {
+            name: Translation.tr("Hyprland"),
+            icon: "select_window_2",
+            component: "modules/settings/HyprlandConfig.qml"
+        },
 
         {
             name: Translation.tr("Advanced"),

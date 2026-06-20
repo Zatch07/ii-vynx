@@ -12,6 +12,7 @@ StyledPopup {
     id: root
     popupRadius: Appearance.rounding.large
 
+    required property bool compact
     property bool compactMode: Config.options.bar.tooltips.compactPopups
     property int cardMargins: 14
 
@@ -49,8 +50,6 @@ StyledPopup {
         if (Config.options.bar.weather.city)
             root.fetchForecast();
     }
-
-
 
     function fetchForecast() {
         forecastLoading = true;
@@ -101,13 +100,6 @@ StyledPopup {
         anchors.centerIn: parent
         spacing: 12
 
-        Connections {
-            target: Weather
-            function onDataChanged() {
-                root.fetchForecast();
-            }
-        }
-
         Process {
             id: forecastFetcher
             command: ["bash", "-c", ""]
@@ -134,7 +126,7 @@ StyledPopup {
             Layout.minimumWidth: 320
             margins: 20
             iconSize: 100
-            icon: Weather.data.currentIcon
+            icon: Icons.getWeatherIcon(Weather.data.wCode)
             pillText: Weather.data.city || "--"
             pillIcon: Weather.data.city ? "location_on" : ""
             title: Weather.data.temp
@@ -142,19 +134,25 @@ StyledPopup {
         }
         
         HourlyForecast {
-            Layout.minimumWidth: 360
-            margins: root.cardMargins
+            visible: !root.compact
+            showDivider: false
             spacing: 6
+            
+            icon: "schedule"
+            title: Translation.tr("Hourly")
+            headerExtraText: Translation.tr("Last refresh: %1").arg(Weather.data.lastRefresh || "--").slice(0, 20)
+            
             shapeString: "Clover4Leaf"
             shapeColor: Appearance.colors.colSecondaryContainer
             symbolColor: Appearance.colors.colOnSecondaryContainer
-            showDivider: false
-            title: Translation.tr("Hourly")
-            icon: "schedule"
-            headerExtraText: Translation.tr("Last refresh: %1").arg(Weather.data.lastRefresh || "--").slice(0, 20)
+            
+            Layout.minimumWidth: 360
+            margins: root.cardMargins
         }
 
         MetricsGrid {
+            visible: !root.compact
+
             Layout.fillWidth: true
             columns: 2
             rowSpacing: 8
@@ -163,6 +161,8 @@ StyledPopup {
         }
 
         InDayForecast {
+            visible: !root.compact
+
             Layout.minimumWidth: 360
             margins: root.cardMargins
             spacing: 8

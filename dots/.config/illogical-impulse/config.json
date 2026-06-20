@@ -47,7 +47,7 @@
         },
         "palette": {
             "accentColor": "",
-            "type": "scheme-fruit-salad"
+            "type": "samurai"
         },
         "sharpMode": false,
         "toggleWindowRounding": false,
@@ -119,7 +119,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Watchcat[WE-3588262443]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/a_hand_holding_a_cassette_tape.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/yande.re_1162618_cha_hanare_genshin_impact_hu_tao_japanese_clothes.jpg",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -354,7 +354,7 @@
         "tooltips": {
             "bluetoothDevicesLayout": "classic",
             "clickToShow": false,
-            "compactPopups": true,
+            "compactPopups": false,
             "enableBluetoothConnectionPopup": true,
             "showSwap": false
         },
@@ -375,7 +375,7 @@
             "city": "Barmer",
             "enable": true,
             "enableGPS": false,
-            "fetchInterval": 10,
+            "fetchInterval": 30,
             "useUSCS": false
         },
         "workspaces": {
@@ -477,7 +477,49 @@
         "arbitraryRaceConditionDelay": 20
     },
     "hyprland": {
-        "defaultHyprlandLayout": "dwindle"
+        "animations": {
+            "animation": "normal",
+            "enable": true
+        },
+        "autostartApps": {
+            "apps": [
+            ],
+            "enable": false
+        },
+        "decoration": {
+            "activeOpacity": 1,
+            "blur": {
+                "enabled": true,
+                "passes": 6,
+                "size": 5
+            },
+            "inactiveOpacity": 0.99,
+            "rounding": 3,
+            "shadow": {
+                "enabled": true,
+                "range": 4
+            }
+        },
+        "defaultHyprlandLayout": "dwindle",
+        "general": {
+            "borderSize": 2,
+            "gapsIn": 2,
+            "gapsOut": 5,
+            "layout": "scrolling"
+        },
+        "input": {
+            "followMouse": 1,
+            "kbLayout": "us",
+            "numlock": true,
+            "repeatDelay": 250,
+            "repeatRate": 35,
+            "touchpad": {
+                "clickfingerBehavior": false,
+                "disableWhileTyping": false,
+                "naturalScroll": false,
+                "scrollFactor": 0.1
+            }
+        }
     },
     "interactions": {
         "deadPixelWorkaround": {
@@ -515,6 +557,11 @@
             "from": "19:00",
             "to": "06:30"
         }
+    },
+    "localsend": {
+        "autoStart": true,
+        "downloadPath": "",
+        "showNotifications": true
     },
     "lock": {
         "blur": {

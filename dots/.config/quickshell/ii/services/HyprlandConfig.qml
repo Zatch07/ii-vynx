@@ -13,45 +13,54 @@ import qs.modules.common.functions
  */
 Singleton {
     id: root
-    
     signal reloaded()
 
     readonly property string configuratorScriptPath: Quickshell.shellPath("scripts/hyprland/hyprconfigurator.py")
-    readonly property string shellOverridesPath: FileUtils.trimFileProtocol(`${Directories.config}/hypr/hyprland/shellOverrides/main.conf`)
+    readonly property string shellOverridesPath: FileUtils.trimFileProtocol(`${Directories.config}/hypr/hyprland/shellOverrides/main.lua`)
+    readonly property string animOverridesPath: FileUtils.trimFileProtocol(`${Directories.config}/hypr/hyprland/shellOverrides/animations.lua`)
 
     function set(key: string, value: var) {
-        Quickshell.execDetached(["bash", "-c", //
-            `${Directories.cliPath} hyprset key '${key}' '${value}' >/dev/null 2>&1 || true; hyprctl reload` //
+        Quickshell.execDetached([
+            "python3", root.configuratorScriptPath,
+            "--file", root.shellOverridesPath,
+            "--set", key, String(value)
         ])
     }
-    
+
     function setMany(entries: var) {
-        let cmds = ""
+        let args = ["python3", root.configuratorScriptPath, "--file", root.shellOverridesPath]
         for (let key in entries) {
-            cmds += `${Directories.cliPath} hyprset key '${key}' '${entries[key]}' >/dev/null 2>&1; `
+            args.push("--set", key, String(entries[key]))
         }
-        cmds += "hyprctl reload;"
-        Quickshell.execDetached(["bash", "-c", cmds])
+        Quickshell.execDetached(args)
     }
-    
+
     function reset(key: string) {
-        Quickshell.execDetached(["bash", "-c", //
-            `${Directories.cliPath} hyprset reset '${key}' >/dev/null 2>&1 || true; hyprctl reload` //
+        Quickshell.execDetached([
+            "python3", root.configuratorScriptPath,
+            "--file", root.shellOverridesPath,
+            "--reset", key
         ])
     }
-    
+
     function resetMany(keys: list<string>) {
-        let cmds = ""
+        let args = ["python3", root.configuratorScriptPath, "--file", root.shellOverridesPath]
         for (let i = 0; i < keys.length; i++) {
-            cmds += `${Directories.cliPath} hyprset reset '${keys[i]}' >/dev/null 2>&1; `
+            args.push("--reset", keys[i])
         }
-        cmds += "hyprctl reload;"
-        Quickshell.execDetached(["bash", "-c", cmds])
+        Quickshell.execDetached(args)
+    }
+
+    function setAnimPreset(preset: string) {
+        Quickshell.execDetached([
+            "python3", root.configuratorScriptPath,
+            "--anim-preset", preset,
+            "--anim-file", root.animOverridesPath
+        ])
     }
 
     Connections {
         target: Hyprland
-
         function onRawEvent(event) {
             if (event.name == "configreloaded") {
                 root.reloaded()

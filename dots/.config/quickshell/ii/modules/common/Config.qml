@@ -509,6 +509,47 @@ Singleton {
 
             property JsonObject hyprland: JsonObject {
                 property string defaultHyprlandLayout: "dwindle" // Options: dwindle, monocle, master // It's best to not use scrolling
+                property JsonObject animations: JsonObject {
+                    property string animation: "normal"
+                    property bool enable: true
+                }
+                property JsonObject autostartApps: JsonObject {
+                    property bool enable: false
+                    property list<var> apps: []
+                }
+                property JsonObject decoration: JsonObject {
+                    property int rounding: 22
+                    property real activeOpacity: 1.0
+                    property real inactiveOpacity: 0.9
+                    property JsonObject blur: JsonObject {
+                        property bool enabled: true
+                        property int size: 1
+                        property int passes: 3
+                    }
+                    property JsonObject shadow: JsonObject {
+                        property bool enabled: true
+                        property int range: 4
+                    }
+                }
+                property JsonObject general: JsonObject {
+                    property int borderSize: 1
+                    property int gapsIn: 2
+                    property int gapsOut: 5
+                    property string layout: "dwindle"
+                }
+                property JsonObject input: JsonObject {
+                    property string kbLayout: "us"
+                    property bool numlock: true
+                    property int repeatDelay: 250
+                    property int repeatRate: 35
+                    property int followMouse: 1
+                    property JsonObject touchpad: JsonObject {
+                        property bool naturalScroll: false
+                        property bool disableWhileTyping: true
+                        property bool clickfingerBehavior: false
+                        property real scrollFactor: 0.7
+                    }
+                }
             }
 
             property JsonObject interactions: JsonObject {
@@ -659,6 +700,12 @@ Singleton {
             property JsonObject resources: JsonObject {
                 property int updateInterval: 3000
                 property int historyLength: 60
+            }
+
+            property JsonObject localsend: JsonObject {
+                property bool autoStart: false
+                property bool showNotifications: true
+                property string downloadPath: ""
             }
 
             property JsonObject lyricsService: JsonObject {

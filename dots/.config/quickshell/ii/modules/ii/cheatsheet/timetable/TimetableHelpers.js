@@ -30,7 +30,7 @@ function minutesToKhalTimeStr(totalMinutes) {
 
 function getDateForDayIndex(dayIndex, firstDayOfWeek) {
     let d = new Date();
-    let currentConfigDayIndex = (d.getDay() - firstDayOfWeek + 7) % 7;
+    let currentConfigDayIndex = (d.getDay() - firstDayOfWeek + 6) % 7;
     d.setDate(d.getDate() - currentConfigDayIndex + dayIndex);
     return d;
 }

@@ -23,7 +23,17 @@ Item {
     property list<bool> workspaceOccupied: []
     property int workspaceButtonWidth: 26
     
-    property int hoverIndex: -1
+    property int hoverIndex: interactionMouseArea.calculatedHoverIndex
+
+    property var allWindows: HyprlandData.windowList
+
+    function getRollableIcons() {
+        let icons = [];
+        for (let i = 0; i < root.allWindows.length; i++) {
+            icons.push(AppSearch.guessIcon(root.allWindows[i].class));
+        }
+        return icons;
+    }
 
     function updateWorkspaceOccupied() {
         workspaceOccupied = Array.from({ length: root.workspacesShown }, (_, i) => {
@@ -34,6 +44,54 @@ Item {
     Connections { target: Hyprland.workspaces; function onValuesChanged() { updateWorkspaceOccupied(); } }
     Connections { target: Hyprland; function onFocusedWorkspaceChanged() { updateWorkspaceOccupied(); } }
     onWorkspaceGroupChanged: updateWorkspaceOccupied()
+
+    onEffectiveActiveWorkspaceIdChanged: {
+        if (!root.isJackpotActive && getRollableIcons().length > 0) {
+            root.isJackpotActive = true
+            root.showJackpotText = false
+            
+            let icons = getRollableIcons()
+            let isWin = false
+            
+            // Determine final icons
+            if (icons.length > 0) {
+                if (Math.random() > 0.9) {
+                    let winIcon = icons[Math.floor(Math.random() * icons.length)]
+                    root.slot1Icon = winIcon
+                    root.slot2Icon = winIcon
+                    root.slot3Icon = winIcon
+                    isWin = true
+                } else {
+                    root.slot1Icon = icons[Math.floor(Math.random() * icons.length)]
+                    root.slot2Icon = icons[Math.floor(Math.random() * icons.length)]
+                    root.slot3Icon = icons[Math.floor(Math.random() * icons.length)]
+                    if (root.slot1Icon === root.slot2Icon && root.slot2Icon === root.slot3Icon && root.slot1Icon !== "image-missing") {
+                        isWin = true
+                    }
+                }
+            } else {
+                root.slot1Icon = "image-missing"
+                root.slot2Icon = "image-missing"
+                root.slot3Icon = "image-missing"
+            }
+
+            // Start spinning
+            root.slot1Spinning = true
+            root.slot2Spinning = true
+            root.slot3Spinning = true
+            
+            // Stop them progressively
+            stopTimer1.start()
+            stopTimer2.start()
+            stopTimer3.start()
+            
+            if (isWin) {
+                winTimer.start()
+            } else {
+                resetTimer.start()
+            }
+        }
+    }
 
     implicitWidth: Math.max(normalLayout.implicitWidth, root.vertical ? Appearance.sizes.verticalBarWidth : 80)
     implicitHeight: Math.max(normalLayout.implicitHeight, root.vertical ? 80 : Appearance.sizes.barHeight)
@@ -89,6 +147,62 @@ Item {
         Behavior on opacity { animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(hoverIndicator) }
     }
 
+    MouseArea {
+        id: interactionMouseArea
+        z: 4
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.LeftButton
+        
+        property int calculatedHoverIndex: {
+            if (!containsMouse || root.isJackpotActive) return -1;
+            
+            const mx = mouseX - normalLayer.x - normalLayout.x;
+            const my = mouseY - normalLayer.y - normalLayout.y;
+            const position = root.vertical ? my : mx;
+            
+            let accumulated = 0;
+            for (let i = 0; i < root.workspacesShown; i++) {
+                const item = repeater.itemAt(i);
+                if (!item || !item.visible) continue;
+                
+                const itemSize = root.vertical ? item.height : item.width;
+                if (position >= accumulated && position < accumulated + itemSize) {
+                    return i;
+                }
+                accumulated += itemSize;
+            }
+            return -1;
+        }
+
+        onPressed: (mouse) => {
+            if (root.isJackpotActive) return;
+
+            const mx = mouse.x - normalLayer.x - normalLayout.x;
+            const my = mouse.y - normalLayer.y - normalLayout.y;
+            const position = root.vertical ? my : mx;
+            
+            let accumulated = 0;
+            let clickedIndex = -1;
+            for (let i = 0; i < root.workspacesShown; i++) {
+                const item = repeater.itemAt(i);
+                if (!item || !item.visible) continue;
+                
+                const itemSize = root.vertical ? item.height : item.width;
+                if (position >= accumulated && position < accumulated + itemSize) {
+                    clickedIndex = i;
+                    break;
+                }
+                accumulated += itemSize;
+            }
+
+            if (clickedIndex !== -1) {
+                const wsId = workspaceGroup * root.workspacesShown + clickedIndex + 1;
+                Hyprland.dispatch(`hl.dsp.focus({ workspace = ${wsId} })`);
+            }
+        }
+    }
+
     // Jackpot State Machine
     property bool isJackpotActive: false
     property bool isSpinning: false
@@ -98,74 +212,33 @@ Item {
     property string slot2Icon: ""
     property string slot3Icon: ""
 
-    Timer {
-        id: spinTimer
-        interval: 100
-        repeat: true
-        property int spinCount: 0
-        
-        onTriggered: {
-            spinCount++
-            
-            // Pick random icons from currently active windows on the monitor
-            let winList = root.monitorWindows
-            if (winList && winList.length > 0) {
-                root.slot1Icon = winList[Math.floor(Math.random() * winList.length)].icon
-                root.slot2Icon = winList[Math.floor(Math.random() * winList.length)].icon
-                root.slot3Icon = winList[Math.floor(Math.random() * winList.length)].icon
-            } else {
-                root.slot1Icon = "image-missing"
-                root.slot2Icon = "image-missing"
-                root.slot3Icon = "image-missing"
-            }
+    property bool slot1Spinning: false
+    property bool slot2Spinning: false
+    property bool slot3Spinning: false
 
-            if (spinCount >= 10) {
-                stop()
-                root.isSpinning = false
-                
-                // Determine if jackpot
-                let winCount = root.activeWindowsCount
-                if (winCount > 0) {
-                    // Force a win condition sometimes if there are windows
-                    if (Math.random() > 0.3) {
-                        let win = winList[0] // just pick the first for a guaranteed match
-                        root.slot1Icon = win.icon
-                        root.slot2Icon = win.icon
-                        root.slot3Icon = win.icon
-                        root.showJackpotText = true
-                    }
-                }
-                
-                resetTimer.start()
-            }
+    Timer { id: stopTimer1; interval: 300; onTriggered: root.slot1Spinning = false }
+    Timer { id: stopTimer2; interval: 500; onTriggered: root.slot2Spinning = false }
+    Timer { id: stopTimer3; interval: 700; onTriggered: root.slot3Spinning = false }
+
+    Timer {
+        id: winTimer
+        interval: 1000 // Waits for slot3 to stop (700ms) + 300ms pause
+        onTriggered: {
+            root.showJackpotText = true
+            resetTimer.start()
         }
     }
 
     Timer {
         id: resetTimer
-        interval: root.showJackpotText ? 2000 : 800
+        interval: root.showJackpotText ? 1500 : 1200 // Longer to show text
         onTriggered: {
             root.showJackpotText = false
             root.isJackpotActive = false
         }
     }
 
-    // Capture Super Key Down
-    Connections {
-        target: GlobalStates
-        function onSuperDownChanged() {
-            if (GlobalStates.superDown && !root.isJackpotActive && root.activeWindowsCount > 0) {
-                root.isJackpotActive = true
-                root.isSpinning = true
-                root.showJackpotText = false
-                spinTimer.spinCount = 0
-                spinTimer.start()
-            } else if (!GlobalStates.superDown && !root.showJackpotText) {
-                // If super is released before jackpot animation finishes, optionally reset immediately or let it finish.
-                // We'll let it finish.
-            }
-        }
-    }
+    // Removed GlobalStates Super Key binding to trigger on workspace change exclusively
 
     // LAYER 1: Normal Workspaces (Pill Style)
     Item {
@@ -203,15 +276,6 @@ Item {
 
                     property var workspaceWindows: HyprlandData.windowList.filter(w => w.workspace.id === workspaceValue)
                     property int maxIcons: Config.options.bar.workspaces.maxWindowCount
-
-                    onPressed: Hyprland.dispatch(`hl.dsp.focus({ workspace = ${workspaceValue} })`)
-
-                    HoverHandler {
-                        onHoveredChanged: {
-                            if (hovered) root.hoverIndex = index;
-                            else if (root.hoverIndex === index) root.hoverIndex = -1;
-                        }
-                    }
 
                     property int activeExtraPixels: workspaceWindows.length > 0 ? (Math.min(workspaceWindows.length, maxIcons) * 22 + 8) : 12
 
@@ -363,34 +427,93 @@ Item {
             border.width: 1
 
             // Slots
-            RowLayout {
+            GridLayout {
                 anchors.centerIn: parent
-                spacing: 8
+                columnSpacing: 8
+                rowSpacing: 8
+                columns: root.vertical ? 1 : 3
+                rows: root.vertical ? 3 : 1
                 opacity: root.showJackpotText ? 0.3 : 1.0
                 Behavior on opacity { NumberAnimation { duration: 200 } }
 
-                Image {
-                    Layout.preferredWidth: 16; Layout.preferredHeight: 16
-                    source: root.slot1Icon ? Quickshell.iconPath(root.slot1Icon, "image-missing") : ""
+                // Slot 1
+                Item {
+                    clip: true
+                    Layout.preferredWidth: 16
+                    Layout.preferredHeight: 16
+                    Column {
+                        id: col1; y: 0
+                        property var pool: root.getRollableIcons()
+                        Repeater {
+                            model: root.slot1Spinning ? 20 : 1
+                            Image {
+                                width: 16; height: 16
+                                source: (!root.slot1Spinning || col1.pool.length === 0) 
+                                    ? (root.slot1Icon ? Quickshell.iconPath(root.slot1Icon, "image-missing") : "")
+                                    : Quickshell.iconPath(col1.pool[Math.floor(Math.random() * col1.pool.length)], "image-missing")
+                            }
+                        }
+                        NumberAnimation on y { id: anim1; running: root.slot1Spinning; from: -16 * 19; to: 0; duration: 40 * 20; loops: Animation.Infinite }
+                    }
+                    Connections { target: root; function onSlot1SpinningChanged() { if (root.slot1Spinning) { col1.pool = root.getRollableIcons(); anim1.restart() } else { anim1.stop(); col1.y = 0 } } }
                 }
-                Image {
-                    Layout.preferredWidth: 16; Layout.preferredHeight: 16
-                    source: root.slot2Icon ? Quickshell.iconPath(root.slot2Icon, "image-missing") : ""
+
+                // Slot 2
+                Item {
+                    clip: true
+                    Layout.preferredWidth: 16
+                    Layout.preferredHeight: 16
+                    Column {
+                        id: col2; y: 0
+                        property var pool: root.getRollableIcons()
+                        Repeater {
+                            model: root.slot2Spinning ? 20 : 1
+                            Image {
+                                width: 16; height: 16
+                                source: (!root.slot2Spinning || col2.pool.length === 0) 
+                                    ? (root.slot2Icon ? Quickshell.iconPath(root.slot2Icon, "image-missing") : "")
+                                    : Quickshell.iconPath(col2.pool[Math.floor(Math.random() * col2.pool.length)], "image-missing")
+                            }
+                        }
+                        NumberAnimation on y { id: anim2; running: root.slot2Spinning; from: -16 * 19; to: 0; duration: 35 * 20; loops: Animation.Infinite }
+                    }
+                    Connections { target: root; function onSlot2SpinningChanged() { if (root.slot2Spinning) { col2.pool = root.getRollableIcons(); anim2.restart() } else { anim2.stop(); col2.y = 0 } } }
                 }
-                Image {
-                    Layout.preferredWidth: 16; Layout.preferredHeight: 16
-                    source: root.slot3Icon ? Quickshell.iconPath(root.slot3Icon, "image-missing") : ""
+
+                // Slot 3
+                Item {
+                    clip: true
+                    Layout.preferredWidth: 16
+                    Layout.preferredHeight: 16
+                    Column {
+                        id: col3; y: 0
+                        property var pool: root.getRollableIcons()
+                        Repeater {
+                            model: root.slot3Spinning ? 20 : 1
+                            Image {
+                                width: 16; height: 16
+                                source: (!root.slot3Spinning || col3.pool.length === 0) 
+                                    ? (root.slot3Icon ? Quickshell.iconPath(root.slot3Icon, "image-missing") : "")
+                                    : Quickshell.iconPath(col3.pool[Math.floor(Math.random() * col3.pool.length)], "image-missing")
+                            }
+                        }
+                        NumberAnimation on y { id: anim3; running: root.slot3Spinning; from: -16 * 19; to: 0; duration: 50 * 20; loops: Animation.Infinite }
+                    }
+                    Connections { target: root; function onSlot3SpinningChanged() { if (root.slot3Spinning) { col3.pool = root.getRollableIcons(); anim3.restart() } else { anim3.stop(); col3.y = 0 } } }
                 }
             }
 
             // Jackpot Text
             StyledText {
                 anchors.centerIn: parent
-                text: "JACKPOT!"
-                font.pixelSize: Appearance.font.pixelSize.small
+                text: root.vertical ? "J\nA\nC\nK\nP\nO\nT\n!" : "JACKPOT!"
+                font.pixelSize: root.vertical ? (Appearance.font.pixelSize.small * 0.9) : Appearance.font.pixelSize.small
+                lineHeight: root.vertical ? 0.8 : 1.0
+                horizontalAlignment: Text.AlignHCenter
                 font.bold: true
                 color: Appearance.colors.colPrimary
                 visible: root.showJackpotText
+                rotation: 0
                 
                 // Add a little pop animation
                 scale: root.showJackpotText ? 1.2 : 0.5

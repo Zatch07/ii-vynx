@@ -12,8 +12,8 @@ MouseArea {
     id: root
     property bool vertical: false
     property bool hovered: false
-    implicitWidth: root.vertical ? (rowLayout.implicitHeight + 10 * 2) : (rowLayout.implicitWidth + 10 * 2.5)
-    implicitHeight: root.vertical ? (rowLayout.implicitWidth + 10 * 2.5) : (rowLayout.implicitHeight + 10 * 2)
+    implicitWidth: rowLayout.implicitWidth + 10 * 2.5
+    implicitHeight: rowLayout.implicitHeight + 10 * 2
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
@@ -33,35 +33,16 @@ MouseArea {
     GridLayout {
         id: rowLayout
         anchors.centerIn: parent
-        rotation: root.vertical ? 90 : 0
 
-        columns: 2
-        rows: 1
+        columns: root.vertical ? 1 : 2
+        rows: root.vertical ? 2 : 1
 
-        Item {
-            Layout.alignment: Qt.AlignVCenter
-            implicitWidth: Appearance.font.pixelSize.large
-            implicitHeight: Appearance.font.pixelSize.large
-            
-            property string currentIcon: Weather.data.currentIcon ?? "cloud"
-            property bool isMoon: currentIcon.startsWith("moon_")
-
-            MaterialSymbol {
-                anchors.centerIn: parent
-                visible: !parent.isMoon
-                fill: 0
-                text: parent.currentIcon
-                iconSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colOnLayer1
-            }
-
-            MoonPhaseIcon {
-                anchors.centerIn: parent
-                visible: parent.isMoon
-                iconSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colOnLayer1
-                phase: parent.isMoon ? parseInt(parent.currentIcon.split("_")[1]) : 0
-            }
+        MaterialSymbol {
+            fill: 0
+            text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+            iconSize: Appearance.font.pixelSize.large
+            color: Appearance.colors.colOnLayer1
+            Layout.alignment: root.vertical ? Qt.AlignHCenter : Qt.AlignVCenter
         }
 
         StyledText {
@@ -69,30 +50,12 @@ MouseArea {
             font.pixelSize: Appearance.font.pixelSize.small
             color: Appearance.colors.colOnLayer1
             text: Weather.data?.temp ?? "--°"
-            Layout.alignment: Qt.AlignVCenter
+            Layout.alignment: root.vertical ? Qt.AlignHCenter : Qt.AlignVCenter
         }
     }
 
-    property bool compactMode: Config.options.bar.tooltips.compactPopups
-
-    Loader {
-        active: true
-        sourceComponent: root.compactMode ? weatherPopupCompact : weatherPopup
-    }
-    
-    Component {
-        id: weatherPopupCompact
-
-        WeatherPopupCompact {
-            hoverTarget: root
-        }
-    }
-    
-    Component {
-        id: weatherPopup
-
-        WeatherPopup {
-            hoverTarget: root
-        }
+    WeatherPopup {
+        compact: Config.options.bar.tooltips.compactPopups
+        hoverTarget: root
     }
 }

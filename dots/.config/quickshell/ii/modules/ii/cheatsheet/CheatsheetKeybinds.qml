@@ -92,6 +92,40 @@ Item {
         "Super": Config.options.cheatsheet.superKey
     } : {}, Config.options.cheatsheet.useMacSymbol ? macSymbolMap : {}, Config.options.cheatsheet.useFnSymbol ? functionSymbolMap : {}, Config.options.cheatsheet.useMouseSymbol ? mouseSymbolMap : {})
 
+    property var categoryIcons: ({
+        "Audio": "volume_up",
+        "Layout": "view_quilt",
+        "Window": "desktop_windows",
+        "System": "settings",
+        "Apps": "apps",
+        "Misc": "category"
+    })
+    property var sectionShapes: [
+        "squircle", "circle", "square", "hexagon"
+    ]
+
+    component KeyChip: Rectangle {
+        id: chipRoot
+        property string chipText
+        property color textColor: Appearance.colors.colOnSurface
+        property color bgColor: Appearance.colors.colSurfaceContainerLow
+
+        implicitWidth: chipLabel.implicitWidth + 16
+        implicitHeight: chipLabel.implicitHeight + 10
+        radius: Appearance.rounding.small
+        color: bgColor
+
+        StyledText {
+            id: chipLabel
+            anchors.centerIn: parent
+            text: chipRoot.chipText
+            font.family: Appearance.font.family.monospace
+            font.pixelSize: Config.options.cheatsheet.fontSize.key
+            font.weight: Font.Bold
+            color: chipRoot.textColor
+        }
+    }
+
     function parseKeymaps(cheatsheet, unbinds) {
         if (!unbinds) unbinds = [];
         if (!cheatsheet) return [];
@@ -289,62 +323,104 @@ Item {
                 model: keybinds.children
                 visible: !!keybinds.children.length
 
-                delegate: Item { // Section with real keybinds
+                delegate: Rectangle { // Section with real keybinds
                     id: keybindSection
                     required property var modelData
-                    implicitWidth: sectionColumn.implicitWidth
-                    implicitHeight: sectionColumn.implicitHeight
+                    required property int index
+
+                    visible: !!keybindSection.modelData.keybinds.length
+                    implicitWidth: cardContent.implicitWidth + 32
+                    implicitHeight: cardContent.implicitHeight + 32
+                    color: Appearance.colors.colLayer4
+                    radius: Appearance.rounding.large
+                    clip: true
 
                     Column {
-                        id: sectionColumn
-                        anchors.centerIn: parent
-                        spacing: root.titleSpacing
-                        visible: !!keybindSection.modelData.keybinds.length
+                        id: cardContent
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            margins: 16
+                        }
+                        spacing: 12
 
-                        StyledText {
-                            id: sectionTitle
-                            visible: keybindSection.modelData.name !== ""
-                            font {
-                                family: Appearance.font.family.title
-                                pixelSize: Appearance.font.pixelSize.title
-                                variableAxes: Appearance.font.variableAxes.title
+                        Row {
+                            spacing: 10
+
+                            MaterialShape {
+                                shapeString: root.sectionShapes[keybindSection.index % root.sectionShapes.length] || "squircle"
+                                implicitSize: 32
+                                color: Appearance.colors.colPrimaryContainer
+
+                                MaterialSymbol {
+                                    anchors.centerIn: parent
+                                    text: root.categoryIcons[keybindSection.modelData.name] || "keyboard"
+                                    iconSize: Appearance.font.pixelSize.normal
+                                    fill: 1.0
+                                    color: Appearance.colors.colOnPrimaryContainer
+                                }
                             }
-                            color: Appearance.colors.colOnLayer0
-                            text: keybindSection.modelData.name
+
+                            StyledText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                font {
+                                    family: Appearance.font.family.title
+                                    pixelSize: Appearance.font.pixelSize.title
+                                    weight: Font.Bold
+                                }
+                                color: Appearance.colors.colOnSurface
+                                text: keybindSection.modelData.name || "Keybinds"
+                            }
+                        }
+
+                        Rectangle {
+                            width: parent.width
+                            height: 1
+                            radius: 1
+                            color: Appearance.colors.colOutlineVariant
+                            opacity: 0.3
                         }
 
                         Column {
-                            spacing: 4
+                            spacing: 8
+
                             Repeater {
                                 model: keybindSection.modelData.keybinds
                                 delegate: Row {
                                     required property var modelData
-                                    spacing: 16
+                                    spacing: 12
+
                                     Row {
                                         spacing: 4
                                         Repeater {
                                             model: modelData.mods
-                                            delegate: KeyboardKey {
+                                            delegate: KeyChip {
                                                 required property var modelData
-                                                key: root.keySubstitutions[modelData] || modelData
-                                                pixelSize: Config.options.cheatsheet.fontSize.key
+                                                chipText: root.keySubstitutions[modelData] || modelData
+                                                bgColor: Appearance.colors.colSurfaceContainerLow
+                                                textColor: Appearance.colors.colOnSurface
                                             }
                                         }
                                         StyledText {
                                             visible: Config.options.cheatsheet.splitButtons && !root.keyBlacklist.includes(modelData.key) && modelData.mods.length > 0
                                             text: "+"
+                                            font.pixelSize: Config.options.cheatsheet.fontSize.key
+                                            color: Appearance.colors.colPrimary
                                         }
-                                        KeyboardKey {
+                                        KeyChip {
                                             visible: Config.options.cheatsheet.splitButtons && !root.keyBlacklist.includes(modelData.key)
-                                            key: root.keySubstitutions[modelData.key] || modelData.key
-                                            pixelSize: Config.options.cheatsheet.fontSize.key
-                                            color: Appearance.colors.colOnLayer0
+                                            chipText: root.keySubstitutions[modelData.key] || modelData.key
+                                            bgColor: Appearance.colors.colPrimary
+                                            textColor: Appearance.colors.colOnPrimary
                                         }
                                     }
+
                                     StyledText {
                                         anchors.verticalCenter: parent.verticalCenter
                                         font.pixelSize: Config.options.cheatsheet.fontSize.comment || Appearance.font.pixelSize.smaller
-                                        text: modelData.comment
+                                        color: Appearance.colors.colOnSurface
+                                        opacity: 0.7
+                                        text: modelData.comment || ""
                                     }
                                 }
                             }

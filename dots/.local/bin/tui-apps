@@ -41,8 +41,34 @@ if command -v flatpak >/dev/null 2>&1; then
     done < <(flatpak list --app --columns=application,name 2>/dev/null)
 fi
 
-# --- 3. UI Selection (Preview Removed) ---
-SELECTED=$(echo "$LIST" | grep . | sort -u | fzf \
+# --- 3. UI Selection ---
+export TUI_APPS_LIST="/tmp/tui-apps-list.$$"
+export TUI_APPS_STATE="/tmp/tui-apps-state.$$"
+echo "$LIST" | grep . | sort -u > "$TUI_APPS_LIST"
+echo 0 > "$TUI_APPS_STATE"
+
+filter_apps() {
+    local dir=$1
+    local state=$(cat "$TUI_APPS_STATE")
+    if [ "$dir" = "left" ]; then
+        state=$(((state-1)%4))
+        [ $state -lt 0 ] && state=3
+    elif [ "$dir" = "right" ]; then
+        state=$(((state+1)%4))
+    fi
+    echo $state > "$TUI_APPS_STATE"
+    
+    if [ $state -eq 0 ]; then cat "$TUI_APPS_LIST"
+    elif [ $state -eq 1 ]; then grep '󰀻 ' "$TUI_APPS_LIST"
+    elif [ $state -eq 2 ]; then grep '󰏖 ' "$TUI_APPS_LIST"
+    elif [ $state -eq 3 ]; then grep ' ' "$TUI_APPS_LIST"
+    fi
+}
+export -f filter_apps
+
+trap 'rm -f "$TUI_APPS_LIST" "$TUI_APPS_STATE"' EXIT
+
+SELECTED=$(cat "$TUI_APPS_LIST" | fzf \
     --style full \
     --delimiter '|' \
     --with-nth '1,2' \
@@ -50,7 +76,9 @@ SELECTED=$(echo "$LIST" | grep . | sort -u | fzf \
     --layout reverse \
     --border \
     --prompt "🚀 Run: " \
-    --header "󰀻 System | 󰏖 Flatpak |   Terminal")
+    --header "<- All | 󰀻 System | 󰏖 Flatpak |   Terminal ->" \
+    --bind "left:reload(bash -c 'filter_apps left')" \
+    --bind "right:reload(bash -c 'filter_apps right')")
 
 # --- 4. Launch ---
 if [ -n "$SELECTED" ]; then
