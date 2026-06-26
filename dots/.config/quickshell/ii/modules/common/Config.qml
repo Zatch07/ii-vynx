@@ -711,11 +711,6 @@ Singleton {
                 property int historyLength: 60
             }
 
-            property JsonObject localsend: JsonObject {
-                property bool autoStart: false
-                property bool showNotifications: true
-                property string downloadPath: ""
-            }
 
             property JsonObject lyricsService: JsonObject {
                 property bool enable: true
