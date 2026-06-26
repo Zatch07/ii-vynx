@@ -10,8 +10,8 @@ QuickToggleModel {
     icon: "gamepad"
 
     mainAction: () => {
-        if (!root.toggled) {
-            confOpt.value = false;
+        root.toggled = !root.toggled;
+        if (root.toggled) {
             HyprlandSettings.setKeys({
                 "animations:enabled": 0,
                 "decoration:shadow:enabled": 0,
@@ -25,13 +25,10 @@ QuickToggleModel {
                 "general:allow_tearing": 1
             });
         } else {
-            confOpt.value = true;
             HyprlandSettings.resetKeys([
                 "animations:enabled",
                 "decoration:shadow:enabled",
                 "decoration:blur:enabled",
-                "decoration:active_opacity",
-                "decoration:inactive_opacity",
                 "general:gaps_in",
                 "general:gaps_out",
                 "general:border_size",

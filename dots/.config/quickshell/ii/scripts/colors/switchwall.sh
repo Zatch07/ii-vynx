@@ -55,9 +55,9 @@ post_process() {
     local screen_height="$2"
     local wallpaper_path="$3"
 
-    handle_kde_material_you_colors >/dev/null 2>&1 &
-    "$SCRIPT_DIR/code/material-code-set-color.sh" >/dev/null 2>&1 &
-    
+    handle_kde_material_you_colors &
+    "$SCRIPT_DIR/code/material-code-set-color.sh"
+
     # Generate YouTube Music theme
     "$SCRIPT_DIR/../ytmusic/generate-ytmusic-theme.sh" > /dev/null 2>&1 &
 }
@@ -116,7 +116,6 @@ is_video() {
 
 kill_existing_mpvpaper() {
     pkill -f -9 mpvpaper || true
-    pkill -f -9 linux-wallpaperengine || true
 }
 
 create_restore_script() {
@@ -160,9 +159,51 @@ set_thumbnail_path() {
 }
 
 categorize_wallpaper() {
-    img_cat=$("$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh" "$1")
-    # notify-send "Wallpaper category" "$img_cat"
-    echo "$img_cat" > "$STATE_DIR/user/generated/wallpaper/category.txt"
+    local target_payload="$1"
+
+    if [[ -z "$ai_script" || ! -f "$target_payload" ]]; then
+        return
+    fi
+
+    local wallpaper_name=$(basename "$imgpath")
+    local cache_file="$CACHE_DIR/ai-categories/$wallpaper_name.txt"
+  
+    if [ -f "$cache_file" ]; then
+    #Cache hit :) sleep for 300ms to allow the script to finish before changing clock theme
+        (
+            sleep 0.3 
+            cat "$cache_file" >"$STATE_DIR/user/generated/wallpaper/category.txt"
+        ) &
+    else
+        # Cache Miss :(
+        mkdir -p "$CACHE_DIR/ai-categories"
+        (
+            local tmp_output="/tmp/quickshell/ai/cat_verify_${wallpaper_name}.txt"
+            mkdir -p "$(dirname "$tmp_output")"
+
+            "$ai_script" "$target_payload" >"$tmp_output" 2>"$STATE_DIR/user/generated/wallpaper/ai_error.log"
+
+            # checking the output because sometimes we get garbage for some reason
+            local clean_res=$(cat "$tmp_output" | tr -d '"' | xargs | tr '[:upper:]' '[:lower:]')
+            local valid_categories=("abstract" "anime" "city" "minimalist" "landscape" "plants" "person" "space")
+            local api_success=0
+
+            for cat in "${valid_categories[@]}"; do
+                if [[ "$clean_res" == "$cat" ]]; then
+                    api_success=1
+                    break
+                fi
+            done
+
+            if [[ $api_success -eq 1 ]]; then
+                mv "$tmp_output" "$cache_file"
+                cat "$cache_file" >"$STATE_DIR/user/generated/wallpaper/category.txt"
+            else
+                rm -f "$tmp_output"
+                echo "API Failure: Invalid output structure received ($clean_res)" >>"$STATE_DIR/user/generated/wallpaper/ai_error.log"
+            fi
+        ) &
+    fi
 }
 
 switch() {
@@ -171,16 +212,18 @@ switch() {
     type_flag="$3"
     color_flag="$4"
     color="$5"
+    theme_file="$6"
 
     # Start Gemini auto-categorization if enabled
     aiStylingEnabled=$(jq -r '.background.widgets.clock.cookie.aiStyling' "$SHELL_CONFIG_FILE")
     aiStylingModel=$(jq -r '.background.widgets.clock.cookie.aiStylingModel' "$SHELL_CONFIG_FILE")
+    ai_script=""
+
     if [[ "$aiStylingEnabled" == "true" ]]; then
         if [[ "$aiStylingModel" == "gemini" ]]; then  
-            "$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" 2>/dev/null &
-        fi
-        if [[ "$aiStylingModel" == "openrouter" ]]; then  
-            "$SCRIPT_DIR/../ai/openrouter-categorize-wallpaper.sh" "$imgpath" > "$STATE_DIR/user/generated/wallpaper/category.txt" 2>/dev/null &
+            ai_script="$SCRIPT_DIR/../ai/gemini-categorize-wallpaper.sh"
+        elif [[ "$aiStylingModel" == "openrouter" ]]; then  
+            ai_script="$SCRIPT_DIR/../ai/openrouter-categorize-wallpaper.sh"
         fi
     fi
 
@@ -202,89 +245,10 @@ switch() {
             exit 0
         fi
 
-        check_and_prompt_upscale "$imgpath" >/dev/null 2>&1 &
+        check_and_prompt_upscale "$imgpath" &
         kill_existing_mpvpaper
 
-        if [[ "$imgpath" == *"[WE-"* ]]; then
-            set_wallpaper_path "$imgpath"
-            
-            # Check type from project.json
-            local we_type=$(jq -r '.type' "$imgpath/project.json" 2>/dev/null | tr '[:upper:]' '[:lower:]')
-            local we_file=$(jq -r '.file' "$imgpath/project.json" 2>/dev/null)
-            
-            if [[ "$we_type" == "video" ]]; then
-                local video_path="$imgpath/$we_file"
-                
-                # Dependency check for mpvpaper
-                if ! command -v mpvpaper &> /dev/null; then
-                    notify-send -a "Wallpaper switcher" -c "im.error" "Missing mpvpaper" "Please install mpvpaper to play this video wallpaper."
-                    exit 1
-                fi
-                
-                # Use mpvpaper for videos
-                monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
-                for monitor in $monitors; do
-                    nohup mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" >/dev/null 2>&1 &
-                    sleep 0.1
-                done
-                
-                # Update Restore Script for Video WE
-                cat > "$RESTORE_SCRIPT.tmp" << EOF
-#!/bin/bash
-pkill -f -9 mpvpaper
-pkill -f -9 linux-wallpaperengine
-monitors=\$(hyprctl monitors -j | jq -r '.[] | .name')
-for monitor in \$monitors; do
-    nohup mpvpaper -o "$VIDEO_OPTS" "\$monitor" "$video_path" >/dev/null 2>&1 &
-    sleep 0.1
-done
-EOF
-            else
-                # Use linux-wallpaperengine for scenes
-                if ! command -v linux-wallpaperengine &> /dev/null; then
-                    notify-send -a "Wallpaper switcher" -c "im.error" "Missing linux-wallpaperengine" "Please install linux-wallpaperengine to play this scene."
-                    exit 1
-                fi
-
-                # Setup array to handle multi-monitor execution
-                local we_args=(--fps 60 --silent)
-                while read -r monitor; do
-                    we_args+=(--screen-root "$monitor")
-                done < <(hyprctl monitors -j | jq -r '.[] | .name')
-                
-                # Pass the direct directory path
-                we_args+=("$imgpath")
-                
-                /usr/bin/linux-wallpaperengine "${we_args[@]}" > "$STATE_DIR/user/generated/linux_we.log" 2>&1 &
-                
-                # Update Restore Script for Scene WE
-                cat > "$RESTORE_SCRIPT.tmp" << EOF
-#!/bin/bash
-pkill -f -9 mpvpaper
-pkill -f -9 linux-wallpaperengine
-we_args=(--fps 60 --silent)
-while read -r monitor; do
-    we_args+=(--screen-root "\$monitor")
-done < <(hyprctl monitors -j | jq -r '.[] | .name')
-we_args+=("$imgpath")
-/usr/bin/linux-wallpaperengine "\${we_args[@]}" > "$STATE_DIR/user/generated/linux_we.log" 2>&1 &
-EOF
-            fi
-            
-            mv "$RESTORE_SCRIPT.tmp" "$RESTORE_SCRIPT"
-            chmod +x "$RESTORE_SCRIPT"
-            
-            # Find the preview image for Matugen 
-            local thumbnail="$imgpath/preview.jpg"
-            if [ ! -f "$thumbnail" ]; then
-                thumbnail="$imgpath/preview.png"
-            fi
-            set_thumbnail_path "$thumbnail"
-            
-            matugen_args+=(image "$thumbnail")
-            generate_colors_material_args=(--path "$thumbnail")
-
-        elif is_video "$imgpath"; then
+        if is_video "$imgpath"; then
             mkdir -p "$THUMBNAIL_DIR"
 
             missing_deps=()
@@ -334,6 +298,8 @@ EOF
                 matugen_args+=(image "$thumbnail")
                 generate_colors_material_args=(--path "$thumbnail")
                 create_restore_script "$video_path"
+
+                categorize_wallpaper "$thumbnail"
             else
                 echo "Cannot create image to colorgen"
                 remove_restore
@@ -345,6 +311,8 @@ EOF
             # Update wallpaper path in config
             set_wallpaper_path "$imgpath"
             remove_restore
+
+            categorize_wallpaper "$imgpath"
         fi
     fi
 
@@ -392,12 +360,18 @@ EOF
         [[ "$term_fg_boost" != "null" && -n "$term_fg_boost" ]] && generate_colors_material_args+=(--term_fg_boost "$term_fg_boost")
     fi
 
-    matugen "${matugen_args[@]}"
-    source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
-    python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
-        > "$STATE_DIR"/user/generated/material_colors.scss
-    "$SCRIPT_DIR"/applycolor.sh
-    deactivate
+    if [[ -n "$theme_file" ]]; then
+        mkdir -p "$(dirname "$STATE_DIR/user/generated/colors.json")"
+        cp "$theme_file" "$STATE_DIR/user/generated/colors.json"
+        echo "[switchwall.sh] Applied theme: $type_flag"
+    else
+        matugen "${matugen_args[@]}"
+        source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
+        python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
+            > "$STATE_DIR"/user/generated/material_colors.scss
+        deactivate
+        "$SCRIPT_DIR"/applycolor.sh
+    fi
 
     # Pass screen width, height, and wallpaper path to post_process
     max_width_desired="$(hyprctl monitors -j | jq '([.[].width] | min)' | xargs)"
@@ -492,21 +466,29 @@ main() {
             break
         fi
     done
+
+    # If type is not a standard scheme variant, check if it's a built-in or custom theme file
+    theme_file=""
     if [[ $valid_type -eq 0 ]]; then
-        echo "[switchwall.sh] Warning: Invalid type '$type_flag', defaulting to 'auto'" >&2
-        type_flag="auto"
+        builtin_theme="$SCRIPT_DIR/../../defaults/themes/${type_flag}.json"
+        custom_theme="$(dirname "$SHELL_CONFIG_FILE")/themes/${type_flag}.json"
+        if [[ -f "$builtin_theme" ]]; then
+            theme_file="$builtin_theme"
+            valid_type=1
+        elif [[ -f "$custom_theme" ]]; then
+            theme_file="$custom_theme"
+            valid_type=1
+        fi
+        if [[ -z "$theme_file" ]]; then
+            echo "[switchwall.sh] Warning: Invalid type '$type_flag', defaulting to 'auto'" >&2
+            type_flag="auto"
+        fi
     fi
 
     # Only prompt for wallpaper if not using --color and not using --noswitch and no imgpath set
     if [[ -z "$imgpath" && -z "$color_flag" && -z "$noswitch_flag" ]]; then
         cd "$(xdg-user-dir PICTURES)/Wallpapers/showcase" 2>/dev/null || cd "$(xdg-user-dir PICTURES)/Wallpapers" 2>/dev/null || cd "$(xdg-user-dir PICTURES)" || return 1
         imgpath="$(kdialog --getopenfilename . --title 'Choose wallpaper')"
-    fi
-
-    if [[ -n "$imgpath" && -z "$noswitch_flag" ]]; then
-        set_accent_color ""
-        color_flag=""
-        color=""
     fi
 
     if [[ -n "$imgpath" && -z "$noswitch_flag" ]]; then
@@ -539,7 +521,7 @@ main() {
         fi
     fi
 
-    switch "$imgpath" "$mode_flag" "$type_flag" "$color_flag" "$color"
+    switch "$imgpath" "$mode_flag" "$type_flag" "$color_flag" "$color" "$theme_file"
 }
 
 main "$@"

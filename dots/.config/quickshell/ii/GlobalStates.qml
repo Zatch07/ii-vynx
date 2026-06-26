@@ -32,6 +32,7 @@ Singleton {
     property bool superDown: false
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
+    property bool webWallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
     property bool sidebarRightToggledByShortcut: false
 
@@ -63,6 +64,10 @@ Singleton {
             default:         return dashboardPanelOpen;
         }
     }
+
+    // helper properties
+    readonly property bool policiesOnLeft: Config.options.sidebar.position === "default" || Config.options.sidebar.position === "left"
+    readonly property bool dashboardOnLeft: Config.options.sidebar.position === "inverted" || Config.options.sidebar.position === "left"
 
     onPoliciesPanelOpenChanged: {
         if (policiesPanelOpen) {

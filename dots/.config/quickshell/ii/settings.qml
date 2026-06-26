@@ -15,6 +15,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions as CF
+import qs.modules.settings
 
 ApplicationWindow {
     id: root
@@ -62,11 +63,10 @@ ApplicationWindow {
             component: "modules/settings/ServicesConfig.qml"
         },
         {
-            name: Translation.tr("Hyprland"),
-            icon: "select_window_2",
-            component: "modules/settings/HyprlandConfig.qml"
+            name: Translation.tr("Extensions"),
+            icon: "extension",
+            component: "modules/settings/ExtensionsConfig.qml"
         },
-
         {
             name: Translation.tr("Advanced"),
             icon: "construction",

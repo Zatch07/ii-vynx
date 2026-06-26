@@ -64,6 +64,7 @@ Scope {
     PanelLoader { component: SidebarDashboard {} }
     PanelLoader { extraCondition: Config.options.bar.vertical && barExtraCondition; component: VerticalBar {} }
     PanelLoader { component: WallpaperSelector {} }
+    PanelLoader { component: WebWallpaperSelector {} }
     PanelLoader { component: WrappedFrame {} }
     PanelLoader { component: BluetoothConnectionPopup {} }
     PanelLoader { component: VideoEditorPopup {} }
