@@ -240,7 +240,7 @@ MouseArea {
 
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
-            GlobalStates.wallpaperSelectorOpen = false;
+            GlobalStates.webWallpaperSelectorOpen = false;
             event.accepted = true;
         } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) { // Intercept Ctrl+V to handle "paste to go to" in pickers
             wallpaperSelectorContent.handleFilePasting(event);
@@ -662,8 +662,8 @@ MouseArea {
 
     Connections {
         target: GlobalStates
-        function onWallpaperSelectorOpenChanged() {
-            if (GlobalStates.wallpaperSelectorOpen) {
+        function onWebWallpaperSelectorOpenChanged() {
+            if (GlobalStates.webWallpaperSelectorOpen) {
                 if (monitorIsFocused) {
                     filterField.forceActiveFocus();
                 }
@@ -676,7 +676,7 @@ MouseArea {
     Connections {
         target: Wallpapers
         function onChanged() {
-            GlobalStates.wallpaperSelectorOpen = false;
+            GlobalStates.webWallpaperSelectorOpen = false;
         }
         function onColorCacheChanged() {
             if (wallpaperSelectorContent.activeColorFilter) {

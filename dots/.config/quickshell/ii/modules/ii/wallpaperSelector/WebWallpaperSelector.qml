@@ -20,6 +20,8 @@ Scope {
         function onWebWallpaperSelectorOpenChanged() {
             if (GlobalStates.webWallpaperSelectorOpen) {
                 root._zatchLoadState = true;
+            } else {
+                root._zatchLoadState = false;
             }
         }
     }
@@ -68,9 +70,6 @@ Scope {
                 id: content
                 anchors {
                     fill: parent
-                }
-                onDismissFinished: {
-                    root._zatchLoadState = false;
                 }
             }
         }
