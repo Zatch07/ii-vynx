@@ -411,6 +411,14 @@ if [ -d "$SCRIPT_DIR/dots-extra/swaylock" ]; then
     echo -e "${GREEN}✓ Copied dots-extra/swaylock${NC}"
 fi
 
+# 5. Explicitly copy shapes
+echo -e "${BLUE}• Copying shapes directory explicitly...${NC}"
+if [ -d "$SOURCE_DIR/modules/common/widgets/shapes" ]; then
+    mkdir -p "$TARGET_DIR/modules/common/widgets/shapes"
+    cp -r "$SOURCE_DIR/modules/common/widgets/shapes/." "$TARGET_DIR/modules/common/widgets/shapes/"
+    echo -e "${GREEN}✓ Copied shapes directory${NC}"
+fi
+
 setup_hyprland_overrides
 
 install_apps() {
