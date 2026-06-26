@@ -208,7 +208,7 @@
                 "enable": true
             }
         },
-        "barBackgroundStyle": 1,
+        "barBackgroundStyle": 2,
         "barGroupStyle": 0,
         "bottom": true,
         "cornerStyle": 1,

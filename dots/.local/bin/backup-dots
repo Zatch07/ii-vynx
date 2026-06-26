@@ -43,6 +43,24 @@ if [ -d "$REPO_DIR/dots/.local/share" ]; then
     sync_target "$HOME/.local/share" "$REPO_DIR/dots/.local/share"
 fi
 
+# 3. Sync Pictures
+# Sync Scripts inside Wallpapers
+if [ -d "$HOME/Pictures/Wallpapers/Scripts" ]; then
+    mkdir -p "$REPO_DIR/dots/Pictures/Wallpapers/Scripts"
+    rsync -a --delete "$HOME/Pictures/Wallpapers/Scripts/" "$REPO_DIR/dots/Pictures/Wallpapers/Scripts/"
+fi
+
+# Ensure WallpaperEngine folder inside Wallpapers exists (without copying its contents)
+if [ -d "$HOME/Pictures/Wallpapers/WallpaperEngine" ]; then
+    mkdir -p "$REPO_DIR/dots/Pictures/Wallpapers/WallpaperEngine"
+fi
+
+# Sync 'Wallpaper Engine' folder and its contents
+if [ -d "$HOME/Pictures/Wallpaper Engine" ]; then
+    mkdir -p "$REPO_DIR/dots/Pictures/Wallpaper Engine"
+    rsync -a --delete "$HOME/Pictures/Wallpaper Engine/" "$REPO_DIR/dots/Pictures/Wallpaper Engine/"
+fi
+
 echo "📁 Copied configuration files successfully."
 
 # Make sure git tracks changes

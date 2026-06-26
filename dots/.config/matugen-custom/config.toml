@@ -39,7 +39,7 @@ output_path = '~/.local/state/quickshell/user/generated/wallpaper/path.txt'
 
 [templates.discord]
 input_path = '~/.config/matugen-custom/templates/midnight-discord.css'
-output_path = '~/.config/vesktop/themes/midnight.theme.css'
+output_path = '~/.config/Vencord/themes/midnight.theme.css'
 
 [templates.spicetify]
 input_path = '~/.config/matugen-custom/templates/spotify-colors.ini'
