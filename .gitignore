@@ -18,3 +18,4 @@ __pycache__/
 
 # Quickshell local environment config
 /dots/.config/quickshell/ii/.env
+dots/.config/illogical-impulse/extensions/
