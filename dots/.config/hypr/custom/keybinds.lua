@@ -41,6 +41,7 @@ hl.bind("CTRL + SUPER + B", hl.dsp.global("quickshell:barToggle"), { description
 hl.bind("CTRL + SUPER + W", hl.dsp.global("quickshell:customWallpaperSelectorToggle"), { description = "Shell: Toggle custom wallpaper selector" })
 hl.bind("CTRL + SUPER + ALT + W", hl.dsp.global("quickshell:customWallpaperSelectorRandom"), { description = "Shell: Select random wallpaper" })
 hl.bind("CTRL + SUPER + M", hl.dsp.global("quickshell:mediaModeToggle"), { description = "Shell: Toggle media mode" })
+hl.bind("SUPER + SHIFT + W", hl.dsp.global("quickshell:webWallpaperSelectorToggle"), { description = "Shell: Toggle web wallpaper selector" })
 
 hl.bind("CTRL + SUPER + R", hl.dsp.exec_cmd("~/.config/hypr/custom/scripts/refresh-quickshell.sh"), { description = "Shell: Refresh Hyprland and Quickshell" })
 hl.bind("SUPER + U", hl.dsp.exec_cmd("~/.config/caelestia-hoverboard/toggle-hoverboard.sh"), { description = "Shell: Toggle Caelestia Hoverboard Dashboard" })

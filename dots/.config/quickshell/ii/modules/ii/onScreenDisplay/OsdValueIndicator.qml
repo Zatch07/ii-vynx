@@ -22,9 +22,6 @@ Item {
     implicitWidth: Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin
     implicitHeight: valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin
 
-    StyledRectangularShadow {
-        target: valueIndicator
-    }
     Rectangle {
         id: valueIndicator
         anchors {
@@ -32,7 +29,9 @@ Item {
             margins: Appearance.sizes.elevationMargin
         }
         radius: Appearance.rounding.full
-        color: Appearance.m3colors.m3surfaceContainer
+        color: Qt.alpha(Appearance.colors.colLayer0, 0.5)
+        border.width: 1
+        border.color: Qt.alpha(Appearance.colors.colLayer0Border, 0.3)
 
         implicitWidth: valueRow.implicitWidth
         implicitHeight: valueRow.implicitHeight

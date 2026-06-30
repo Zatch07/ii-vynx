@@ -114,9 +114,9 @@ Scope { // Scope
             Rectangle {
                 id: cheatsheetBackground
                 anchors.centerIn: parent
-                color: Appearance.colors.colLayer0
+                color: Qt.alpha(Appearance.colors.colLayer0, 0.5)
                 border.width: 1
-                border.color: Appearance.colors.colLayer0Border
+                border.color: Qt.alpha(Appearance.colors.colLayer0Border, 0.3)
                 radius: Appearance.rounding.windowRounding
                 property real padding: 20
                 property real maxBgWidth: cheatsheetRoot.screen ? cheatsheetRoot.screen.width * 0.95 : 1900

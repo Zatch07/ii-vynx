@@ -40,3 +40,13 @@ output_path = '~/.config/antigravity/themes/matugen.json'
 [templates.zed]
 input_path = '~/.config/matugen/templates/matugen-custom/zed.json'
 output_path = '~/.config/zed/themes/matugen.json'
+
+[templates.yazi]
+input_path = '~/.config/matugen/templates/yazi/theme.toml'
+output_path = '~/.config/yazi/theme.toml'
+
+[templates.starship]
+input_path = '~/.config/matugen/templates/starship.toml'
+output_path = '~/.config/starship.toml'
+
+

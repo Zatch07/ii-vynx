@@ -24,13 +24,67 @@ Item {
 
     property bool isValidKey: Todo.apiKey !== "" && Todo.apiKey !== "YOUR_TODOIST_API_KEY_HERE"
 
-    Keys.onPressed: (event) => {
-        if (event.key === Qt.Key_N && root.isValidKey) {
-            root.showAddDialog = true;
-            event.accepted = true;
-        } else if (event.key === Qt.Key_Escape && root.showAddDialog) {
-            root.showAddDialog = false;
-            event.accepted = true;
+    Shortcut {
+        sequence: "n"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: root.showAddDialog = true
+    }
+
+    Shortcut {
+        sequence: "Esc"
+        enabled: root.visible && root.isValidKey && root.showAddDialog
+        onActivated: root.showAddDialog = false
+    }
+
+    property bool isDoneListActive: false
+
+    Shortcut {
+        sequence: "Up"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: {
+            var view = root.isDoneListActive ? doneList.view : activeList.view;
+            if (view.currentIndex > 0) view.currentIndex--;
+        }
+    }
+    Shortcut {
+        sequence: "Down"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: {
+            var view = root.isDoneListActive ? doneList.view : activeList.view;
+            if (view.currentIndex < view.count - 1) view.currentIndex++;
+        }
+    }
+    Shortcut {
+        sequence: "Left"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: root.isDoneListActive = false
+    }
+    Shortcut {
+        sequence: "Right"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: root.isDoneListActive = true
+    }
+    Shortcut {
+        sequence: "c"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: {
+            var list = root.isDoneListActive ? doneList : activeList;
+            var currentItemModel = list.taskList[list.view.currentIndex];
+            if (currentItemModel) {
+                if (!currentItemModel.done) Todo.markDone(currentItemModel.originalIndex);
+                else Todo.markUnfinished(currentItemModel.originalIndex);
+            }
+        }
+    }
+    Shortcut {
+        sequence: "d"
+        enabled: root.visible && root.isValidKey && !root.showAddDialog
+        onActivated: {
+            var list = root.isDoneListActive ? doneList : activeList;
+            var currentItemModel = list.taskList[list.view.currentIndex];
+            if (currentItemModel) {
+                Todo.deleteItem(currentItemModel.originalIndex);
+            }
         }
     }
 
@@ -126,7 +180,8 @@ Item {
                         id: activeList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        listBottomPadding: root.fabSize + root.fabMargins * 2
+                        isActiveList: !root.isDoneListActive
+                        listBottomPadding: 160
                         taskFontSize: Appearance.font.pixelSize.larger
                         emptyPlaceholderIcon: "check_circle"
                         emptyPlaceholderText: Translation.tr("You're all caught up!")
@@ -214,6 +269,7 @@ Item {
                         id: doneList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
+                        isActiveList: root.isDoneListActive
                         listBottomPadding: 20
                         taskFontSize: Appearance.font.pixelSize.larger
                         emptyPlaceholderIcon: "checklist"
@@ -455,11 +511,24 @@ Item {
         visible: root.isValidKey
         baseSize: root.fabSize
         anchors.left: parent.left
+        anchors.bottom: notifierText.top
+        anchors.leftMargin: root.fabMargins + 24
+        anchors.bottomMargin: 8
+        onClicked: root.showAddDialog = true
+        iconText: "add"
+    }
+
+    StyledText {
+        id: notifierText
+        anchors.left: parent.left
         anchors.bottom: parent.bottom
         anchors.leftMargin: root.fabMargins + 24
         anchors.bottomMargin: root.fabMargins + 24
-        onClicked: root.showAddDialog = true
-        iconText: "add"
+        visible: root.isValidKey && !root.showAddDialog
+        text: Translation.tr("Press 'N' to add a new task\nUse Arrow Keys to navigate\nPress 'C' to complete, 'D' to delete")
+        color: Appearance.colors.colOnSurfaceVariant
+        font.pixelSize: Appearance.font.pixelSize.smaller
+        font.weight: Font.Medium
     }
 
     // Add Task Dialog Overlay

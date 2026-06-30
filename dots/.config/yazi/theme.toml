@@ -1,0 +1,145 @@
+[app]
+overall = { bg = "#121314" }
+
+[manager]
+cwd = { fg = "#c0c8cc" }
+
+# Hovered
+hovered         = { fg = "#121314", bg = "#bac9d1" }
+preview_hovered = { underline = true }
+
+# Find
+find_keyword  = { fg = "#b4cad5", italic = true }
+find_position = { fg = "#bac9d1", bg = "reset", italic = true }
+
+# Marker
+marker_copied   = { fg = "#c0c8cc", bg = "#c0c8cc" }
+marker_cut      = { fg = "#ffb4ab", bg = "#ffb4ab" }
+marker_marked   = { fg = "#bac9d1", bg = "#bac9d1" }
+marker_selected = { fg = "#bac9d1", bg = "#bac9d1" }
+
+# Tab
+tab_active   = { fg = "#121314", bg = "#e3e2e2", bold = true }
+tab_inactive = { fg = "#e3e2e2", bg = "#464747" }
+
+# Count
+count_copied   = { fg = "#121314", bg = "#c0c8cc" }
+count_cut      = { fg = "#121314", bg = "#ffb4ab" }
+count_selected = { fg = "#121314", bg = "#bac9d1" }
+
+# Border
+border_symbol = "│"
+border_style  = { fg = "#464747" }
+
+[mode]
+normal_main = { fg = "#121314", bg = "#bac9d1", bold = true }
+normal_alt  = { fg = "#bac9d1", bg = "#121314"}
+
+select_main = { fg = "#121314", bg = "#c0c8cc", bold = true }
+select_alt  = { fg = "#c0c8cc", bg = "#121314"}
+
+unset_main  = { fg = "#121314", bg = "#b4cad5", bold = true }
+unset_alt   = { fg = "#b4cad5", bg = "#121314"}
+
+[status]
+separator_open  = ""
+separator_close = ""
+separator_style = { fg = "#464747" }
+progress_label  = { fg = "#ffffff", bold = true }
+progress_normal = { fg = "#c0c8cc", bg = "#464747" }
+progress_error  = { fg = "#b4cad5", bg = "#ffb4ab" }
+
+[input]
+border   = { fg = "#bac9d1" }
+title    = {}
+value    = {}
+selected = { reversed = true }
+
+[pick]
+border   = { fg = "#bac9d1" }
+active   = { fg = "#c0c8cc" }
+inactive = {}
+
+[completion]
+border   = { fg = "#bac9d1" }
+active   = { bg = "#464747" }
+inactive = {}
+
+[tasks]
+border  = { fg = "#bac9d1" }
+title   = {}
+hovered = { fg = "#c0c8cc", bold = true }
+
+[which]
+mask            = { bg = "#121314" }
+cand            = { fg = "#c0c8cc" }
+rest            = { fg = "#919091" }
+desc            = { fg = "#bac9d1" }
+separator       = "  "
+separator_style = { fg = "#38393a" }
+
+[notify]
+title_info  = { fg = "#c0c8cc" }
+title_warn  = { fg = "#b4cad5" }
+title_error = { fg = "#ffb4ab" }
+
+[filetype]
+rules = [
+	# Media
+	{ mime = "image/*", fg = "#b4cad5" },
+	{ mime = "{audio,video}/*", fg = "#c0c8cc" },
+
+	# Archives
+	{ mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "#ffb4ab" },
+
+	# Documents
+	{ mime = "application/{pdf,doc,rtf}", fg = "#c0c8cc" },
+
+	# Virtual file system
+	{ mime = "vfs/{absent,stale}", fg = "#464747" },
+
+	# Special file
+	{ url = "*", is = "orphan", bg = "#ffb4ab" },
+	{ url = "*", is = "exec"  , fg = "#bac9d1" },
+
+	# Dummy file
+	{ url = "*", is = "dummy", bg = "#ffb4ab" },
+	{ url = "*/", is = "dummy", bg = "#ffb4ab" },
+
+	# Fallback Directory
+	{ url = "*/", fg = "#bac9d1" },
+]
+
+[icon]
+dirs = [
+	{ name = ".config", text = "", fg = "#bac9d1" },
+	{ name = ".git", text = "", fg = "#bac9d1" },
+	{ name = ".github", text = "", fg = "#bac9d1" },
+	{ name = ".npm", text = "", fg = "#bac9d1" },
+	{ name = "Desktop", text = "", fg = "#bac9d1" },
+	{ name = "Development", text = "", fg = "#bac9d1" },
+	{ name = "Documents", text = "", fg = "#bac9d1" },
+	{ name = "Downloads", text = "", fg = "#bac9d1" },
+	{ name = "Library", text = "", fg = "#bac9d1" },
+	{ name = "Movies", text = "", fg = "#bac9d1" },
+	{ name = "Music", text = "", fg = "#bac9d1" },
+	{ name = "Pictures", text = "", fg = "#bac9d1" },
+	{ name = "Public", text = "", fg = "#bac9d1" },
+	{ name = "Videos", text = "", fg = "#bac9d1" },
+]
+conds = [
+	# Special files
+	{ if = "orphan", text = "", fg = "#e3e2e2" },
+	{ if = "link", text = "", fg = "#c7c6c7" },
+	{ if = "block", text = "", fg = "#b4cad5" },
+	{ if = "char", text = "", fg = "#b4cad5" },
+	{ if = "fifo", text = "", fg = "#b4cad5" },
+	{ if = "sock", text = "", fg = "#b4cad5" },
+	{ if = "sticky", text = "", fg = "#b4cad5" },
+	{ if = "dummy", text = "", fg = "#ffb4ab" },
+
+	# Fallback
+	{ if = "dir", text = "", fg = "#bac9d1" },
+	{ if = "exec", text = "", fg = "#bac9d1" },
+	{ if = "!dir", text = "", fg = "#bac9d1" },
+]

@@ -2,6 +2,8 @@
 if status is-login
     if test -z "$DISPLAY" -a "$XDG_VTNR" = 1
         mkdir -p ~/.cache
+        # Clear the terminal screen to hide any boot text before graphics initialize
+        clear
         exec start-hyprland > ~/.cache/hyprland.log 2>&1
     end
 end

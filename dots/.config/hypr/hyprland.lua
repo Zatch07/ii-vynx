@@ -36,8 +36,8 @@ end
 -- require("workspaces")
 -- require("monitors")
 
--- Shell overrides --
-require("hyprland.shellOverrides.main")
-
 -- HyprMod managed settings
 require("hyprland-gui")
+
+-- Shell overrides --
+require("hyprland.shellOverrides.main")

@@ -108,10 +108,32 @@ Item {
         endRadius: rootItem.endRadius
         colBackground: primaryBackgroundComps.includes(modelData.id) ? rootItem.colBackgroundHighlight : rootItem.colBackground
 
+        readonly property var _currentComp: {
+            BarComponentRegistry._extensionCompVersion
+            let builtin = compMap[modelData.id]
+            if (builtin) return builtin[vertical ? 1 : 0]
+            return BarComponentRegistry.getComponentForId(modelData.id, vertical)
+        }
+
         Loader {
             id: itemLoader
             active: true
-            sourceComponent: compMap[modelData.id][vertical ? 1 : 0]
+            sourceComponent: wrapper._currentComp
+            onLoaded: {
+                let extId = BarComponentRegistry.getExtensionIdForComponent(modelData.id)
+                if (extId && item) {
+                    if ("extensionId" in item) {
+                        item.extensionId = extId
+                    } else {
+                        Object.defineProperty(item, "extensionId", {
+                            value: extId,
+                            writable: true,
+                            configurable: true,
+                            enumerable: true
+                        })
+                    }
+                }
+            }
         }
     }
 
@@ -150,9 +172,8 @@ Item {
     Component { id: policiesPanelButton; PoliciesPanelButton {} }
     
     Component { id: dashboardPanelButton; DashboardPanelButton {} }
-    Component { id: dashboardPanelButtonVert; VerticalDashboardPanelButton {} }
-
     Component { id: networkSpeedComp; NetworkSpeed { vertical: rootItem.vertical } }
+    Component { id: dashboardPanelButtonVert; VerticalDashboardPanelButton {} }
     Component { id: updatesComp; UpdatesButton {} }
     Component { id: powerButtonComp; PowerButton {} }
     Component { id: visualizerComp; Visualizer {} }

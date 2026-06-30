@@ -18,7 +18,7 @@ Singleton {
             return
         }
         if (!key.includes(":")) return
-        Quickshell.execDetached(["bash", "-c", Directories.cliPath + " hyprset key " + key + " " + String(value) + " && hyprctl reload"])
+        Quickshell.execDetached([Directories.cliPath, "hyprset", "key", key, String(value)])
     }
 
     function changeAnimation(animName, style) {
@@ -26,7 +26,7 @@ Singleton {
             console.error("[HyprlandSettings] Unsafe characters rejected:", animName, style)
             return
         }
-        Quickshell.execDetached(["bash", "-c", Directories.cliPath + " hyprset anim " + animName + " " + String(style) + " && hyprctl reload"])
+        Quickshell.execDetached([Directories.cliPath, "hyprset", "anim", animName, String(style)])
     }
 
     function setLayout(layout) {
@@ -56,7 +56,7 @@ Singleton {
             parts.push(Directories.cliPath + " hyprset key " + key + " " + String(value))
         }
         if (parts.length > 0)
-            Quickshell.execDetached(["bash", "-c", parts.join(" && ") + " && hyprctl reload"])
+            Quickshell.execDetached(["bash", "-c", parts.join(" && ")])
     }
 
     function reset(key) {
@@ -64,7 +64,7 @@ Singleton {
             console.error("[HyprlandSettings] Unsafe characters rejected:", key)
             return
         }
-        Quickshell.execDetached(["bash", "-c", Directories.cliPath + " hyprset reset " + key + " && hyprctl reload"])
+        Quickshell.execDetached([Directories.cliPath, "hyprset", "reset", key])
     }
 
     function resetKeys(keys) {
@@ -78,7 +78,7 @@ Singleton {
             parts.push(Directories.cliPath + " hyprset reset " + key)
         }
         if (parts.length > 0)
-            Quickshell.execDetached(["bash", "-c", parts.join(" && ") + " && hyprctl reload"])
+            Quickshell.execDetached(["bash", "-c", parts.join(" && ")])
     }
 
     Connections {

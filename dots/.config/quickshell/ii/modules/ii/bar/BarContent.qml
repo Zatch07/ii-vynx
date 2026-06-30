@@ -75,10 +75,10 @@ Item { // Bar content region
             fill: parent
             margins: Config.options.bar.cornerStyle === 1 ? (Appearance.sizes.hyprlandGapsOut) : 0 // idk why but +1 is needed
         }
-        color: root.showBarBackground ? Appearance.colors.colLayer0 : "transparent"
+        color: root.showBarBackground ? Qt.alpha(Appearance.colors.colLayer0, 0.5) : "transparent"
         radius: Config.options.bar.cornerStyle === 1 ? 3 : 0
         border.width: Config.options.bar.cornerStyle === 1 ? 1 : 0
-        border.color: root.showBarBackground ? Appearance.colors.colLayer0Border : "transparent"
+        border.color: root.showBarBackground ? Qt.alpha(Appearance.colors.colLayer0Border, 0.3) : "transparent"
 
         Behavior on color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)

@@ -1,0 +1,145 @@
+[app]
+overall = { bg = "#{{colors.background.default.hex_stripped}}" }
+
+[manager]
+cwd = { fg = "#{{colors.secondary.default.hex_stripped}}" }
+
+# Hovered
+hovered         = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.primary.default.hex_stripped}}" }
+preview_hovered = { underline = true }
+
+# Find
+find_keyword  = { fg = "#{{colors.tertiary.default.hex_stripped}}", italic = true }
+find_position = { fg = "#{{colors.primary.default.hex_stripped}}", bg = "reset", italic = true }
+
+# Marker
+marker_copied   = { fg = "#{{colors.secondary.default.hex_stripped}}", bg = "#{{colors.secondary.default.hex_stripped}}" }
+marker_cut      = { fg = "#{{colors.error.default.hex_stripped}}", bg = "#{{colors.error.default.hex_stripped}}" }
+marker_marked   = { fg = "#{{colors.primary.default.hex_stripped}}", bg = "#{{colors.primary.default.hex_stripped}}" }
+marker_selected = { fg = "#{{colors.primary.default.hex_stripped}}", bg = "#{{colors.primary.default.hex_stripped}}" }
+
+# Tab
+tab_active   = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.on_background.default.hex_stripped}}", bold = true }
+tab_inactive = { fg = "#{{colors.on_background.default.hex_stripped}}", bg = "#{{colors.surface_variant.default.hex_stripped}}" }
+
+# Count
+count_copied   = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.secondary.default.hex_stripped}}" }
+count_cut      = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.error.default.hex_stripped}}" }
+count_selected = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.primary.default.hex_stripped}}" }
+
+# Border
+border_symbol = "│"
+border_style  = { fg = "#{{colors.outline_variant.default.hex_stripped}}" }
+
+[mode]
+normal_main = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.primary.default.hex_stripped}}", bold = true }
+normal_alt  = { fg = "#{{colors.primary.default.hex_stripped}}", bg = "#{{colors.surface.default.hex_stripped}}"}
+
+select_main = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.secondary.default.hex_stripped}}", bold = true }
+select_alt  = { fg = "#{{colors.secondary.default.hex_stripped}}", bg = "#{{colors.surface.default.hex_stripped}}"}
+
+unset_main  = { fg = "#{{colors.background.default.hex_stripped}}", bg = "#{{colors.tertiary.default.hex_stripped}}", bold = true }
+unset_alt   = { fg = "#{{colors.tertiary.default.hex_stripped}}", bg = "#{{colors.surface.default.hex_stripped}}"}
+
+[status]
+separator_open  = ""
+separator_close = ""
+separator_style = { fg = "#{{colors.surface_variant.default.hex_stripped}}" }
+progress_label  = { fg = "#ffffff", bold = true }
+progress_normal = { fg = "#{{colors.secondary.default.hex_stripped}}", bg = "#{{colors.surface_variant.default.hex_stripped}}" }
+progress_error  = { fg = "#{{colors.tertiary.default.hex_stripped}}", bg = "#{{colors.error.default.hex_stripped}}" }
+
+[input]
+border   = { fg = "#{{colors.primary.default.hex_stripped}}" }
+title    = {}
+value    = {}
+selected = { reversed = true }
+
+[pick]
+border   = { fg = "#{{colors.primary.default.hex_stripped}}" }
+active   = { fg = "#{{colors.secondary.default.hex_stripped}}" }
+inactive = {}
+
+[completion]
+border   = { fg = "#{{colors.primary.default.hex_stripped}}" }
+active   = { bg = "#{{colors.surface_variant.default.hex_stripped}}" }
+inactive = {}
+
+[tasks]
+border  = { fg = "#{{colors.primary.default.hex_stripped}}" }
+title   = {}
+hovered = { fg = "#{{colors.secondary.default.hex_stripped}}", bold = true }
+
+[which]
+mask            = { bg = "#{{colors.surface.default.hex_stripped}}" }
+cand            = { fg = "#{{colors.secondary.default.hex_stripped}}" }
+rest            = { fg = "#{{colors.outline.default.hex_stripped}}" }
+desc            = { fg = "#{{colors.primary.default.hex_stripped}}" }
+separator       = "  "
+separator_style = { fg = "#{{colors.surface_bright.default.hex_stripped}}" }
+
+[notify]
+title_info  = { fg = "#{{colors.secondary.default.hex_stripped}}" }
+title_warn  = { fg = "#{{colors.tertiary.default.hex_stripped}}" }
+title_error = { fg = "#{{colors.error.default.hex_stripped}}" }
+
+[filetype]
+rules = [
+	# Media
+	{ mime = "image/*", fg = "#{{colors.tertiary.default.hex_stripped}}" },
+	{ mime = "{audio,video}/*", fg = "#{{colors.secondary.default.hex_stripped}}" },
+
+	# Archives
+	{ mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", fg = "#{{colors.error.default.hex_stripped}}" },
+
+	# Documents
+	{ mime = "application/{pdf,doc,rtf}", fg = "#{{colors.secondary.default.hex_stripped}}" },
+
+	# Virtual file system
+	{ mime = "vfs/{absent,stale}", fg = "#{{colors.surface_variant.default.hex_stripped}}" },
+
+	# Special file
+	{ url = "*", is = "orphan", bg = "#{{colors.error.default.hex_stripped}}" },
+	{ url = "*", is = "exec"  , fg = "#{{colors.primary.default.hex_stripped}}" },
+
+	# Dummy file
+	{ url = "*", is = "dummy", bg = "#{{colors.error.default.hex_stripped}}" },
+	{ url = "*/", is = "dummy", bg = "#{{colors.error.default.hex_stripped}}" },
+
+	# Fallback Directory
+	{ url = "*/", fg = "#{{colors.primary.default.hex_stripped}}" },
+]
+
+[icon]
+dirs = [
+	{ name = ".config", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = ".git", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = ".github", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = ".npm", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Desktop", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Development", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Documents", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Downloads", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Library", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Movies", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Music", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Pictures", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Public", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ name = "Videos", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+]
+conds = [
+	# Special files
+	{ if = "orphan", text = "", fg = "#{{colors.on_background.default.hex_stripped}}" },
+	{ if = "link", text = "", fg = "#{{colors.on_surface_variant.default.hex_stripped}}" },
+	{ if = "block", text = "", fg = "#{{colors.tertiary.default.hex_stripped}}" },
+	{ if = "char", text = "", fg = "#{{colors.tertiary.default.hex_stripped}}" },
+	{ if = "fifo", text = "", fg = "#{{colors.tertiary.default.hex_stripped}}" },
+	{ if = "sock", text = "", fg = "#{{colors.tertiary.default.hex_stripped}}" },
+	{ if = "sticky", text = "", fg = "#{{colors.tertiary.default.hex_stripped}}" },
+	{ if = "dummy", text = "", fg = "#{{colors.error.default.hex_stripped}}" },
+
+	# Fallback
+	{ if = "dir", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ if = "exec", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+	{ if = "!dir", text = "", fg = "#{{colors.primary.default.hex_stripped}}" },
+]

@@ -59,7 +59,7 @@ apply_anyterm() {
     sed -i "s/${colorlist[$i]} #/${colorvalues[$i]#\#}/g" "$STATE_DIR"/user/generated/terminal/sequences.txt
   done
 
-  sed -i "s/\$alpha/$term_alpha/g" "$STATE_DIR/user/generated/terminal/sequences.txt"
+  sed -i "s/\\$alpha/$term_alpha/g" "$STATE_DIR/user/generated/terminal/sequences.txt"
 
   for file in /dev/pts/*; do
     if [[ $file =~ ^/dev/pts/[0-9]+$ ]]; then

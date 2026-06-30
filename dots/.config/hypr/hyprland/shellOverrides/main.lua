@@ -1,13 +1,2 @@
 -- MANAGED BY HYPRSET.LUA — DO NOT EDIT
 hl.config({general={layout="scrolling"}})
-hl.config({decoration={blur={passes=6}}})
-hl.config({input={repeat_delay=250}})
-hl.config({input={repeat_rate=35}})
-hl.config({decoration={blur={size=5}}})
-hl.config({input={touchpad={scroll_factor=0.1}}})
-hl.config({input={numlock_by_default=true}})
-hl.config({input={touchpad={natural_scroll=false}}})
-hl.config({input={kb_layout="us"}})
-hl.config({input={touchpad={clickfinger_behavior=false}}})
-hl.config({input={touchpad={disable_while_typing=false}}})
-hl.config({input={follow_mouse=1}})

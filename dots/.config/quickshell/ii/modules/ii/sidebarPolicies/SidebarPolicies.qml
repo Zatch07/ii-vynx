@@ -12,6 +12,7 @@ Scope { // Scope
     id: root
     property bool detach: false
     property bool pin: false
+    property bool extend: false
     property Component contentComponent: SidebarPoliciesContent {}
     property Item sidebarContent
 
@@ -93,12 +94,11 @@ Scope { // Scope
             id: panelWindow
             visible: GlobalStates.sidebarLeftOpen
             
-            property bool extend: false
             readonly property real sidebarWidth: {
                 const p = Config.options.policies;
                 const allFeatures = p.ai !== 0 && p.weeb == 1 && p.wallpapers !== 0 && p.translator !== 0;
 
-                if (panelWindow.extend) return Appearance.sizes.sidebarWidthExtended;
+                if (root.extend) return Appearance.sizes.sidebarWidthExtended;
                 return allFeatures ? Appearance.sizes.sidebarWidthExpanded : Appearance.sizes.sidebarWidth;
             }
             
@@ -160,9 +160,9 @@ Scope { // Scope
 
             Rectangle {
                 id: sidebarLeftBackground
-                color: Appearance.colors.colLayer0
+                color: Qt.alpha(Appearance.colors.colLayer0, 0.5)
                 border.width: root.pin ? 0 : 1
-                border.color: root.pin ? "transparent" : Appearance.colors.colLayer0Border
+                border.color: root.pin ? "transparent" : Qt.alpha(Appearance.colors.colLayer0Border, 0.3)
                 radius: root.pin ? 0 : Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
                 
                 height: root.pin ? parent.height : parent.height - (Appearance.sizes.hyprlandGapsOut * 2)
@@ -230,7 +230,7 @@ Scope { // Scope
                     }
                     if (event.modifiers === Qt.ControlModifier) {
                         if (event.key === Qt.Key_O) {
-                            panelWindow.extend = !panelWindow.extend;
+                            root.extend = !root.extend;
                         } else if (event.key === Qt.Key_D) {
                             root.toggleDetach();
                         } else if (event.key === Qt.Key_P) {

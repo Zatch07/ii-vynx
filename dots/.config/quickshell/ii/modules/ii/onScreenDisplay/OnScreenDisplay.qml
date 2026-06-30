@@ -181,13 +181,12 @@ Scope {
                             implicitWidth: protectionMessageBackground.implicitWidth
                             opacity: root.protectionMessage !== "" ? 1 : 0
 
-                            StyledRectangularShadow {
-                                target: protectionMessageBackground
-                            }
                             Rectangle {
                                 id: protectionMessageBackground
                                 anchors.centerIn: parent
-                                color: Appearance.m3colors.m3error
+                                color: Qt.alpha(Appearance.m3colors.m3error, 0.5)
+                                border.width: 1
+                                border.color: Qt.alpha(Appearance.m3colors.m3error, 0.3)
                                 property real padding: 10
                                 implicitHeight: protectionMessageRowLayout.implicitHeight + padding * 2
                                 implicitWidth: protectionMessageRowLayout.implicitWidth + padding * 2

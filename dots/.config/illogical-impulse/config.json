@@ -47,7 +47,7 @@
         },
         "palette": {
             "accentColor": "",
-            "type": "samurai"
+            "type": "scheme-auto"
         },
         "sharpMode": false,
         "toggleWindowRounding": false,
@@ -62,10 +62,10 @@
             "enableQtApps": true,
             "enableTerminal": true,
             "terminalGenerationProps": {
-                "forceDarkMode": false,
-                "harmonizeThreshold": 100,
-                "harmony": 0.6,
-                "termFgBoost": 0.35
+                "forceDarkMode": true,
+                "harmonizeThreshold": 70,
+                "harmony": 0.8,
+                "termFgBoost": 0.7
             }
         },
         "wrappedFrameThickness": 10
@@ -119,7 +119,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Watchcat[WE-3588262443]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/yande.re_1162618_cha_hanare_genshin_impact_hu_tao_japanese_clothes.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/grey-abstract-3840x2160-26349.jpg",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -127,14 +127,14 @@
                     "aiStylingModel": "gemini",
                     "backgroundShape": "Cookie12Sided",
                     "backgroundStyle": "shape",
-                    "constantlyRotate": false,
+                    "constantlyRotate": true,
                     "dateInClock": true,
-                    "dateStyle": "bubble",
+                    "dateStyle": "rect",
                     "dialNumberStyle": "dots",
                     "hourHandStyle": "hollow",
                     "hourMarks": false,
                     "minuteHandStyle": "classic",
-                    "secondHandStyle": "line",
+                    "secondHandStyle": "hide",
                     "sides": 14,
                     "timeIndicators": false
                 },
@@ -144,10 +144,10 @@
                     "colorful": false,
                     "font": {
                         "family": "Google Sans Flex",
-                        "roundness": 0,
-                        "size": 90,
-                        "weight": 350,
-                        "width": 100
+                        "roundness": 100,
+                        "size": 279.5519770408164,
+                        "weight": 797.1530799819928,
+                        "width": 100.14161914765907
                     },
                     "showColon": true,
                     "showDate": true,
@@ -162,8 +162,8 @@
                 "showOnlyWhenLocked": false,
                 "style": "cookie",
                 "styleLocked": "cookie",
-                "x": 64.34765625,
-                "y": 1109.8515625
+                "x": 2277.0859375,
+                "y": 292.9921875
             },
             "media": {
                 "backgroundShape": "Cookie12Sided",
@@ -208,10 +208,10 @@
                 "enable": true
             }
         },
-        "barBackgroundStyle": 2,
+        "barBackgroundStyle": 1,
         "barGroupStyle": 0,
         "bottom": true,
-        "cornerStyle": 1,
+        "cornerStyle": 2,
         "floatStyleShadow": true,
         "indicators": {
             "notifications": {
@@ -237,11 +237,6 @@
                     "centered": false,
                     "id": "active_window",
                     "visible": true
-                },
-                {
-                    "centered": false,
-                    "id": "timer",
-                    "visible": false
                 }
             ],
             "left": [
@@ -276,6 +271,11 @@
                     "centered": false,
                     "id": "network_speed",
                     "visible": true
+                },
+                {
+                    "centered": false,
+                    "id": "timer",
+                    "visible": false
                 },
                 {
                     "centered": false,
@@ -429,12 +429,12 @@
         "locale": "en-GB"
     },
     "cheatsheet": {
-        "commandsTagsSidebar": false,
+        "commandsTagsSidebar": true,
         "enableCommands": true,
         "enableGmail": true,
         "enablePeriodicTable": false,
         "enableTasks": true,
-        "enableTimetable": true,
+        "enableTimetable": false,
         "fontSize": {
             "comment": 12,
             "key": 12
@@ -459,7 +459,6 @@
         "enablePreview": true,
         "height": 60,
         "hoverRegionHeight": 2,
-        "hoverToReveal": false,
         "ignoredAppRegexes": [
         ],
         "isolateMonitors": false,
@@ -471,7 +470,11 @@
         "pinnedFiles": [
         ],
         "pinnedOnStartup": false,
-        "position": "bottom"
+        "position": "bottom",
+        "revealOnEmptyWorkspace": true
+    },
+    "extensions": {
+        "enable": true
     },
     "hacks": {
         "arbitraryRaceConditionDelay": 20
@@ -494,7 +497,7 @@
                 "size": 5
             },
             "inactiveOpacity": 0.99,
-            "rounding": 3,
+            "rounding": 4,
             "shadow": {
                 "enabled": true,
                 "range": 4
@@ -887,15 +890,6 @@
             }
         ],
         "useSystemFileDialog": false
-    },
-    "wallpapers": {
-        "paths": {
-            "download": "/home/zatch/Pictures/Wallpapers",
-            "nsfw": "/home/zatch/Pictures/Wallpapers/NSFW"
-        },
-        "service": "wallhaven",
-        "showAnimeResults": false,
-        "sort": "favourites"
     },
     "windows": {
         "centerTitle": true,

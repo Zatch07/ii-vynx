@@ -12,19 +12,19 @@ $character"""
 
 # Replace the "❯" symbol in the prompt with "➜"
 [character]                            
-success_symbol = "[   ](bold fg:#bac9d1)"
-error_symbol = "[   ](bold fg:#ffb4ab)"
+success_symbol = "[   ](bold fg:#{{colors.primary.default.hex_stripped}})"
+error_symbol = "[   ](bold fg:#{{colors.error.default.hex_stripped}})"
 
 # Disable the package module, hiding it from the prompt completely
 [package]
 disabled = true
 
 [git_branch]
-style = "bg:#b4cad5"
+style = "bg:#{{colors.tertiary.default.hex_stripped}}"
 symbol = "󰘬"
 truncation_length = 12
 truncation_symbol = ""
-format = "󰜥 [](bold fg:#b4cad5)[$symbol $branch(:$remote_branch)](fg:#121314 bg:#b4cad5)[ ](bold fg:#b4cad5)"
+format = "󰜥 [](bold fg:#{{colors.tertiary.default.hex_stripped}})[$symbol $branch(:$remote_branch)](fg:#{{colors.background.default.hex_stripped}} bg:#{{colors.tertiary.default.hex_stripped}})[ ](bold fg:#{{colors.tertiary.default.hex_stripped}})"
 
 [git_commit]
 commit_hash_length = 4
@@ -48,7 +48,7 @@ deleted = " 🗑 "
 
 [hostname]
 ssh_only = false
-format =  "[•$hostname](bg:#b4cad5 bold fg:#121314)[](bold fg:#b4cad5)"
+format =  "[•$hostname](bg:#{{colors.tertiary.default.hex_stripped}} bold fg:#{{colors.background.default.hex_stripped}})[](bold fg:#{{colors.tertiary.default.hex_stripped}})"
 trim_at = ".companyname.com"
 disabled = false
 
@@ -67,19 +67,19 @@ format = '🕙[\[ $time \]]($style) '
 time_format = "%T"
 
 [username]
-style_user = "bold bg:#b4cad5 fg:#121314"
+style_user = "bold bg:#{{colors.tertiary.default.hex_stripped}} fg:#{{colors.background.default.hex_stripped}}"
 style_root = "red bold"
-format = "[](bold fg:#b4cad5)[$user]($style)"
+format = "[](bold fg:#{{colors.tertiary.default.hex_stripped}})[$user]($style)"
 disabled = false
 show_always = true
 
 [directory]
 home_symbol = "  "
 read_only = "  "
-style = "bg:#bac9d1 fg:#121314"
+style = "bg:#{{colors.primary.default.hex_stripped}} fg:#{{colors.background.default.hex_stripped}}"
 truncation_length = 6
 truncation_symbol = " ••/"
-format = '[](bold fg:#bac9d1)[󰉋 $path]($style)[](bold fg:#bac9d1)'
+format = '[](bold fg:#{{colors.primary.default.hex_stripped}})[󰉋 $path]($style)[](bold fg:#{{colors.primary.default.hex_stripped}})'
 
 [directory.substitutions]
 "Desktop" = "  "
@@ -92,4 +92,4 @@ format = '[](bold fg:#bac9d1)[󰉋 $path]($style)[](bold fg:#bac9d1)'
 
 [cmd_duration]
 min_time = 0
-format = '[](bold fg:#c0c8cc)[󰪢 $duration](bold bg:#c0c8cc fg:#121314)[](bold fg:#c0c8cc)'
+format = '[](bold fg:#{{colors.secondary.default.hex_stripped}})[󰪢 $duration](bold bg:#{{colors.secondary.default.hex_stripped}} fg:#{{colors.background.default.hex_stripped}})[](bold fg:#{{colors.secondary.default.hex_stripped}})'

@@ -7,7 +7,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 
-Item {
+FocusScope {
     id: root
     required property var taskList
     property string emptyPlaceholderIcon
@@ -16,6 +16,9 @@ Item {
     property int todoListItemPadding: 8
     property int listBottomPadding: 80
     property int taskFontSize: Appearance.font.pixelSize.normal
+
+    property alias view: listView
+    property bool isActiveList: false
 
     StyledListView {
         id: listView
@@ -53,6 +56,8 @@ Item {
                 anchors.bottom: parent.bottom
                 implicitHeight: todoContentRowLayout.implicitHeight
                 color: Appearance.colors.colLayer2
+                border.width: todoItem.ListView.isCurrentItem && root.isActiveList ? 1 : 0
+                border.color: Appearance.colors.colPrimary
                 radius: Appearance.rounding.small
 
                 ColumnLayout {
