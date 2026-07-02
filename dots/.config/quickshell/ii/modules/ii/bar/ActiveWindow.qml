@@ -32,6 +32,29 @@ Item {
     implicitWidth: isFixedSize ? fixedSize : Math.min(Math.max(classText.implicitWidth, titleText.implicitWidth) + 20, maxSize)
     clip: true
 
+    property int popupWidth: 350
+    property int maxPopupWidth: 600
+
+    property bool containsMouse: mouseArea.containsMouse
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.NoButton
+    }
+
+    ActiveWindowPopup {
+        id: titlePopup
+        targetItem: root
+        appClassText: root.appClassText
+        appTitleText: root.appTitleText
+        activeWindowAddress: root.activeWindowAddress
+        monitor: root.monitor
+        popupWidth: root.popupWidth
+        maxPopupWidth: root.maxPopupWidth
+    }
+
     Behavior on implicitWidth {
         animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
     }

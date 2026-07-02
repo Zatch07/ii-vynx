@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1">
+ <circle style="fill:#bac9d1" cx="4.5" cy="5.5" r="4.5"/>
+ <circle style="fill:#40484c" cx="4.5" cy="4.5" r="1.5"/>
+ <circle style="fill:#2a3235" cx="4.5" cy="4.5" r=".5"/>
+ <circle style="fill:#c0c8cc" cx="10.5" cy="8.5" r="5.5"/>
+ <circle style="fill:#40484c" cx="11.5" cy="7.5" r="2.5"/>
+ <circle style="fill:#2a3235" cx="11.5" cy="7.5" r=".5"/>
+</svg>

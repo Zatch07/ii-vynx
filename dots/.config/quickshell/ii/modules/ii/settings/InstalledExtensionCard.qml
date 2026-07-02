@@ -204,7 +204,7 @@ Item {
                         }
 
                         RippleButton {
-                            visible: hasConfigSchema
+                            visible: false // hasConfigSchema
                             implicitHeight: 28
                             buttonRadius: Appearance.rounding.full
                             colBackground: Appearance.colors.colSecondaryContainer

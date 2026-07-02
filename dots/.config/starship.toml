@@ -12,7 +12,7 @@ $character"""
 
 # Replace the "❯" symbol in the prompt with "➜"
 [character]                            
-success_symbol = "[   ](bold fg:#bac9d1)"
+success_symbol = "[   ](bold fg:#b8c4ff)"
 error_symbol = "[   ](bold fg:#ffb4ab)"
 
 # Disable the package module, hiding it from the prompt completely
@@ -20,11 +20,11 @@ error_symbol = "[   ](bold fg:#ffb4ab)"
 disabled = true
 
 [git_branch]
-style = "bg:#b4cad5"
+style = "bg:#e4bad9"
 symbol = "󰘬"
 truncation_length = 12
 truncation_symbol = ""
-format = "󰜥 [](bold fg:#b4cad5)[$symbol $branch(:$remote_branch)](fg:#121314 bg:#b4cad5)[ ](bold fg:#b4cad5)"
+format = "󰜥 [](bold fg:#e4bad9)[$symbol $branch(:$remote_branch)](fg:#121318 bg:#e4bad9)[ ](bold fg:#e4bad9)"
 
 [git_commit]
 commit_hash_length = 4
@@ -48,7 +48,7 @@ deleted = " 🗑 "
 
 [hostname]
 ssh_only = false
-format =  "[•$hostname](bg:#b4cad5 bold fg:#121314)[](bold fg:#b4cad5)"
+format =  "[•$hostname](bg:#e4bad9 bold fg:#121318)[](bold fg:#e4bad9)"
 trim_at = ".companyname.com"
 disabled = false
 
@@ -67,19 +67,19 @@ format = '🕙[\[ $time \]]($style) '
 time_format = "%T"
 
 [username]
-style_user = "bold bg:#b4cad5 fg:#121314"
+style_user = "bold bg:#e4bad9 fg:#121318"
 style_root = "red bold"
-format = "[](bold fg:#b4cad5)[$user]($style)"
+format = "[](bold fg:#e4bad9)[$user]($style)"
 disabled = false
 show_always = true
 
 [directory]
 home_symbol = "  "
 read_only = "  "
-style = "bg:#bac9d1 fg:#121314"
+style = "bg:#b8c4ff fg:#121318"
 truncation_length = 6
 truncation_symbol = " ••/"
-format = '[](bold fg:#bac9d1)[󰉋 $path]($style)[](bold fg:#bac9d1)'
+format = '[](bold fg:#b8c4ff)[󰉋 $path]($style)[](bold fg:#b8c4ff)'
 
 [directory.substitutions]
 "Desktop" = "  "
@@ -92,4 +92,4 @@ format = '[](bold fg:#bac9d1)[󰉋 $path]($style)[](bold fg:#bac9d1)'
 
 [cmd_duration]
 min_time = 0
-format = '[](bold fg:#c0c8cc)[󰪢 $duration](bold bg:#c0c8cc fg:#121314)[](bold fg:#c0c8cc)'
+format = '[](bold fg:#c2c5dd)[󰪢 $duration](bold bg:#c2c5dd fg:#121318)[](bold fg:#c2c5dd)'

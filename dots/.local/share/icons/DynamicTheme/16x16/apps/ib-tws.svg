@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1">
+ <rect style="fill:#c0c8cc" width="16" height="16" x="0" y="0" rx=".8" ry=".8"/>
+ <path style="fill:#2a3235" d="M 5,7.0000004 10.4,13 H 5 Z"/>
+ <path style="fill:#3b494f" d="m 5,7.0000004 5.2,-6 L 5,13 Z"/>
+ <circle style="fill:#3b494f" cx="9.5" cy="8.5" r="1.5"/>
+</svg>

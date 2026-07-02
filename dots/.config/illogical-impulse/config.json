@@ -11,8 +11,7 @@
                 ]
             },
             {
-                "google": [
-                ]
+                "google": []
             }
         ],
         "otherModels": [
@@ -30,8 +29,7 @@
         "tool": "functions"
     },
     "appearance": {
-        "customColorSchemes": [
-        ],
+        "customColorSchemes": [],
         "defaultBorderRadius": 18,
         "extraBackgroundTint": true,
         "fakeScreenRounding": 0,
@@ -47,7 +45,7 @@
         },
         "palette": {
             "accentColor": "",
-            "type": "scheme-auto"
+            "type": "scheme-tonal-spot"
         },
         "sharpMode": false,
         "toggleWindowRounding": false,
@@ -72,8 +70,7 @@
     },
     "apps": {
         "bluetooth": "kcmshell6 kcm_bluetooth",
-        "bluetoothDeviceImages": [
-        ],
+        "bluetoothDeviceImages": [],
         "changePassword": "kitty -1 --hold=yes fish -i -c 'passwd'",
         "manageUser": "kcmshell6 kcm_users",
         "network": "kcmshell6 kcm_networkmanagement",
@@ -119,7 +116,7 @@
         },
         "thumbnailPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Watchcat[WE-3588262443]/preview.jpg",
         "transitionType": "radial",
-        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/grey-abstract-3840x2160-26349.jpg",
+        "wallpaperPath": "/home/zatch/Pictures/Wallpapers/WallpaperEngine/Watchcat[WE-3588262443]",
         "widgets": {
             "clock": {
                 "cookie": {
@@ -290,7 +287,7 @@
                 {
                     "centered": false,
                     "id": "system_tray",
-                    "visible": true
+                    "visible": false
                 },
                 {
                     "centered": false,
@@ -341,8 +338,7 @@
             "memoryWarningThreshold": 95,
             "swapWarningThreshold": 85
         },
-        "screenList": [
-        ],
+        "screenList": [],
         "sizes": {
             "height": 45,
             "width": 45
@@ -459,16 +455,14 @@
         "enablePreview": true,
         "height": 60,
         "hoverRegionHeight": 2,
-        "ignoredAppRegexes": [
-        ],
+        "ignoredAppRegexes": [],
         "isolateMonitors": false,
         "monochromeIcons": true,
         "pinnedApps": [
             "org.kde.dolphin",
             "kitty"
         ],
-        "pinnedFiles": [
-        ],
+        "pinnedFiles": [],
         "pinnedOnStartup": false,
         "position": "bottom",
         "revealOnEmptyWorkspace": true
@@ -485,8 +479,7 @@
             "enable": true
         },
         "autostartApps": {
-            "apps": [
-            ],
+            "apps": [],
             "enable": false
         },
         "decoration": {
